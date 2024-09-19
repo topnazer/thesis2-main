@@ -1,0 +1,90 @@
+html {
+    margin:0;
+    padding:0;
+    font-family: 'Roboto', sans-serif;
+}
+.whole-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.Admin-header {
+    width: 100%;
+    height: 50px;
+    background-color: rgb(255, 255, 255); 
+    border-color: rgb(238, 178, 178);
+    box-shadow: 1px 1px 1px rgb(238, 178, 178);
+}
+
+.Admin-navbar {
+    background-color: white;
+    width: 300px;
+    height: 676px;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    border-color: rgb(238, 178, 178);
+    box-shadow: 1px 1px 1px 1px rgb(238, 178, 178);
+}
+.Admin-links {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+}
+
+.Admin-links a {
+  background: #f8f7f7;
+  border: 1px solid rgb(238, 178, 178);
+  border-radius: 6px;
+  box-shadow: 1px 1px 1px black;
+  color: black;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 16px;
+  padding: 12px 66px;
+  text-align:center;
+  text-decoration: none;
+  margin: 14px;
+}
+.Admin-links a:hover,.Admin-links a:focus {
+    background-color: rgb(69, 5, 5);
+    color: white;
+}
+
+.Admin-navbar h1 {
+ text-align: center;
+ font-size: 45px;
+ text-decoration: underline;
+}
+
+.nav-container {
+ display: flex;
+ flex-direction: column;
+ align-items: right;
+ width: 100%;
+ height: 100%;
+}
+
+.route-container {
+    text-align: center;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 1px 1px 1px 1px rgb(238, 178, 178); 
+    align-items: center;
+    margin:20px;
+    max-height: fit-content;
+}
+.notification-link {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .notification-link .badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 3px 7px;
+    font-size: 12px;
+  }

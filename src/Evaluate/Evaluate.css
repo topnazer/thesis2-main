@@ -1,0 +1,224 @@
+/* Dean Evaluation */
+.evaluate-dean-page .evaluation-form {
+  margin: 20px;
+}
+
+.evaluate-dean-page .rating-legend {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.evaluate-dean-page table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.evaluate-dean-page table th, 
+.evaluate-dean-page table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.evaluate-dean-page table th:first-child,
+.evaluate-dean-page table td:first-child {
+  width: 60%; /* Allocate more space for the Question column */
+  text-align: left; /* Align questions to the left */
+}
+
+.evaluate-dean-page table th:not(:first-child), 
+.evaluate-dean-page table td:not(:first-child) {
+  width: 8%; /* Allocate less space for rating columns */
+}
+
+.evaluate-dean-page table th {
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+}
+
+.evaluate-dean-page table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.evaluate-dean-page table tbody tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+.evaluate-dean-page textarea {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.evaluate-dean-page button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.evaluate-dean-page button:hover {
+  background-color: #45a049;
+}
+
+.evaluate-dean-page button:focus {
+  background-color: blue;
+}
+
+/* Faculty Evaluation */
+.evaluate-faculty-page .evaluation-form {
+  margin: 20px;
+}
+
+.evaluate-faculty-page .rating-legend {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.evaluate-faculty-page table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.evaluate-faculty-page table th, 
+.evaluate-faculty-page table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.evaluate-faculty-page table th:first-child,
+.evaluate-faculty-page table td:first-child {
+  width: 60%; /* Allocate more space for the Question column */
+  text-align: left; /* Align questions to the left */
+}
+
+.evaluate-faculty-page table th:not(:first-child), 
+.evaluate-faculty-page table td:not(:first-child) {
+  width: 8%; /* Allocate less space for rating columns */
+}
+
+.evaluate-faculty-page table th {
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+}
+
+.evaluate-faculty-page table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.evaluate-faculty-page table tbody tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+.evaluate-faculty-page textarea {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.evaluate-faculty-page button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.evaluate-faculty-page button:hover {
+  background-color: #45a049;
+}
+
+.evaluate-faculty-page button:focus {
+  background-color: blue;
+}
+
+/* Subject Evaluation */
+.evaluate-subject-page .evaluation-form {
+  margin: 20px;
+}
+
+.evaluate-subject-page .rating-legend {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.evaluate-subject-page table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.evaluate-subject-page table th, 
+.evaluate-subject-page table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.evaluate-subject-page table th:first-child,
+.evaluate-subject-page table td:first-child {
+  width: 60%; /* Allocate more space for the Question column */
+  text-align: left; /* Align questions to the left */
+}
+
+.evaluate-subject-page table th:not(:first-child), 
+.evaluate-subject-page table td:not(:first-child) {
+  width: 8%; /* Allocate less space for rating columns */
+}
+
+.evaluate-subject-page table th {
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+}
+
+.evaluate-subject-page table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.evaluate-subject-page table tbody tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+.evaluate-subject-page textarea {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.evaluate-subject-page button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.evaluate-subject-page button:hover {
+  background-color: #45a049;
+}
+
+.evaluate-subject-page button:focus {
+  background-color: blue;
+}

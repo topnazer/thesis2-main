@@ -1,0 +1,113 @@
+/* General Page Styling */
+.view-evaluation-page {
+    padding: 20px;
+  }
+  
+  .evaluation-card {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+  }
+  
+  .evaluation-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .evaluation-table th, .evaluation-table td {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  /* Evaluation Form Section */
+  .evaluation-page {
+    padding: 20px;
+  }
+  
+  .evaluation-header {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .question-form {
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .question-input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .buttons-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .buttons-container button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .save-button {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .cancel-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .questions-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .questions-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+  }
+  
+  .operation-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .operation-buttons button {
+    background-color: #f1f1f1;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px;
+    border-radius: 5px;
+  }
+  
+  .operation-buttons .edit-button {
+    color: #ffffff;
+  }
+  
+  .operation-buttons .delete-button {
+    color: #ffffff;
+  }
+  

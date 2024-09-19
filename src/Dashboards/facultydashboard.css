@@ -1,0 +1,82 @@
+/* General body styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+/* Navigation Bar */
+.faculty-dashboard nav {
+  background-color: #343a40;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.faculty-dashboard nav h1 {
+  font-size: 1.5rem;
+}
+
+.faculty-dashboard nav button {
+  background-color: #dc3545;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+/* Section styling */
+.faculty-dashboard section {
+  margin: 2rem;
+}
+
+/* Table styling */
+.faculty-dashboard table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.faculty-dashboard table th, 
+.faculty-dashboard table td {
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+  text-align: left;
+}
+
+.faculty-dashboard table th {
+  background-color: #343a40;
+  color: white;
+}
+
+.faculty-dashboard table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.faculty-dashboard table tr:hover {
+  background-color: #e9ecef;
+}
+
+.faculty-dashboard button {
+  background-color: #007bff;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.faculty-dashboard button:hover {
+  background-color: #0056b3;
+}
+
+.faculty-dashboard .evaluation-done {
+  color: #28a745; /* Green color for completed evaluations */
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  display: inline-block;
+  font-size: 1rem;
+}
