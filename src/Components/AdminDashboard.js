@@ -74,7 +74,7 @@ const AdminDashboard = () => {
 
       <div className="right-container">
           <div className="Admin-header">
-            <p>Welcome, Admin! Here you can manage users, evaluation forms, and more.</p>
+            <p>she wanna do drugs smoke weed get drunk</p>
           </div>
             <div className="route-container">
               <Routes>
