@@ -74,7 +74,7 @@ const AdminDashboard = () => {
 
       <div className="right-container">
           <div className="Admin-header">
-            <p>she wanna do drugs smoke weed get drunk theys hoes</p>
+            <p>she wanna do drugs smoke weed get drunk theys hoes luh</p>
           </div>
             <div className="route-container">
               <Routes>
