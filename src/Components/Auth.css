@@ -3,18 +3,17 @@
   justify-content: center;
   align-items: center;
   height: 100vh;  
-  background-image: url("");
-  background-repeat: no-repeat;
-  background-size: cover;
+  background-color: #F5F5DC;
   font-family: 'Arial', sans-serif;
-
 }
+
 .header {
   width: 100%;
   height: 30px;
-  background-color: red;
-  top:0;    
+  background-color: #800020;
+  top: 0;    
 }
+
 .auth-container {
   display: flex;
   width: 900px;
@@ -45,7 +44,7 @@
   margin-bottom: 20px;
   padding: 15px;
   font-size: 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid #8B4513;
   border-radius: 5px;
 }
 
@@ -56,14 +55,13 @@
 }
 
 .auth-left .login-button {
-  background-color: #b60c0c;
+  background-color: #800020;
   color: white;
   padding: 15px;
   font-size: 1rem;
   border: none;   
   border-radius: 5px;
   cursor: pointer;
-  
 }
 
 .auth-left .signup-button {
@@ -97,13 +95,12 @@
   background-size: cover;
 }
 
-/* SIGN UP*/
 .signup-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;    
-  background-color: #e7414f;
+  background-color: #F5F5DC;
   font-family: 'Arial', sans-serif;
 }
 
@@ -132,13 +129,18 @@
   margin-bottom: 15px;
   padding: 10px;
   font-size: 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid #8B4513;
   border-radius: 5px;
   width: 95%;
 }
 
+.signup-box select {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .signup-box .signup-button {
-  background-color: #ff0000;
+  background-color: #800020;
   color: white;
   padding: 15px;
   font-size: 1rem;
@@ -150,7 +152,7 @@
 
 .signup-box .login-button {
   background-color: transparent;
-  color: #ff0080;
+  color: #800020;
   font-size: 1rem;
   cursor: pointer;
   margin-top: 10px;

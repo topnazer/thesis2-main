@@ -2,7 +2,7 @@ import React, { useState, useEffect, } from "react";
 import { useNavigate, Route, Routes, Link } from "react-router-dom";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { auth } from "../firebase";
-import { onAuthStateChanged } from "firebase/auth"; // Import directly from firebase/auth
+import { onAuthStateChanged,signOut } from "firebase/auth"; // Import directly from firebase/auth
 import UsersPage from "./UsersPage";
 import EvaluationToolsPage from "./EvaluationToolsPage";
 import NotificationsPage from "./NotificationsPage";
@@ -16,6 +16,16 @@ const AdminDashboard = () => {
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
   const db = getFirestore();
   const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log("User logged out successfully");
+      // Optionally, redirect to login page or show message
+    } catch (error) {
+      console.error("Error logging out: ", error);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -47,8 +57,9 @@ const AdminDashboard = () => {
       <div className="Admin-navbar">
         <h1>Admin Dashboard</h1>
         <div className="Admin-links">
-          <Link to="users">User</Link>
+          <Link to="users">Users</Link>
           <Link to="evaluation-tools">Evaluation Tools</Link>
+          <Link to="evaluation-report">Evaluation Report</Link>
           <Link to="notifications" className="notification-link">
             Notifications
             {pendingUsersCount > 0 && (
@@ -56,11 +67,12 @@ const AdminDashboard = () => {
             )}
           </Link>
           <Link to="subjects">Subjects</Link>
-          <Link to="evaluation-report">Evaluation Report</Link> 
+          <button onClick={handleLogout}>Log Out</button>
+    
         </div>
       </div>
 
-      <div className="nav-container">
+      <div className="right-container">
           <div className="Admin-header">
             <p>Welcome, Admin! Here you can manage users, evaluation forms, and more.</p>
           </div>

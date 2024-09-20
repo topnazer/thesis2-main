@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getFirestore, collection, deleteDoc, updateDoc, onSnapshot, doc, setDoc, query, where, getDocs, getDoc } from "firebase/firestore";
-import './AdminR.css';
+
 
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);

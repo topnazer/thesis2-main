@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 const EvaluationReportPage = () => {
   const [facultyList, setFacultyList] = useState([]);
@@ -10,11 +10,10 @@ const EvaluationReportPage = () => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const db = getFirestore();
 
-  // Fetch all faculty members and their evaluations
   useEffect(() => {
     const fetchFaculty = async () => {
       try {
@@ -55,21 +54,18 @@ const EvaluationReportPage = () => {
     fetchFaculty();
   }, [db]);
 
-  // Search function to filter faculty list based on search query
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
     filterFaculty(query, departmentFilter);
   };
 
-  // Handle department filtering
   const handleDepartmentChange = (e) => {
     const selectedDepartment = e.target.value;
     setDepartmentFilter(selectedDepartment);
     filterFaculty(searchQuery, selectedDepartment);
   };
 
-  // Function to filter faculty list based on search query and department
   const filterFaculty = (query, department) => {
     const filtered = facultyList.filter(faculty =>
       (faculty.firstName?.toLowerCase().includes(query) ||
@@ -81,9 +77,7 @@ const EvaluationReportPage = () => {
     setFilteredFacultyList(filtered);
   };
 
-  // Navigate to ViewEvaluationPage
   const handleViewEvaluation = (faculty) => {
-    // Navigate to the view evaluation page, passing the facultyId and names as state
     navigate(`/view-evaluation/${faculty.facultyId}`, { state: { firstName: faculty.firstName, lastName: faculty.lastName } });
   };
 
@@ -92,9 +86,8 @@ const EvaluationReportPage = () => {
 
   return (
     <div>
+      <div className="faculty-header">
       <h1>Faculty Evaluation Report</h1>
-
-      {/* Search Bar */}
       <input
         type="text"
         placeholder="Search faculty by name, email, or ID"
@@ -103,7 +96,6 @@ const EvaluationReportPage = () => {
         style={{ marginBottom: '20px', padding: '10px', width: '300px' }}
       />
 
-      {/* Department Filter */}
       <select
         value={departmentFilter}
         onChange={handleDepartmentChange}
@@ -116,28 +108,24 @@ const EvaluationReportPage = () => {
           </option>
         ))}
       </select>
-
-      {/* Faculty List */}
+      </div>
       <div>
         {filteredFacultyList.length > 0 ? (
-        <ul>
-        {filteredFacultyList.map((faculty, index) => (
-          <li key={index} style={{ marginBottom: '20px' }}>
-            <h3>
-              {faculty.firstName} {faculty.lastName} (ID: {faculty.facultyId})
-            </h3>
-            <p>Email: {faculty.email}</p>
-            <p>Department: {faculty.department}</p>
-            <p>
-              {faculty.evaluation
-                ? `Average Score: ${faculty.evaluation.averageScore}, Completed Evaluations: ${faculty.evaluation.completedEvaluations}`
-                : 'No evaluations available'}
-            </p>
-            {/* Pass faculty object directly */}
-            <button onClick={() => handleViewEvaluation(faculty)}>View</button> {/* View button */}
-          </li>
-        ))}
-      </ul>
+          filteredFacultyList.map((faculty, index) => (
+            <div className="faculty-card" key={index}>
+              <h3 className="faculty-name">
+                {faculty.firstName} {faculty.lastName} (ID: {faculty.facultyId})
+              </h3>
+              <p className="faculty-email">Email: {faculty.email}</p>
+              <p className="faculty-department">Department: {faculty.department}</p>
+              <p className="faculty-evaluation">
+                {faculty.evaluation
+                  ? `Average Score: ${faculty.evaluation.averageScore}, Completed Evaluations: ${faculty.evaluation.completedEvaluations}`
+                  : 'No evaluations available'}
+              </p>
+              <button className="view-button" onClick={() => handleViewEvaluation(faculty)}>View</button>
+            </div>
+          ))
         ) : (
           <p>No faculty members found.</p>
         )}

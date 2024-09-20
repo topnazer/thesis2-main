@@ -40,7 +40,7 @@ const LoginForm = ({ toggleSignUp }) => {
           case "Student":
             navigate("/student-dashboard");
             break;
-          case "ACAF":  // Added ACAF role case
+          case "ACAF": 
             navigate("/acaf-dashboard");
             break;
           default:

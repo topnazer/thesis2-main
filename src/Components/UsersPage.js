@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
-import './AdminR.css';
+import './User.css';
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
@@ -56,10 +56,9 @@ const UsersPage = () => {
 
   return (
     <div>
-      <h2>Users by Department</h2>
-      <div>
+      <div className='user-button'>
         {departments.map((dept) => (
-          <button
+          <button 
             key={dept}
             onClick={() => setSelectedDepartment(dept)}
             className={selectedDepartment === dept ? "active-department" : ""}
@@ -73,15 +72,19 @@ const UsersPage = () => {
       {users.length === 0 ? (
         <p>No users found in {selectedDepartment} department.</p>
       ) : (
-        <ul>
-          {users.map((user) => (
-            <li key={user.id}>
-              {user.firstName} {user.lastName} - {user.role} ({user.status})
-              <br />
+        <div className="user-card">
+        {users.map((user) => (
+          <div key={user.id} className="user-item">
+            <div className="user-info">
+              {user.firstName} {user.lastName} - {user.role} 
+              <p>({user.status})</p>
+            </div>
+            <div className="user-subjects">
               Subjects: {userSubjects[user.id]?.join(", ") || "No subjects"}
-            </li>
-          ))}
-        </ul>
+            </div>
+          </div>
+        ))}
+      </div>
       )}
     </div>
   );

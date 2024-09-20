@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getFirestore, doc, setDoc, collection, getDocs, getDoc } from "firebase/firestore";
-import './evaluationtoolspage.css'; // Import the new CSS file
+import './evaluationtoolspage.css'; 
+
 
 const EvaluationToolsPage = () => {
-  // Define necessary states
+ 
   const [evaluationForms, setEvaluationForms] = useState({});
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("");
@@ -36,7 +37,7 @@ const EvaluationToolsPage = () => {
       if (facultyEvaluationDoc.exists()) {
         setFacultyQuestions(facultyEvaluationDoc.data().questions);
       } else {
-        setFacultyQuestions([]); // Initialize if no form exists
+        setFacultyQuestions([]); 
       }
     } catch (error) {
       console.error("Error fetching faculty evaluation form:", error);
@@ -49,7 +50,7 @@ const EvaluationToolsPage = () => {
       if (deanEvaluationDoc.exists()) {
         setDeanQuestions(deanEvaluationDoc.data().questions);
       } else {
-        setDeanQuestions([]); // Initialize if no form exists
+        setDeanQuestions([]); 
       }
     } catch (error) {
       console.error("Error fetching dean evaluation form:", error);
@@ -61,11 +62,11 @@ const EvaluationToolsPage = () => {
   
     const questionWithWeight = {
       text: newQuestion,
-      weight: parseFloat(newWeight) || 1, // Default weight is 1
+      weight: parseFloat(newWeight) || 1, 
     };
   
     if (editingIndex !== null) {
-      // Editing an existing question
+      
       if (currentFormType === "Subject" && selectedSubject) {
         setEvaluationForms((prevForms) => {
           const updatedQuestions = [...(prevForms[selectedSubject] || [])];
@@ -81,9 +82,8 @@ const EvaluationToolsPage = () => {
         updatedQuestions[editingIndex] = questionWithWeight;
         setDeanQuestions(updatedQuestions);
       }
-      setEditingIndex(null); // Clear the edit mode
-    } else {
-      // Adding a new question
+      setEditingIndex(null); 
+      
       if (currentFormType === "Subject" && selectedSubject) {
         setEvaluationForms((prevForms) => ({
           ...prevForms,
@@ -179,6 +179,7 @@ const EvaluationToolsPage = () => {
         <div className="question-form">
           <label htmlFor="subjectSelect">Select Subject:</label>
           <select
+  className='evaluation-select'
   id="subjectSelect"
   value={selectedSubject}
   onChange={(e) => {

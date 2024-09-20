@@ -1,132 +1,73 @@
-/* View Evaluation Page */
-.view-evaluation-page .evaluation-card {
-    margin: 20px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+.faculty-card {
+    width: 50%;
+    background-color: #F5F5DC; 
+    border: 1px solid #8B4513; 
+    border-radius: 10px;
     padding: 20px;
-    margin-bottom: 20px;
-}
-
-.view-evaluation-page h1 {
-    font-size: 24px;
-    color: #333;
-}
-
-.view-evaluation-page .evaluation-card .question-text {
-    font-weight: bold;
-    font-size: 16px;
-    color: #333;
-}
-
-.view-evaluation-page .evaluation-card .response {
-    background-color: #e9ecef;
-    font-size: 14px;
-    padding: 5px 10px;
-    border-radius: 5px;
-    color: #007bff;
-}
-
-.view-evaluation-page p {
-    margin: 10px 0;
-}
-
-.view-evaluation-page h3 {
-    margin-top: 20px;
-    color: #333;
-}
-
-.view-evaluation-page ul {
-    list-style-type: none;
-    padding-left: 0;
-}
-
-.view-evaluation-page ul li {
-    background-color: #f9f9f9;
-    padding: 10px;
-    border: 1px solid #ddd;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    display: flex;
-    justify-content: space-between;
-}
-
-.view-evaluation-page .comment-section {
-    background-color: #f0f8ff;
-    padding: 15px;
-    border-radius: 5px;
-    margin-top: 20px;
-    border: 1px solid #5e7288;
-    color: #333;
-}
-
-.view-evaluation-page .comment-section p {
-    margin: 0;
-    font-size: 14px;
-    color: #555;
-}
-
-.view-evaluation-page button {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
+    margin: 20px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+  }
+  
+  .faculty-card:hover {
+    transform: scale(1.02);
+  }
+  
+  .faculty-name {
+    color: #800020; 
+    font-size: 20px;
+    margin: 0 0 10px;
+  }
+  
+  .faculty-email,
+  .faculty-department,
+  .faculty-evaluation {
+    color: #333; 
+    margin: 5px 0;
+  }
+  
+  .view-button {
+    background-color: #800020; 
+    color: #FFFFFF; 
     border: none;
+    padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
-}
+    transition: background-color 0.3s;
+  }
+  
+  .view-button:hover {
+    background-color: #FFFFFF;
+    color: #5c0016; 
+  }
 
-.view-evaluation-page button:hover {
-    background-color: #45a049;
-}
+ 
+  faculty-header input,
+  .faculty-header select {
+      margin: 0px 6px;
+      padding: 10px;
+      border: 1px solid #8B4513; 
+      border-radius: 5px;
+      background-color: #F5F5DC; 
+      color: #800020; 
+      font-size: 16px;
+  }
+  
+  .faculty-header input::placeholder,
+  .faculty-header select {
+      color: #333; 
+  }
+  
 
-.view-evaluation-page button:focus {
-    background-color: blue;
-}
-
-/* Question and Response Table Layout */
-.view-evaluation-page .evaluation-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-}
-
-.view-evaluation-page .evaluation-table th, 
-.view-evaluation-page .evaluation-table td {
-    border: 1px solid #ddd;
-    padding: 12px; /* Increase padding for more space */
-    text-align: center;
-}
-
-.view-evaluation-page .evaluation-table th {
-    background-color: #4CAF50;
-    color: white;
-    font-weight: bold;
-}
-/*sulod sa table cell */
-.view-evaluation-page .evaluation-table td:first-child {
-    text-align: left;
-    width: 70%; /* Increase space for the question */
-    padding-top: 30px;  /* Add more space at the top */
-    padding-bottom: 30px;  /* Add more space at the bottom */
-    
-}
-
-.view-evaluation-page .evaluation-table td:not(:first-child) {
-    width: 6%; /* Adjust width for the score columns */
-}
-
-.view-evaluation-page .evaluation-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.view-evaluation-page .evaluation-table tbody tr:nth-child(odd) {
-    background-color: #fff;
-}
-
-.view-evaluation-page .evaluation-table .response-circle {
-    width: 18px; /* Make the circle bigger */
-    height: 18px;
-    border-radius: 50%;
-    background-color: #007bff;
-    display: inline-block;
-}
+  .faculty-header input:hover,
+  .faculty-header select:hover {
+      border-color: #800020; 
+      background-color: #FFFFFF; 
+  }
+  
+ 
+  .faculty-header select:focus {
+      outline: none;
+      border-color: #4caf50; 
+      box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+  }
