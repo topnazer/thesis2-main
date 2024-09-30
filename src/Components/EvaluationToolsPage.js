@@ -59,46 +59,49 @@ const EvaluationToolsPage = () => {
 
   const addQuestion = () => {
     if (!newQuestion.trim()) return;
-  
+
     const questionWithWeight = {
-      text: newQuestion,
-      weight: parseFloat(newWeight) || 1, 
+        text: newQuestion,
+        weight: parseFloat(newWeight) || 1, 
     };
-  
+
     if (editingIndex !== null) {
-      
-      if (currentFormType === "Subject" && selectedSubject) {
-        setEvaluationForms((prevForms) => {
-          const updatedQuestions = [...(prevForms[selectedSubject] || [])];
-          updatedQuestions[editingIndex] = questionWithWeight;
-          return { ...prevForms, [selectedSubject]: updatedQuestions };
-        });
-      } else if (currentFormType === "Faculty") {
-        const updatedQuestions = [...facultyQuestions];
-        updatedQuestions[editingIndex] = questionWithWeight;
-        setFacultyQuestions(updatedQuestions);
-      } else if (currentFormType === "Dean") {
-        const updatedQuestions = [...deanQuestions];
-        updatedQuestions[editingIndex] = questionWithWeight;
-        setDeanQuestions(updatedQuestions);
-      }
-      setEditingIndex(null); 
-      
-      if (currentFormType === "Subject" && selectedSubject) {
-        setEvaluationForms((prevForms) => ({
-          ...prevForms,
-          [selectedSubject]: [...(prevForms[selectedSubject] || []), questionWithWeight],
-        }));
-      } else if (currentFormType === "Faculty") {
-        setFacultyQuestions([...facultyQuestions, questionWithWeight]);
-      } else if (currentFormType === "Dean") {
-        setDeanQuestions([...deanQuestions, questionWithWeight]);
-      }
+        // Updating an existing question
+        if (currentFormType === "Subject" && selectedSubject) {
+            setEvaluationForms((prevForms) => {
+                const updatedQuestions = [...(prevForms[selectedSubject] || [])];
+                updatedQuestions[editingIndex] = questionWithWeight;
+                return { ...prevForms, [selectedSubject]: updatedQuestions };
+            });
+        } else if (currentFormType === "Faculty") {
+            const updatedQuestions = [...facultyQuestions];
+            updatedQuestions[editingIndex] = questionWithWeight;
+            setFacultyQuestions(updatedQuestions);
+        } else if (currentFormType === "Dean") {
+            const updatedQuestions = [...deanQuestions];
+            updatedQuestions[editingIndex] = questionWithWeight;
+            setDeanQuestions(updatedQuestions);
+        }
+        setEditingIndex(null); // Reset the editing index
+    } else {
+        // Adding a new question
+        if (currentFormType === "Subject" && selectedSubject) {
+            setEvaluationForms((prevForms) => ({
+                ...prevForms,
+                [selectedSubject]: [...(prevForms[selectedSubject] || []), questionWithWeight],
+            }));
+        } else if (currentFormType === "Faculty") {
+            setFacultyQuestions([...facultyQuestions, questionWithWeight]);
+        } else if (currentFormType === "Dean") {
+            setDeanQuestions([...deanQuestions, questionWithWeight]);
+        }
     }
-  
+
+    // Clear input fields
     setNewQuestion("");
     setNewWeight("");
-  };
+};
+
 
   const deleteQuestion = (index) => {
     if (currentFormType === "Subject" && selectedSubject) {
