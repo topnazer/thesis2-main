@@ -5,6 +5,7 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import './Auth.css';
 
+
 const LoginForm = ({ toggleSignUp }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,7 +62,7 @@ const LoginForm = ({ toggleSignUp }) => {
     <div className="auth-page">   
       <div className="auth-container">
         <div className="auth-left">
-          <h2>Hello, welcome!</h2>
+          <h1>"Hi, Welcome Back!"</h1>
           <form onSubmit={handleLogin}>
             <input
               type="email"
@@ -93,7 +94,9 @@ const LoginForm = ({ toggleSignUp }) => {
             <a href="#"> <i className="fab fa-instagram"></i> </a>
           </div>
         </div>
-        <div className="auth-right"></div>
+        <div className="auth-right">
+          <h1>"Growth starts with honest feedback. Evaluate to improve, not to criticize."</h1>
+        </div>
       </div>
     </div>
   );

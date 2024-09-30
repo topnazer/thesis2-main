@@ -1,7 +1,6 @@
-  // File path: ./src/NotificationsPage.js
-
   import React, { useState, useEffect, useCallback } from 'react';
   import { getFirestore, collection, getDocs, updateDoc, doc } from "firebase/firestore";
+  import './Notificationpage.css';
 
   const NotificationsPage = () => {
     const [pendingUsers, setPendingUsers] = useState([]);
@@ -17,7 +16,7 @@
 
         setPendingUsers(pendingUsersList);
         
-        // Store the pending users count in localStorage
+        
         localStorage.setItem('pendingUsersCount', pendingUsersList.length);
       } catch (error) {
         console.error("Error fetching pending users:", error);
@@ -52,22 +51,28 @@
 
     return (
       <div>
-        <h2>Pending User Registrations</h2>
-        {pendingUsers.length === 0 ? (
-          <p>No pending users to approve.</p>
-        ) : (
-          <ul>
-            {pendingUsers.map((user) => (
-              <li key={user.id}>
-                {user.firstName} {user.lastName} - {user.role} ({user.email})
-                <button onClick={() => handleApproveUser(user.id)}>Approve</button>
-                <button onClick={() => handleRejectUser(user.id)}>Reject</button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    );
-  };
+      <h2>Pending User Registrations</h2>
+      {pendingUsers.length === 0 ? (
+        <p>No pending users to approve.</p>
+      ) : (
+        <div className="user-card-container">
+          {pendingUsers.map((user) => (
+            <div key={user.id} className="user-card">
+              <div className="user-info">
+                <h3>{user.firstName} {user.lastName}</h3>
+                <p>Role: {user.role}</p>
+                <p>Email: {user.email}</p>
+              </div>
+              <div className="user-actions">
+                <button onClick={() => handleApproveUser(user.id)} className="approve-button">Approve</button>
+                <button onClick={() => handleRejectUser(user.id)} className="reject-button">Reject</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
   export default NotificationsPage;

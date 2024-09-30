@@ -21,7 +21,7 @@
   background-color: white;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 4px 8px #8B4513; 
 }
 
 .auth-left {
@@ -62,6 +62,10 @@
   border: none;   
   border-radius: 5px;
   cursor: pointer;
+}
+.auth-left .login-button:hover {
+  background-color: #5a001F; 
+    color:#F5F5DC;
 }
 
 .auth-left .signup-button {
@@ -156,4 +160,9 @@
   font-size: 1rem;
   cursor: pointer;
   margin-top: 10px;
+}
+
+.auth-right h1 {
+  text-align: center;
+  color: white;
 }

@@ -16,16 +16,18 @@ html {
     color: #F5F5DC; 
     box-shadow: 1px 1px 1px 1px #F5F5DC; 
     text-align: center;
+    border-radius: 6px;
 }
 
 .Admin-navbar {
-    background-color: #F5F5DC; 
+    background-color: #ffffff; 
     width: 300px;
     height: 725px;
     align-items: center;
     display: flex;
     flex-direction: column;
-    box-shadow: 1px 1px 1px 1px #8B4513; 
+    box-shadow:  0px 4px 8px #8B4513; 
+    border-radius: 5px;
 }
 
 .Admin-links {
@@ -38,7 +40,7 @@ html {
     background-color: #800020; 
     color: #F5F5DC; 
     border: 1px solid #800020; 
-    box-shadow: 1px 1px 1px #800020; 
+    box-shadow: 0px 4px 8px #8B4513; 
     border-radius: 6px;
     cursor: pointer;
     display: inline-block;
@@ -54,8 +56,8 @@ html {
 }
 
 .Admin-links a:hover, .Admin-links a:focus, .Admin-links button:hover {
-    background-color: #F5F5DC; 
-    color:#800020;
+    background-color: rgb(102, 1, 26); 
+    color:#F5F5DC;
 }
 
 .Admin-navbar h1 {
@@ -76,10 +78,11 @@ html {
 
 .route-container {
     text-align: center;
-    box-shadow: 1px 1px 1px 1px #8B4513; 
+    box-shadow: 0px 4px 8px #8B4513; 
     background-color: white; 
     align-items: center;
     margin: 20px;
+    border-radius: 8px;
     height: 650px;
     max-height: 650px;
     overflow-y: auto;

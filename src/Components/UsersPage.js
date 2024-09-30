@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
 import './User.css';
@@ -7,6 +6,7 @@ const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [userSubjects, setUserSubjects] = useState({});
   const [selectedDepartment, setSelectedDepartment] = useState("CCS"); // Default department
+  const [searchTerm, setSearchTerm] = useState(''); // Search state
   const db = getFirestore();
 
   // Fetch users by department
@@ -33,7 +33,7 @@ const UsersPage = () => {
     }
   }, [db]);
 
-  // Fetch subjects for a user based on their role
+
   const fetchUserSubjects = useCallback(async (role, userId) => {
     try {
       const collectionPath = role === "Student" ? `students/${userId}/subjects` : `${role.toLowerCase()}/${userId}/subjects`;
@@ -47,12 +47,19 @@ const UsersPage = () => {
     }
   }, [db]);
 
-  // Fetch users when department changes
   useEffect(() => {
     fetchUsersByDepartment(selectedDepartment);
   }, [fetchUsersByDepartment, selectedDepartment]);
 
   const departments = ["CCS", "COC", "CED", "CASS", "COE", "CBA", "ACAF"];
+
+  
+  const filteredUsers = users.filter((user) => {
+    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+    const role = user.role.toLowerCase();
+    const search = searchTerm.toLowerCase();
+    return fullName.includes(search) || role.includes(search);
+  });
 
   return (
     <div>
@@ -69,22 +76,32 @@ const UsersPage = () => {
       </div>
 
       <h2>{selectedDepartment} Department Users</h2>
-      {users.length === 0 ? (
+
+      {}
+      <input 
+        type="text" 
+        placeholder="Search users..." 
+        value={searchTerm} 
+        onChange={(e) => setSearchTerm(e.target.value)} 
+        style={{ marginBottom: '20px', padding: '10px', width: '50%' }}
+      />
+
+      {filteredUsers.length === 0 ? (
         <p>No users found in {selectedDepartment} department.</p>
       ) : (
         <div className="user-card">
-        {users.map((user) => (
-          <div key={user.id} className="user-item">
-            <div className="user-info">
-              {user.firstName} {user.lastName} - {user.role} 
-              <p>({user.status})</p>
+          {filteredUsers.map((user) => (
+            <div key={user.id} className="user-item">
+              <div className="user-info">
+                {user.firstName} {user.lastName} - {user.role} 
+                <p>({user.status})</p>
+              </div>
+              <div className="user-subjects">
+                Subjects: {userSubjects[user.id]?.join(", ") || "No subjects"}
+              </div>
             </div>
-            <div className="user-subjects">
-              Subjects: {userSubjects[user.id]?.join(", ") || "No subjects"}
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
       )}
     </div>
   );
