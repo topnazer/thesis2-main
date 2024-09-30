@@ -195,12 +195,12 @@ const Subjects = () => {
               <p>{subject.name} (ID: {subject.id}) - {subject.facultyId ? facultyList.find(f => f.id === subject.facultyId)?.email : "No faculty assigned"}</p>
             </div>
             <div className="subject-actions">
-              <button onClick={() => {
+              <button className="subject-edit" onClick={() => {
                 setEditSubjectName(subject.name);
                 setSubjectIdToEdit(subject.id);
                 setSelectedFaculty(subject.facultyId);
               }}>Edit</button>
-              <button onClick={() => handleDeleteSubject(subject.id)}>Delete</button>
+              <button  className="subject-delete" onClick={() => handleDeleteSubject(subject.id)}>Delete</button>
 
               {foundUser && (
                 <button onClick={() => handleAssignSubjectToUser(subject.id)}>Assign to User</button>
