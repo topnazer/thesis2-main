@@ -15,9 +15,14 @@
   text-align: center;
   margin: 20px 0; 
   box-sizing: border-box;
-  width: 50%;
+  width: 100%;
 }
 
+.user-item:hover {
+  box-shadow: 0 2px 4px #8B4513(228, 6, 6, 0.853);
+  transition: box-shadow 0.2s ease;
+  ;
+}
 .user-info {
   font-weight: bold;
   margin-bottom: 10px;

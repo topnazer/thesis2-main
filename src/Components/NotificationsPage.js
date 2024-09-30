@@ -55,15 +55,15 @@
       {pendingUsers.length === 0 ? (
         <p>No pending users to approve.</p>
       ) : (
-        <div className="user-card-container">
+        <div className="notif-card-container">
           {pendingUsers.map((user) => (
-            <div key={user.id} className="user-card">
-              <div className="user-info">
+            <div key={user.id} className="notif-card">
+              <div className="notif-info">
                 <h3>{user.firstName} {user.lastName}</h3>
                 <p>Role: {user.role}</p>
                 <p>Email: {user.email}</p>
               </div>
-              <div className="user-actions">
+              <div className="notif-actions">
                 <button onClick={() => handleApproveUser(user.id)} className="approve-button">Approve</button>
                 <button onClick={() => handleRejectUser(user.id)} className="reject-button">Reject</button>
               </div>

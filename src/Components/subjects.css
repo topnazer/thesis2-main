@@ -1,0 +1,67 @@
+.subject-card-container {
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    column-gap: 50px; 
+    margin: 0 auto; 
+    max-width: 650px; 
+  }
+  
+  .subject-card {
+    border: 1px solid #8B4513;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #F5F5DC;
+    text-align: center;
+    margin: 10px auto;
+    box-sizing: border-box;
+    width: 50%;
+  }
+  
+  .subject-card:hover {
+    box-shadow: 0 2px 4px rgba(139, 69, 19, 0.85);
+    transition: box-shadow 0.2s ease;
+  }
+  
+  .subject-info {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    color: #800020;
+  }
+  
+  .subject-info p {
+    color: yellowgreen;
+  }
+  
+  .subject-actions {
+    font-size: 1em;
+    color: #666;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .subject-actions button {
+    background: transparent;
+    border: 1px solid #800020;
+    border-radius: 6px;
+    box-shadow: 1px 1px 1px black;
+    color: black;
+    cursor: pointer;
+    padding: 7px 25px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+  }
+  
+  .subject-edit:hover {
+    background-color: #4caf50;
+    color: white;
+  }
+
+  .subject-delete:hover {
+    background-color: #f44336;
+    color: white;
+  } 
+  

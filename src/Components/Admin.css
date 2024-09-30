@@ -55,9 +55,13 @@ html {
     margin-top: 100px;
 }
 
-.Admin-links a:hover, .Admin-links a:focus, .Admin-links button:hover {
+.Admin-links a:hover, .Admin-links button:hover  {
     background-color: rgb(102, 1, 26); 
     color:#F5F5DC;
+}
+.Admin-links a:focus {
+    background-color: rgb(248, 246, 246); 
+    color:#030303;
 }
 
 .Admin-navbar h1 {
