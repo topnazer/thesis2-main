@@ -71,18 +71,18 @@ const SubjectEvaluationPage = () => {
         setEditingIndex(null);
     };
 
-    const deleteQuestion = (index) => {
+    const deleteQuestion = (absoluteIndex) => {
         setEvaluationForms((prevForms) => {
-            const updatedQuestions = prevForms[selectedSubject].filter((_, i) => i !== index);
+            const updatedQuestions = prevForms[selectedSubject].filter((_, i) => i !== absoluteIndex);
             return { ...prevForms, [selectedSubject]: updatedQuestions };
         });
     };
 
-    const handleEditQuestion = (index) => {
-        setNewQuestion(evaluationForms[selectedSubject][index].text);
-        setNewWeight(evaluationForms[selectedSubject][index].weight);
-        setSelectedCategory(evaluationForms[selectedSubject][index].category);
-        setEditingIndex(index);
+    const handleEditQuestion = (absoluteIndex) => {
+        setNewQuestion(evaluationForms[selectedSubject][absoluteIndex].text);
+        setNewWeight(evaluationForms[selectedSubject][absoluteIndex].weight);
+        setSelectedCategory(evaluationForms[selectedSubject][absoluteIndex].category);
+        setEditingIndex(absoluteIndex);
     };
 
     const handleSaveForm = async () => {
@@ -129,11 +129,11 @@ const SubjectEvaluationPage = () => {
         fetchSubjects();
     }, [fetchSubjects]);
 
-  return (
+    return (
     <div className="subject-evaluation-page">
         <div className="subject-evaluation-card">
             <h2 className="subject-evaluation-header">Create or Edit Evaluation Form for Subjects</h2>
-            
+
             <div className="subject-category-section">
                 <label>Select Category:</label>
                 <select
@@ -158,7 +158,7 @@ const SubjectEvaluationPage = () => {
             <div className="subject-question-form">
                 <label>Select Subject:</label>
                 <select
-                    className='subject-evaluation-select'
+                    className="subject-evaluation-select"
                     value={selectedSubject}
                     onChange={(e) => {
                         setSelectedSubject(e.target.value);
@@ -179,16 +179,20 @@ const SubjectEvaluationPage = () => {
                         <h3>{category}</h3>
                         <ul className="subject-questions-list">
                             {(evaluationForms[selectedSubject] || [])
-                                .filter(question => question.category === category)
-                                .map((question, index) => (
-                                    <li key={index}>
-                                        {question.text} (Weight: {question.weight})
-                                        <div className="subject-operation-buttons">
-                                            <button className="subject-edit-button" onClick={() => handleEditQuestion(index)}>Edit</button>
-                                            <button className="subject-delete-button" onClick={() => deleteQuestion(index)}>Delete</button>
-                                        </div>
-                                    </li>
-                                ))}
+                                .map((question, absoluteIndex) => {
+                                    if (question.category === category) {
+                                        return (
+                                            <li key={absoluteIndex}>
+                                                {question.text} (Weight: {question.weight})
+                                                <div className="subject-operation-buttons">
+                                                    <button className="subject-edit-button" onClick={() => handleEditQuestion(absoluteIndex)}>Edit</button>
+                                                    <button className="subject-delete-button" onClick={() => deleteQuestion(absoluteIndex)}>Delete</button>
+                                                </div>
+                                            </li>
+                                        );
+                                    }
+                                    return null;
+                                })}
                         </ul>
                     </div>
                 ))}
@@ -219,6 +223,6 @@ const SubjectEvaluationPage = () => {
         </div>
     </div>
 );
-    };
-    
-    export default SubjectEvaluationPage;
+};
+
+export default SubjectEvaluationPage;

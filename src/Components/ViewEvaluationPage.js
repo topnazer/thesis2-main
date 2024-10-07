@@ -61,7 +61,7 @@ const ViewEvaluationPage = () => {
     return categories.map((category, categoryIndex) => (
       <React.Fragment key={categoryIndex}>
         <tr>
-        <td colSpan="6" className="category-header"><strong>{category}</strong></td>
+          <th colSpan="6" className="category-header">{category}</th>
         </tr>
         {questions
           .filter(question => question.category === category)

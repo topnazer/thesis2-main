@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
-import './subjectevaluationpage.css';
+import './facultydeanevaluationpage.css';
 
 const FacultyDeanEvaluationPage = () => {
     const [facultyQuestions, setFacultyQuestions] = useState([]);
@@ -11,9 +11,9 @@ const FacultyDeanEvaluationPage = () => {
     const [currentFormType, setCurrentFormType] = useState("faculty");
     const [facultyCategories, setFacultyCategories] = useState([]);
     const [deanCategories, setDeanCategories] = useState([]);
-    const [newFacultyCategory, setNewFacultyCategory] = useState(""); // Separate state for faculty category
-    const [newDeanCategory, setNewDeanCategory] = useState(""); // Separate state for dean category
-    const [selectedCategory, setSelectedCategory] = useState(""); 
+    const [newFacultyCategory, setNewFacultyCategory] = useState("");
+    const [newDeanCategory, setNewDeanCategory] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
     const [editingCategoryIndex, setEditingCategoryIndex] = useState(null);
 
     const db = getFirestore();
@@ -78,7 +78,7 @@ const FacultyDeanEvaluationPage = () => {
             setFacultyQuestions((prevQuestions) => prevQuestions.filter((question) => question.category !== category));
         } else if (currentFormType === "dean") {
             setDeanCategories((prevCategories) => prevCategories.filter((cat) => cat !== category));
-            setDeanQuestions((prevQuestions) => deanQuestions.filter((question) => question.category !== category));
+            setDeanQuestions((prevQuestions) => prevQuestions.filter((question) => question.category !== category));
         }
     };
 
@@ -127,20 +127,20 @@ const FacultyDeanEvaluationPage = () => {
         setEditingIndex(null);
     };
 
-    const deleteQuestion = (index) => {
+    const deleteQuestion = (absoluteIndex) => {
         if (currentFormType === "faculty") {
-            setFacultyQuestions((prevQuestions) => prevQuestions.filter((_, i) => i !== index));
+            setFacultyQuestions((prevQuestions) => prevQuestions.filter((_, i) => i !== absoluteIndex));
         } else if (currentFormType === "dean") {
-            setDeanQuestions((prevQuestions) => prevQuestions.filter((_, i) => i !== index));
+            setDeanQuestions((prevQuestions) => prevQuestions.filter((_, i) => i !== absoluteIndex));
         }
     };
 
-    const handleEditQuestion = (index) => {
-        const questionToEdit = currentFormType === "faculty" ? facultyQuestions[index] : deanQuestions[index];
+    const handleEditQuestion = (absoluteIndex) => {
+        const questionToEdit = currentFormType === "faculty" ? facultyQuestions[absoluteIndex] : deanQuestions[absoluteIndex];
         setNewQuestion(questionToEdit.text);
         setNewWeight(questionToEdit.weight);
         setSelectedCategory(questionToEdit.category);
-        setEditingIndex(index);
+        setEditingIndex(absoluteIndex);
     };
 
     const handleSaveForm = async () => {
@@ -169,26 +169,30 @@ const FacultyDeanEvaluationPage = () => {
                 <h3>{category}</h3>
                 <ul className="questions-list">
                     {questions
-                        .filter((question) => question.category === category)
-                        .map((question, index) => (
-                            <li key={index}>
-                                {question.text} (Weight: {question.weight})
-                                <div className="operation-buttons">
-                                    <button onClick={() => handleEditQuestion(index)}>Edit</button>
-                                    <button onClick={() => deleteQuestion(index)}>Delete</button>
-                                </div>
-                            </li>
-                        ))}
+                        .map((question, absoluteIndex) => {
+                            if (question.category === category) {
+                                return (
+                                    <li key={absoluteIndex}>
+                                        {question.text} (Weight: {question.weight})
+                                        <div className="operation-buttons">
+                                            <button onClick={() => handleEditQuestion(absoluteIndex)}>Edit</button>
+                                            <button onClick={() => deleteQuestion(absoluteIndex)}>Delete</button>
+                                        </div>
+                                    </li>
+                                );
+                            }
+                            return null;
+                        })}
                 </ul>
             </div>
         ));
     };
 
     return (
-        <div className="evaluation-page">
+        <div>
             {/* Faculty Form Section */}
-            <h2 className="evaluation-header">Create or Edit Evaluation Form for Faculty</h2>
-            <div className="category-section">
+            <h2>Create or Edit Evaluation Form for Faculty</h2>
+            <div>
                 <input
                     type="text"
                     value={newFacultyCategory}
@@ -198,7 +202,7 @@ const FacultyDeanEvaluationPage = () => {
                 <button onClick={() => { setCurrentFormType("faculty"); addOrEditCategory(); }}>
                     {editingCategoryIndex !== null ? "Update Category" : "Add Category"}
                 </button>
-
+    
                 <label htmlFor="facultyCategorySelect">Select Category:</label>
                 <select
                     id="facultyCategorySelect"
@@ -210,7 +214,7 @@ const FacultyDeanEvaluationPage = () => {
                         <option key={index} value={category}>{category}</option>
                     ))}
                 </select>
-
+    
                 {facultyCategories.map((category, index) => (
                     <div key={index}>
                         {category}
@@ -219,18 +223,16 @@ const FacultyDeanEvaluationPage = () => {
                     </div>
                 ))}
             </div>
-
-            <div className="question-form">
+    
+            <div>
                 {renderQuestionsByCategory(facultyQuestions, facultyCategories)}
                 <textarea
-                    className="question-input"
                     value={newQuestion}
                     onChange={(e) => setNewQuestion(e.target.value)}
                     placeholder={editingIndex !== null ? "Edit the question" : "Add a new question"}
                 />
                 <input
                     type="number"
-                    className="weight-input"
                     value={newWeight}
                     onChange={(e) => setNewWeight(e.target.value)}
                     placeholder="Set question weight"
@@ -240,10 +242,10 @@ const FacultyDeanEvaluationPage = () => {
                 </button>
                 <button onClick={handleSaveForm}>Save Faculty Form</button>
             </div>
-
+    
             {/* Dean Form Section */}
-            <h2 className="evaluation-header">Create or Edit Evaluation Form for Dean</h2>
-            <div className="category-section">
+            <h2>Create or Edit Evaluation Form for Dean</h2>
+            <div>
                 <input
                     type="text"
                     value={newDeanCategory}
@@ -253,7 +255,7 @@ const FacultyDeanEvaluationPage = () => {
                 <button onClick={() => { setCurrentFormType("dean"); addOrEditCategory(); }}>
                     {editingCategoryIndex !== null ? "Update Category" : "Add Category"}
                 </button>
-
+    
                 <label htmlFor="deanCategorySelect">Select Category:</label>
                 <select
                     id="deanCategorySelect"
@@ -265,7 +267,7 @@ const FacultyDeanEvaluationPage = () => {
                         <option key={index} value={category}>{category}</option>
                     ))}
                 </select>
-
+    
                 {deanCategories.map((category, index) => (
                     <div key={index}>
                         {category}
@@ -274,18 +276,16 @@ const FacultyDeanEvaluationPage = () => {
                     </div>
                 ))}
             </div>
-
-            <div className="question-form">
+    
+            <div>
                 {renderQuestionsByCategory(deanQuestions, deanCategories)}
                 <textarea
-                    className="question-input"
                     value={newQuestion}
                     onChange={(e) => setNewQuestion(e.target.value)}
                     placeholder={editingIndex !== null ? "Edit the question" : "Add a new question"}
                 />
                 <input
                     type="number"
-                    className="weight-input"
                     value={newWeight}
                     onChange={(e) => setNewWeight(e.target.value)}
                     placeholder="Set question weight"
