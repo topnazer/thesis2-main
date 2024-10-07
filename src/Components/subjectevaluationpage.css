@@ -1,0 +1,126 @@
+/* Updated CSS for Subject Evaluation Page */
+
+.subject-evaluation-page {
+    padding: 10px; /* Reduced padding */
+}
+
+.subject-evaluation-card {
+    margin-bottom: 10px; /* Reduced margin */
+    padding: 15px;
+    background-color: #F5F5DC;
+    border-radius: 5px;
+    border: 1px solid #8B4513;
+}
+
+.subject-evaluation-header {
+    font-size: 24px;
+    margin-bottom: 10px; /* Reduced margin */
+    color: #800020;
+    text-align: center;
+}
+
+.subject-category-section,
+.subject-question-form {
+    margin-bottom: 15px; /* Reduced margin */
+}
+
+.subject-evaluation-select {
+    margin: 0px 6px;
+    padding: 8px; /* Reduced padding */
+    border: 1px solid #8B4513; 
+    border-radius: 5px;
+    background-color: #F5F5DC; 
+    color: #800020; 
+    font-size: 16px;
+}
+
+.subject-questions-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0; /* Removed margins */
+}
+
+.subject-questions-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FFFFFF;
+    padding: 8px; /* Reduced padding */
+    margin-bottom: 5px; /* Reduced margin */
+    border-radius: 5px;
+    border: 1px solid #8B4513;
+}
+
+.subject-operation-buttons {
+    display: flex;
+    gap: 5px; /* Reduced gap */
+}
+
+.subject-operation-buttons button {
+    background-color: #F5F5DC;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.subject-edit-button {
+    background-color: #800020;
+    color: white;
+}
+
+.subject-edit-button:hover {
+    background-color: #A52A2A;
+}
+
+.subject-delete-button {
+    background-color: #8B4513;
+    color: white;
+}
+
+.subject-delete-button:hover {
+    background-color: #CD853F;
+}
+
+.subject-question-input {
+    width: 80%;
+    padding: 10px;
+    margin: 10px auto;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: none;
+}
+
+.subject-buttons-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.subject-buttons-container button {
+    padding: 8px 16px; /* Adjusted padding */
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.subject-save-button {
+    background-color: #800020;
+    color: white;
+}
+
+.subject-save-button:hover {
+    background-color: #A52A2A; 
+}
+
+.subject-cancel-button {
+    background-color: #8B4513;
+    color: white;
+}
+
+.subject-cancel-button:hover {
+    background-color: #CD853F; 
+}

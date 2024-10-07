@@ -1,0 +1,23 @@
+/* Example CSS for styling */
+.faculty-card, .subject-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background-color: #f9f2d6;
+    color: #8b0000;
+}
+
+.faculty-card:hover {
+    background-color: #f0e6cc;
+    cursor: pointer;
+}
+
+button {
+    background-color: #8b0000;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}

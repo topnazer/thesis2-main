@@ -1,73 +1,169 @@
+/* viewreport.css */
+
+/* General page styles */
+.view-evaluation-page {
+  width: 80%;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+  color: #333;
+  background-color: #e9e1e1;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Evaluation card styles */
+.evaluation-card {
+  background-color: #fff;
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Table styles */
+.evaluation-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.evaluation-table th,
+.evaluation-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.evaluation-table th:first-child,
+.evaluation-table td:first-child {
+  width: 60%; /* Allocate more space for the Question column */
+  text-align: left;
+}
+
+.evaluation-table th:not(:first-child),
+.evaluation-table td:not(:first-child) {
+  width: 8%; /* Allocate less space for rating columns */
+}
+
+.evaluation-table th {
+  background-color: #4CAF50; /* Green header background */
+  color: white;
+  font-weight: bold;
+}
+
+.evaluation-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.evaluation-table tbody tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+
+
+/* Comment section styles */
+.comment-section {
+  margin-top: 20px;
+  font-style: italic;
+  color: #555;
+}
+
+/* Button styles */
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50; /* Green button background */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049; /* Darker green on hover */
+}
+
+button:focus {
+  background-color: blue; /* Blue on focus */
+}
+
+/* Response circle styles */
+.response-circle {
+  color: #800020;
+  font-size: 18px;
+}
+
 .faculty-card {
-    width: 50%;
-    background-color: #F5F5DC; 
+  width: 50%;
+  background-color: #F5F5DC; 
+  border: 1px solid #8B4513; 
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.faculty-card:hover {
+  transform: scale(1.02);
+}
+
+.faculty-name {
+  color: #800020; 
+  font-size: 20px;
+  margin: 0 0 10px;
+}
+
+.faculty-email,
+.faculty-department,
+.faculty-evaluation {
+  color: #333; 
+  margin: 5px 0;
+}
+
+.view-button {
+  background-color: #800020; 
+  color: #FFFFFF; 
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.view-button:hover {
+  background-color: #FFFFFF;
+  color: #5c0016; 
+}
+
+
+faculty-header input,
+.faculty-header select {
+    margin: 0px 6px;
+    padding: 10px;
     border: 1px solid #8B4513; 
-    border-radius: 10px;
-    padding: 20px;
-    margin: 20px auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
-  }
-  
-  .faculty-card:hover {
-    transform: scale(1.02);
-  }
-  
-  .faculty-name {
-    color: #800020; 
-    font-size: 20px;
-    margin: 0 0 10px;
-  }
-  
-  .faculty-email,
-  .faculty-department,
-  .faculty-evaluation {
-    color: #333; 
-    margin: 5px 0;
-  }
-  
-  .view-button {
-    background-color: #800020; 
-    color: #FFFFFF; 
-    border: none;
-    padding: 10px 20px;
     border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .view-button:hover {
-    background-color: #FFFFFF;
-    color: #5c0016; 
-  }
+    background-color: #F5F5DC; 
+    color: #800020; 
+    font-size: 16px;
+}
 
- 
-  faculty-header input,
-  .faculty-header select {
-      margin: 0px 6px;
-      padding: 10px;
-      border: 1px solid #8B4513; 
-      border-radius: 5px;
-      background-color: #F5F5DC; 
-      color: #800020; 
-      font-size: 16px;
-  }
-  
-  .faculty-header input::placeholder,
-  .faculty-header select {
-      color: #333; 
-  }
-  
+.faculty-header input::placeholder,
+.faculty-header select {
+    color: #333; 
+}
 
-  .faculty-header input:hover,
-  .faculty-header select:hover {
-      border-color: #800020; 
-      background-color: #FFFFFF; 
-  }
-  
- 
-  .faculty-header select:focus {
-      outline: none;
-      border-color: #4caf50; 
-      box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
-  }
+
+.faculty-header input:hover,
+.faculty-header select:hover {
+    border-color: #800020; 
+    background-color: #FFFFFF; 
+}
+
+
+.faculty-header select:focus {
+    outline: none;
+    border-color: #4caf50; 
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}

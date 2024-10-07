@@ -4,11 +4,14 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { auth } from "../firebase";
 import { onAuthStateChanged,signOut } from "firebase/auth"; // Import directly from firebase/auth
 import UsersPage from "./UsersPage";
-import EvaluationToolsPage from "./EvaluationToolsPage";
+import SubjectEvaluationPage from "./SubjectEvaluationPage";
 import NotificationsPage from "./NotificationsPage";
 import Subjects from "./Subjects";
 import EvaluateSubject from '../Evaluate/EvaluateSubject';
 import EvaluationReportPage from "./EvaluationReportPage";
+import FacultyDeanEvaluationPage from './FacultyDeanEvaluationPage';
+import SubjectEvaluationReport from "./SubjectEvaluationReport";
+
 import './Admin.css';
 
 const AdminDashboard = () => {
@@ -58,8 +61,10 @@ const AdminDashboard = () => {
         <h1>Admin Dashboard</h1>
         <div className="Admin-links">
           <Link to="users">Users</Link>
-          <Link to="evaluation-tools">Evaluation Tools</Link>
+          <Link to="faculty-dean-evaluation">Faculty/Dean Evaluation</Link>
+          <Link to="subject-evaluation">Subject Evaluation Tools</Link>
           <Link to="evaluation-report">Evaluation Report</Link>
+          <Link to="subject-evaluation-report">Subject Evaluation Report</Link> 
           <Link to="notifications" className="notification-link">
             Notifications
             {pendingUsersCount > 0 && (
@@ -79,11 +84,13 @@ const AdminDashboard = () => {
             <div className="route-container">
               <Routes>
                 <Route path="users" element={<UsersPage />} />
-                <Route path="evaluation-tools" element={<EvaluationToolsPage />} />
+                <Route path="subject-evaluation" element={<SubjectEvaluationPage />} />
+                <Route path="faculty-dean-evaluation" element={<FacultyDeanEvaluationPage />} />
                 <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="subjects" element={<Subjects />} />
                 <Route path="evaluate-subject/:subjectId" element={<EvaluateSubject />} />
                 <Route path="evaluation-report" element={<EvaluationReportPage />} />
+                <Route path="subject-evaluation-report" element={<SubjectEvaluationReport />} />
               </Routes>
             </div>  
       </div>

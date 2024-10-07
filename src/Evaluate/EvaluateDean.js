@@ -10,6 +10,7 @@ const EvaluateDean = () => {
   const location = useLocation();
   const [dean, setDean] = useState(null);
   const [evaluationForm, setEvaluationForm] = useState([]);
+  const [categories, setCategories] = useState([]); // New state for categories
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [responses, setResponses] = useState([]);
@@ -33,9 +34,11 @@ const EvaluateDean = () => {
 
   const fetchEvaluationForm = useCallback(async () => {
     try {
-      const evaluationDoc = await getDoc(doc(db, 'deanEvaluations', 'default'));
+      const evaluationDoc = await getDoc(doc(db, 'evaluationForms', 'dean'));
       if (evaluationDoc.exists()) {
-        setEvaluationForm(evaluationDoc.data().questions);
+        const data = evaluationDoc.data();
+        setEvaluationForm(data.questions || []);
+        setCategories(data.categories || []); // Set categories state
       } else {
         setError('No evaluation form found for dean.');
       }
@@ -49,16 +52,18 @@ const EvaluateDean = () => {
     fetchEvaluationForm();
   }, [fetchDean, fetchEvaluationForm]);
 
-  const handleResponseChange = (index, value) => {
-    const updatedResponses = [...responses];
-    updatedResponses[index] = value;
+
+  const handleResponseChange = (categoryIndex, questionIndex, value) => {
+    const updatedResponses = { ...responses }; // Change responses to an object
+    const uniqueKey = `${categoryIndex}-${questionIndex}`;
+    updatedResponses[uniqueKey] = value;
     setResponses(updatedResponses);
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const totalScore = responses.reduce((sum, score) => sum + parseInt(score), 0);
+    const totalScore = Object.values(responses).reduce((sum, score) => sum + parseInt(score), 0);
     const maxScore = evaluationForm.length * 5;
     const percentageScore = (totalScore / maxScore) * 100;
 
@@ -115,9 +120,40 @@ const EvaluateDean = () => {
     return <p>{error}</p>;
   }
 
+  const renderQuestionsByCategory = () => {
+    return categories.map((category, categoryIndex) => (
+      <React.Fragment key={categoryIndex}>
+        <tr>
+        <td colSpan="6" className="category-header"><strong>{category}</strong></td>
+        </tr>
+        {evaluationForm
+          .filter(question => question.category === category)
+          .map((question, questionIndex) => {
+            const uniqueKey = `${categoryIndex}-${questionIndex}`;
+            return (
+              <tr key={uniqueKey}>
+                <td>{question.text}</td>
+                {[1, 2, 3, 4, 5].map(value => (
+                  <td key={value}>
+                    <input
+                      type="radio"
+                      name={`question-${uniqueKey}`}
+                      value={value}
+                      checked={responses[uniqueKey] === String(value)}
+                      onChange={(e) => handleResponseChange(categoryIndex, questionIndex, e.target.value)}
+                    />
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+      </React.Fragment>
+    ));
+  };
+
   return (
     <div className="evaluate-dean-page evaluation-form">
-      <h1>Evaluate Dean {dean ? `${dean.firstName} ${dean.lastName}` : ''}</h1>
+      <h1>Evaluate {dean ? `${dean.firstName} ${dean.lastName}` : 'Dean'}</h1>
       <div className="rating-legend">
         <p>Rating Legend</p>
         <p>1 - Strongly Disagree | 2 - Disagree | 3 - Neutral | 4 - Agree | 5 - Strongly Agree</p>
@@ -135,22 +171,7 @@ const EvaluateDean = () => {
             </tr>
           </thead>
           <tbody>
-            {evaluationForm.map((question, index) => (
-              <tr key={index}>
-                <td>{question.text}</td>
-                {[1, 2, 3, 4, 5].map((value) => (
-                  <td key={value}>
-                    <input 
-                      type="radio" 
-                      name={`question-${index}`} 
-                      value={value} 
-                      checked={responses[index] === String(value)} 
-                      onChange={(e) => handleResponseChange(index, e.target.value)} 
-                    />
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {renderQuestionsByCategory()}
           </tbody>
         </table>
         <div>

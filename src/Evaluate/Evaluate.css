@@ -75,7 +75,7 @@
 
 /* Faculty Evaluation */
 .evaluate-faculty-page .evaluation-form {
-  margin: 20px;
+  margin: 20px; 
 }
 
 .evaluate-faculty-page .rating-legend {
@@ -87,6 +87,7 @@
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
+
 }
 
 .evaluate-faculty-page table th, 
@@ -102,6 +103,14 @@
   text-align: left; /* Align questions to the left */
 }
 
+.evaluate-faculty-page table thead th {
+background-color: #305c31;
+}
+
+.evaluate-dean-page table thead th {
+  background-color: #305c31;
+}
+
 .evaluate-faculty-page table th:not(:first-child), 
 .evaluate-faculty-page table td:not(:first-child) {
   width: 8%; /* Allocate less space for rating columns */
@@ -111,6 +120,7 @@
   background-color: #4CAF50;
   color: white;
   font-weight: bold;
+  
 }
 
 .evaluate-faculty-page table tbody tr:nth-child(even) {
@@ -222,3 +232,4 @@
 .evaluate-subject-page button:focus {
   background-color: blue;
 }
+

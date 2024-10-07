@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getFirestore, doc, getDoc, collection, onSnapshot, query, where } from "firebase/firestore";
+import { getFirestore, doc, getDoc, collection, onSnapshot, query, where, getDocs  } from "firebase/firestore";
 import { auth } from "../firebase";
 import './facultydashboard.css';
 
@@ -112,27 +112,46 @@ const FacultyDashboard = () => {
       });
     };
 
-    const fetchAverageScore = async () => {
+    const fetchAverageScoresForSubjects = async () => {
       const user = auth.currentUser;
       if (!user) return;
 
-      const facultyEvaluationDoc = await getDoc(doc(db, "facultyEvaluations", user.uid));
-      if (facultyEvaluationDoc.exists()) {
-        setAverageScore(facultyEvaluationDoc.data().averageScore);
-      } else {
-        console.error("No average score found for this faculty.");
-      }
-    };
+      try {
+          // Fetch subjects handled by the faculty
+          const subjectsCollection = collection(db, 'facultyEvaluations', user.uid, 'subjects');
+          const subjectsSnapshot = await getDocs(subjectsCollection);
+          const subjectsData = subjectsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    fetchUserInfo();
-    fetchEvaluationForm();
-    fetchNotifications();
-    fetchSubjects();
-    fetchFacultyInDepartment();
-    fetchAverageScore();
-    fetchEvaluationsDone(); // Fetch evaluations completed by the faculty
-    fetchDeansInDepartment();
-  }, [db]);
+          setSubjects(subjectsData);
+      } catch (error) {
+          console.error("Error fetching subject average scores for faculty:", error);
+      }
+  };
+
+  const fetchAverageScore = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const facultyEvaluationDoc = await getDoc(doc(db, "facultyEvaluations", user.uid));
+    if (facultyEvaluationDoc.exists()) {
+        setAverageScore(facultyEvaluationDoc.data().averageScore);
+    } else {
+        console.error("No average score found for this faculty.");
+    }
+};
+
+// Call all fetch functions
+fetchUserInfo();
+fetchEvaluationForm();
+fetchNotifications();
+fetchSubjects();
+fetchFacultyInDepartment();
+fetchAverageScore(); // Fetch the faculty's overall average score
+fetchEvaluationsDone(); // Fetch evaluations completed by the faculty
+fetchDeansInDepartment();
+fetchAverageScoresForSubjects(); // Fetch subject average scores
+}, [db]);
+
 
   const handleSignOut = async () => {
     try {
@@ -223,13 +242,21 @@ const FacultyDashboard = () => {
       </section>
 
       <section>
-        <h2>Evaluation Report</h2>
-        {averageScore !== null ? (
-          <p>Your average score: {averageScore.toFixed(2)}</p>
-        ) : (
-          <p>No evaluations submitted yet.</p>
-        )}
-      </section>
+    <h2>Evaluation Report</h2>
+    {averageScore !== null ? (
+        <p>Your overall average score: {averageScore.toFixed(2)}</p>
+    ) : (
+        <p>No evaluations submitted yet.</p>
+    )}
+    <p>Subject Average Scores</p>
+    <ul>
+        {subjects.map((subject) => (
+            <li key={subject.id}>
+                {subject.id}: {subject.averageScore !== null ? subject.averageScore.toFixed(2) : 'No evaluations submitted yet.'}
+            </li>
+        ))}
+    </ul>
+</section>
     </div>
   );
 };

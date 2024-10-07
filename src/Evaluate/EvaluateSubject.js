@@ -1,24 +1,25 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom'; 
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
-import { auth } from "../firebase";
-import './Evaluate.css'; // Add the new CSS file
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { getFirestore, doc, getDoc, setDoc, collection } from 'firebase/firestore';
+import { auth } from '../firebase';
+import './Evaluate.css';
 
 const EvaluateSubject = () => {
-  const { subjectId, sectionId } = useParams(); // Make sure sectionId is part of the route params
-  console.log('Subject ID:', subjectId);
-console.log('Section ID:', sectionId);
-  const navigate = useNavigate(); 
-  const location = useLocation(); 
+  const { subjectId, sectionId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [subject, setSubject] = useState(null);
   const [faculty, setFaculty] = useState(null);
   const [evaluationForm, setEvaluationForm] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [responses, setResponses] = useState([]);
-  const [comment, setComment] = useState(""); 
+  const [responses, setResponses] = useState({});
+  const [comment, setComment] = useState("");
+  const [averageScore, setAverageScore] = useState(null); // State to hold the subject's average score
   const db = getFirestore();
 
+  // Fetch subject data and its average score
   const fetchSubject = useCallback(async () => {
     try {
       const subjectDoc = await getDoc(doc(db, "subjects", subjectId));
@@ -33,6 +34,15 @@ console.log('Section ID:', sectionId);
             setError("Faculty not found for the subject.");
           }
         }
+
+        // Fetch the subject's average score
+        const subjectEvaluationRef = doc(db, 'subjectEvaluations', subjectId);
+        const subjectEvaluationDoc = await getDoc(subjectEvaluationRef);
+        if (subjectEvaluationDoc.exists()) {
+          setAverageScore(subjectEvaluationDoc.data().averageScore || null);
+        } else {
+          setAverageScore(null); // Set to null if no evaluations exist
+        }
       } else {
         setError("Subject not found");
       }
@@ -43,15 +53,14 @@ console.log('Section ID:', sectionId);
     }
   }, [db, subjectId]);
 
+  // Fetch evaluation form with categories
   const fetchEvaluationForm = useCallback(async () => {
     try {
       const evaluationDoc = await getDoc(doc(db, "evaluationForms", subjectId));
       if (evaluationDoc.exists()) {
-        const questionsWithWeights = evaluationDoc.data().questions.map(q => ({
-          ...q,
-          weight: q.weight || 1, // Ensure each question has a weight, default to 1
-        }));
-        setEvaluationForm(questionsWithWeights);
+        const data = evaluationDoc.data();
+        setEvaluationForm(data.questions || []);
+        setCategories(data.categories || []);
       } else {
         setError("No evaluation form found for this subject.");
       }
@@ -65,122 +74,100 @@ console.log('Section ID:', sectionId);
     fetchEvaluationForm();
   }, [fetchSubject, fetchEvaluationForm]);
 
-  const handleResponseChange = (index, value) => {
-    const updatedResponses = [...responses];
-    updatedResponses[index] = value;
+  // Handle response changes
+  const handleResponseChange = (categoryIndex, questionIndex, value) => {
+    const updatedResponses = { ...responses };
+    const uniqueKey = `${categoryIndex}-${questionIndex}`;
+    updatedResponses[uniqueKey] = value;
     setResponses(updatedResponses);
   };
 
+  // Submit evaluation
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    let totalWeightedScore = 0;
-    let maxWeightedScore = 0;
-  
-    // Log the responses and evaluation form for debugging
-    console.log('Responses:', responses);
-    console.log('Evaluation Form:', evaluationForm);
-    
-    // Calculate total weighted score for this student's responses
-    responses.forEach((response, index) => {
-      const questionWeight = evaluationForm[index]?.weight || 1; // Default weight is 1
-      totalWeightedScore += parseInt(response) * questionWeight;
-      maxWeightedScore += 5 * questionWeight; // Max score per question is 5
-    });
-  
-    const percentageScore = (totalWeightedScore / maxWeightedScore) * 100;
-  
+
+    const totalScore = Object.values(responses).reduce((sum, score) => sum + parseInt(score), 0);
+    const maxScore = evaluationForm.length * 5;
+    const percentageScore = (totalScore / maxScore) * 100;
+
     const user = auth.currentUser;
     if (!user) {
-      alert("User not authenticated.");
-      return;
+        alert('User not authenticated.');
+        return;
     }
-  
-    // Log important values for debugging
-    console.log('User ID:', user.uid);
-    console.log('Section ID:', sectionId);
-    console.log('Subject ID:', subjectId);
-    console.log('Faculty ID:', subject?.facultyId);
-    console.log('Percentage Score:', percentageScore);
-    console.log('Comment:', comment);
-  
+
     try {
-      // Store the individual evaluation for this student in the section
-      const evaluationRef = doc(
-        db,
-        `students/${user.uid}/subjects/${subjectId}/sections/${sectionId}/completed_evaluations`,
-        user.uid
-      );
-  
-      await setDoc(evaluationRef, {
-        userId: user.uid,
-        sectionId,
-        subjectId,
-        facultyId: subject?.facultyId || null,
-        scores: responses,
-        comment: comment,
-        percentageScore,
-        createdAt: new Date(),
-      });
-  
-      // Fetch all completed evaluations for this section
-      const sectionEvaluationsSnapshot = await getDocs(
-        collection(db, `subjects/${subjectId}/sections/${sectionId}/completed_evaluations`)
-      );
-  
-      let totalSectionScore = 0;
-      let totalSectionEvaluations = 0;
-  
-      // Calculate section average score
-      sectionEvaluationsSnapshot.forEach((doc) => {
-        const data = doc.data();
-        totalSectionScore += data.percentageScore;
-        totalSectionEvaluations += 1;
-      });
-  
-      const sectionAverageScore = totalSectionScore / totalSectionEvaluations;
-  
-      // Save the average score for the section
-      const sectionRef = doc(db, `subjects/${subjectId}/sections`, sectionId);
-      await setDoc(sectionRef, {
-        sectionAverageScore: sectionAverageScore,
-        totalEvaluations: totalSectionEvaluations,
-      }, { merge: true });
-  
-      // Fetch all sections for the subject
-      const sectionsSnapshot = await getDocs(collection(db, `subjects/${subjectId}/sections`));
-  
-      let totalSubjectScore = 0;
-      let totalSubjectEvaluations = 0;
-  
-      // Calculate overall subject score across all sections
-      sectionsSnapshot.forEach((sectionDoc) => {
-        const sectionData = sectionDoc.data();
-        totalSubjectScore += sectionData.sectionAverageScore * sectionData.totalEvaluations;
-        totalSubjectEvaluations += sectionData.totalEvaluations;
-      });
-  
-      // Calculate overall average score for the entire subject
-      const overallSubjectScore = totalSubjectScore / totalSubjectEvaluations;
-  
-      // Save the overall subject average score
-      const subjectRef = doc(db, "subjects", subjectId);
-      await setDoc(subjectRef, {
-        overallAverageScore: overallSubjectScore,
-        totalEvaluations: totalSubjectEvaluations,
-      }, { merge: true });
-  
-      alert("Evaluation submitted successfully!");
-      navigate(location.state?.redirectTo || "/student-dashboard");
+        // Store the individual student's evaluation
+        const evaluationRef = doc(
+            db,
+            `students/${user.uid}/subjects/${subjectId}/sections/${sectionId}/completed_evaluations`,
+            user.uid
+        );
+
+        await setDoc(evaluationRef, {
+            userId: user.uid,
+            sectionId,
+            subjectId,
+            facultyId: subject?.facultyId || null,
+            scores: responses,
+            comment: comment,
+            percentageScore,
+            createdAt: new Date(),
+        });
+
+        // Update the subject's average score in the database
+        const subjectEvaluationRef = doc(db, 'subjectEvaluations', subjectId);
+        const subjectEvaluationDoc = await getDoc(subjectEvaluationRef);
+        let newAverageScore;
+
+        if (subjectEvaluationDoc.exists()) {
+            const existingAverageScore = subjectEvaluationDoc.data().averageScore || 0;
+            const completedEvaluations = (subjectEvaluationDoc.data().completedEvaluations || 0) + 1;
+            newAverageScore = ((existingAverageScore * (completedEvaluations - 1)) + percentageScore) / completedEvaluations;
+
+            await setDoc(subjectEvaluationRef, {
+                averageScore: newAverageScore,
+                completedEvaluations,
+            }, { merge: true });
+        } else {
+            newAverageScore = percentageScore;
+            await setDoc(subjectEvaluationRef, {
+                averageScore: newAverageScore,
+                completedEvaluations: 1,
+            });
+        }
+
+        // Update the faculty's evaluation data in the database
+        if (subject?.facultyId) {
+            const facultyEvaluationRef = doc(db, 'facultyEvaluations', subject.facultyId, 'subjects', subjectId);
+            const facultyEvaluationDoc = await getDoc(facultyEvaluationRef);
+            let facultyNewAverageScore;
+
+            if (facultyEvaluationDoc.exists()) {
+                const existingFacultyAverageScore = facultyEvaluationDoc.data().averageScore || 0;
+                const facultyCompletedEvaluations = (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
+                facultyNewAverageScore = ((existingFacultyAverageScore * (facultyCompletedEvaluations - 1)) + percentageScore) / facultyCompletedEvaluations;
+
+                await setDoc(facultyEvaluationRef, {
+                    averageScore: facultyNewAverageScore,
+                    completedEvaluations: facultyCompletedEvaluations,
+                }, { merge: true });
+            } else {
+                facultyNewAverageScore = percentageScore;
+                await setDoc(facultyEvaluationRef, {
+                    averageScore: facultyNewAverageScore,
+                    completedEvaluations: 1,
+                });
+            }
+        }
+
+        alert('Evaluation submitted successfully!');
+        navigate(location.state?.redirectTo || "/student-dashboard");
     } catch (error) {
-      alert("Failed to submit evaluation. Please try again.");
-      // Add detailed error logging
-      console.error("Error submitting evaluation:", error.message);
-      console.log("Error stack trace:", error.stack);
+        alert('Failed to submit evaluation. Please try again.');
+        console.error("Error submitting evaluation:", error.message);
     }
-  };
-  
-  
+};
 
   if (loading) {
     return <p>Loading subject data...</p>;
@@ -190,10 +177,45 @@ console.log('Section ID:', sectionId);
     return <p>{error}</p>;
   }
 
+  // Render questions by category
+  const renderQuestionsByCategory = () => {
+    return categories.map((category, categoryIndex) => (
+      <React.Fragment key={categoryIndex}>
+        <tr>
+          <td colSpan="6" className="category-header"><strong>{category}</strong></td>
+        </tr>
+        {evaluationForm
+          .filter(question => question.category === category)
+          .map((question, questionIndex) => {
+            const uniqueKey = `${categoryIndex}-${questionIndex}`;
+            return (
+              <tr key={uniqueKey}>
+                <td>{question.text}</td>
+                {[1, 2, 3, 4, 5].map(value => (
+                  <td key={value}>
+                    <input
+                      type="radio"
+                      name={`question-${uniqueKey}`}
+                      value={value}
+                      checked={responses[uniqueKey] === String(value)}
+                      onChange={(e) => handleResponseChange(categoryIndex, questionIndex, e.target.value)}
+                    />
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+      </React.Fragment>
+    ));
+  };
+
   return (
     <div className="evaluate-subject-page evaluation-form">
-      <h1>Evaluate {subject.name}</h1>
-      <h2>Faculty: {faculty ? `${faculty.firstName} ${faculty.lastName}` : "No faculty assigned"}</h2>
+      <h1>Evaluate {subject?.name}</h1>
+      <h2>Faculty: {faculty ? `${faculty.firstName} ${faculty.lastName}` : 'No faculty assigned'}</h2>
+      {averageScore !== null && (
+        <p>Current Average Score for {subject?.name}: {averageScore.toFixed(2)}</p>
+      )}
       <div className="rating-legend">
         <p>Rating Legend</p>
         <p>1 - Strongly Disagree | 2 - Disagree | 3 - Neutral | 4 - Agree | 5 - Strongly Agree</p>
@@ -211,22 +233,7 @@ console.log('Section ID:', sectionId);
             </tr>
           </thead>
           <tbody>
-            {evaluationForm.map((question, index) => (
-              <tr key={index}>
-                <td>{question.text}</td>
-                {[1, 2, 3, 4, 5].map((value) => (
-                  <td key={value}>
-                    <input 
-                      type="radio" 
-                      name={`question-${index}`} 
-                      value={value} 
-                      checked={responses[index] === String(value)} 
-                      onChange={(e) => handleResponseChange(index, e.target.value)} 
-                    />
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {renderQuestionsByCategory()}
           </tbody>
         </table>
         <div>

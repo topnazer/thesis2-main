@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import './viewreport.css';
 
-
 const ViewEvaluationPage = () => {
-  const { facultyId } = useParams(); // Get the facultyId from the route
-  const location = useLocation(); // To get the passed state (firstName, lastName)
-  const navigate = useNavigate(); // Initialize useNavigate to go back
+  const { facultyId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const firstName = location.state?.firstName || 'N/A';
   const lastName = location.state?.lastName || 'N/A';
 
   const [evaluations, setEvaluations] = useState([]);
-  const [questions, setQuestions] = useState([]); // Store the questions here
+  const [questions, setQuestions] = useState([]);
+  const [categories, setCategories] = useState([]); // Track categories for display
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const db = getFirestore();
 
-  // Fetch evaluations for the facultyId
   useEffect(() => {
     const fetchEvaluations = async () => {
       try {
@@ -30,18 +29,18 @@ const ViewEvaluationPage = () => {
         });
         setEvaluations(evaluationData);
       } catch (error) {
-        setError("Failed to fetch evaluations.");
-        console.error("Error fetching evaluations:", error);
-      } finally {
-        setLoading(false);
+        setError('Failed to fetch evaluations.');
+        console.error('Error fetching evaluations:', error);
       }
     };
 
     const fetchQuestions = async () => {
       try {
-        const questionsDoc = await getDoc(doc(db, 'facultyEvaluations', 'default'));
-        if (questionsDoc.exists()) {
-          setQuestions(questionsDoc.data().questions);
+        const evaluationFormDoc = await getDoc(doc(db, 'evaluationForms', 'faculty'));
+        if (evaluationFormDoc.exists()) {
+          const data = evaluationFormDoc.data();
+          setQuestions(data.questions || []);
+          setCategories(data.categories || []); // Retrieve categories
         } else {
           setError('No questions found.');
         }
@@ -52,12 +51,41 @@ const ViewEvaluationPage = () => {
 
     fetchEvaluations();
     fetchQuestions();
+    setLoading(false);
   }, [facultyId, db]);
 
   if (loading) return <p>Loading evaluations...</p>;
   if (error) return <p>{error}</p>;
 
-  return  (
+  const renderQuestionsByCategory = (evaluation) => {
+    return categories.map((category, categoryIndex) => (
+      <React.Fragment key={categoryIndex}>
+        <tr>
+        <td colSpan="6" className="category-header"><strong>{category}</strong></td>
+        </tr>
+        {questions
+          .filter(question => question.category === category)
+          .map((question, questionIndex) => {
+            const uniqueKey = `${categoryIndex}-${questionIndex}`;
+            const score = evaluation.scores[uniqueKey];
+            return (
+              <tr key={uniqueKey}>
+                <td>{question.text}</td>
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <td key={value}>
+                    {parseInt(score) === value ? (
+                      <span className="response-circle">&#x25CF;</span>
+                    ) : null}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+      </React.Fragment>
+    ));
+  };
+
+  return (
     <div className="view-evaluation-page">
       <h1>Evaluation Details for Faculty: {firstName} {lastName}</h1>
       {evaluations.length > 0 ? (
@@ -67,34 +95,21 @@ const ViewEvaluationPage = () => {
             <p><strong>Percentage Score:</strong> {evaluation.percentageScore}</p>
             <p><strong>Rating:</strong> {evaluation.percentageScore >= 80 ? 'Good' : 'Bad'}</p>
             <h3>Questions and Scores:</h3>
-            {/* Question and Response Table */}
             <table className="evaluation-table">
-  <thead>
-    <tr>
-      <th>Question</th>
-      <th>1</th>
-      <th>2</th>
-      <th>3</th>
-      <th>4</th>
-      <th>5</th>
-    </tr>
-  </thead>
-  <tbody>
-    {evaluation.scores.map((score, index) => (
-      <tr key={index}>
-        <td>{questions[index]?.text || `Question ${index + 1}`}</td>
-        {[1, 2, 3, 4, 5].map((value) => (
-          <td key={value}>
-            {parseInt(score) === value ? (
-              <span className="response-circle"></span>
-            ) : null}
-          </td>
-        ))}
-      </tr>
-    ))}
-  </tbody>
-</table>
-            {/* Comment Section Below */}
+              <thead>
+                <tr>
+                  <th>Question</th>
+                  <th>1</th>
+                  <th>2</th>
+                  <th>3</th>
+                  <th>4</th>
+                  <th>5</th>
+                </tr>
+              </thead>
+              <tbody>
+                {renderQuestionsByCategory(evaluation)}
+              </tbody>
+            </table>
             <div className="comment-section">
               <p><strong>Comment:</strong> {evaluation.comment}</p>
             </div>

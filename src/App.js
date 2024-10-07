@@ -11,6 +11,9 @@ import EvaluateDean from './Evaluate/EvaluateDean';
 import AcafDashboard from "./Dashboards/AcafDashboard";
 import ViewEvaluationPage from './Components/ViewEvaluationPage';
 import EvaluationReportPage from  './Components/EvaluationReportPage';
+import FacultyDeanEvaluationPage from './Components/FacultyDeanEvaluationPage';
+import ViewSubjectEvaluation from './Components/ViewSubjectEvaluation';
+
 
 function App() {
   return (
@@ -26,6 +29,8 @@ function App() {
         <Route path="/view-evaluation/:facultyId" element={<ViewEvaluationPage />} />
         <Route path="/evaluation-report" element={<EvaluationReportPage />} />
         <Route path="/evaluate-subject/:subjectId/:sectionId" element={<EvaluateSubject />} /> 
+        <Route path="/faculty-dean" element={<FacultyDeanEvaluationPage />} />
+        <Route path="/view-subject-evaluation/:subjectId" element={<ViewSubjectEvaluation />} />
         
       </Routes> 
     </Router>

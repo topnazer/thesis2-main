@@ -10,6 +10,7 @@ const EvaluateFaculty = () => {
   const location = useLocation();
   const [faculty, setFaculty] = useState(null);
   const [evaluationForm, setEvaluationForm] = useState([]);
+  const [categories, setCategories] = useState([]); // New state for categories
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [responses, setResponses] = useState([]);
@@ -33,9 +34,11 @@ const EvaluateFaculty = () => {
 
   const fetchEvaluationForm = useCallback(async () => {
     try {
-      const evaluationDoc = await getDoc(doc(db, 'facultyEvaluations', 'default'));
+      const evaluationDoc = await getDoc(doc(db, 'evaluationForms', 'faculty'));
       if (evaluationDoc.exists()) {
-        setEvaluationForm(evaluationDoc.data().questions);
+        const data = evaluationDoc.data();
+        setEvaluationForm(data.questions || []);
+        setCategories(data.categories || []); // Set categories state
       } else {
         setError('No evaluation form found for faculty.');
       }
@@ -49,25 +52,27 @@ const EvaluateFaculty = () => {
     fetchEvaluationForm();
   }, [fetchFaculty, fetchEvaluationForm]);
 
-  const handleResponseChange = (index, value) => {
-    const updatedResponses = [...responses];
-    updatedResponses[index] = value;
+  const handleResponseChange = (categoryIndex, questionIndex, value) => {
+    const updatedResponses = { ...responses }; // Change responses to an object
+    const uniqueKey = `${categoryIndex}-${questionIndex}`;
+    updatedResponses[uniqueKey] = value;
     setResponses(updatedResponses);
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const totalScore = responses.reduce((sum, score) => sum + parseInt(score), 0);
+  
+    const totalScore = Object.values(responses).reduce((sum, score) => sum + parseInt(score), 0);
     const maxScore = evaluationForm.length * 5;
     const percentageScore = (totalScore / maxScore) * 100;
-
+  
     const user = auth.currentUser;
     if (!user) {
       alert('User not authenticated.');
       return;
     }
-
+  
     try {
       const evaluationRef = doc(collection(db, 'facultyEvaluations', facultyId, 'completed_evaluations'), user.uid);
       await setDoc(evaluationRef, {
@@ -78,16 +83,16 @@ const EvaluateFaculty = () => {
         percentageScore,
         createdAt: new Date(),
       });
-
+  
       const facultyEvaluationRef = doc(db, 'facultyEvaluations', facultyId);
       const facultyEvaluationDoc = await getDoc(facultyEvaluationRef);
       let newAverageScore;
-
+  
       if (facultyEvaluationDoc.exists()) {
         const existingAverageScore = facultyEvaluationDoc.data().averageScore || 0;
         const completedEvaluations = (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
         newAverageScore = ((existingAverageScore * (completedEvaluations - 1)) + percentageScore) / completedEvaluations;
-
+  
         await setDoc(facultyEvaluationRef, {
           averageScore: newAverageScore,
           completedEvaluations,
@@ -99,7 +104,7 @@ const EvaluateFaculty = () => {
           completedEvaluations: 1,
         });
       }
-
+  
       alert('Evaluation submitted successfully!');
       navigate(location.state?.redirectTo || "/faculty-dashboard");
     } catch (error) {
@@ -114,6 +119,38 @@ const EvaluateFaculty = () => {
   if (error) {
     return <p>{error}</p>;
   }
+
+  const renderQuestionsByCategory = () => {
+    return categories.map((category, categoryIndex) => (
+      <React.Fragment key={categoryIndex}>
+        <tr>
+        <td colSpan="6" className="category-header"><strong>{category}</strong></td>
+        </tr>
+        {evaluationForm
+          .filter(question => question.category === category)
+          .map((question, questionIndex) => {
+            const uniqueKey = `${categoryIndex}-${questionIndex}`;
+            return (
+              <tr key={uniqueKey}>
+                <td>{question.text}</td>
+                {[1, 2, 3, 4, 5].map(value => (
+                  <td key={value}>
+                    <input
+                      type="radio"
+                      name={`question-${uniqueKey}`}
+                      value={value}
+                      checked={responses[uniqueKey] === String(value)}
+                      onChange={(e) => handleResponseChange(categoryIndex, questionIndex, e.target.value)}
+                    />
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+      </React.Fragment>
+    ));
+  };
+  
 
   return (
     <div className="evaluate-faculty-page evaluation-form">
@@ -136,22 +173,7 @@ const EvaluateFaculty = () => {
             </tr>
           </thead>
           <tbody>
-            {evaluationForm.map((question, index) => (
-              <tr key={index}>
-                <td>{question.text}</td>
-                {[1, 2, 3, 4, 5].map((value) => (
-                  <td key={value}>
-                    <input 
-                      type="radio" 
-                      name={`question-${index}`} 
-                      value={value} 
-                      checked={responses[index] === String(value)} 
-                      onChange={(e) => handleResponseChange(index, e.target.value)} 
-                    />
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {renderQuestionsByCategory()}
           </tbody>
         </table>
         <div>
