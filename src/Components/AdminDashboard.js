@@ -13,6 +13,9 @@ import FacultyDeanEvaluationPage from './FacultyDeanEvaluationPage';
 import SubjectEvaluationReport from "./SubjectEvaluationReport";
 
 import './Admin.css';
+import { CircleUserRound, Hammer, FileCheck , Bell, BookCopy  } from 'lucide-react';
+
+
 
 const AdminDashboard = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -55,45 +58,43 @@ const AdminDashboard = () => {
   if (!isAdmin) return <p>tagad ha</p>;
 
   return (
-
     <div className="whole-container">
+      <div className="Admin-header">
+      <p>bayot ventic </p>
+      </div>
+      <div className="content-container">
       <div className="Admin-navbar">
-        <h1>Admin Dashboard</h1>
+        <h1>Dashboard</h1>
         <div className="Admin-links">
-          <Link to="users">Users</Link>
+          <Link to="users" > <CircleUserRound />   Users</Link>
           <Link to="faculty-dean-evaluation">Faculty/Dean Evaluation</Link>
-          <Link to="subject-evaluation">Subject Evaluation Tools</Link>
-          <Link to="evaluation-report">Evaluation Report</Link>
+          <Link to="subject-evaluation">Subject  <Hammer />   Evaluation Tools</Link>
+          <Link to="evaluation-report"> <FileCheck />   Evaluation Report</Link>
           <Link to="subject-evaluation-report">Subject Evaluation Report</Link> 
           <Link to="notifications" className="notification-link">
-            Notifications
+           <Bell/>   Notifications
             {pendingUsersCount > 0 && (
               <span className="badge">{pendingUsersCount}</span>
             )}
           </Link>
-          <Link to="subjects">Subjects</Link>
+          <Link to="subjects"><BookCopy/>   Subjects</Link>
+          <div className="line"></div>  
           <button onClick={handleLogout}>Log Out</button>
-    
         </div>
       </div>
-
-      <div className="right-container">
-          <div className="Admin-header">
-            <p>she wanna do drugs smoke weed get drunk theys hoes luh</p>
-          </div>
-            <div className="route-container">
-              <Routes>
-                <Route path="users" element={<UsersPage />} />
-                <Route path="subject-evaluation" element={<SubjectEvaluationPage />} />
+      <div className="route-container">
+       <Routes>
+        <Route path="users" element={<UsersPage />} />
+        <Route path="subject-evaluation" element={<SubjectEvaluationPage />} />
                 <Route path="faculty-dean-evaluation" element={<FacultyDeanEvaluationPage />} />
-                <Route path="notifications" element={<NotificationsPage />} />
-                <Route path="subjects" element={<Subjects />} />
-                <Route path="evaluate-subject/:subjectId" element={<EvaluateSubject />} />
-                <Route path="evaluation-report" element={<EvaluationReportPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="subjects" element={<Subjects />} />
+        <Route path="evaluate-subject/:subjectId" element={<EvaluateSubject />} />
+        <Route path="evaluation-report" element={<EvaluationReportPage />} />
                 <Route path="subject-evaluation-report" element={<SubjectEvaluationReport />} />
-              </Routes>
-            </div>  
-      </div>
+       </Routes>
+      </div>  
+    </div>
     </div>
   );
 };

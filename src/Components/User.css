@@ -7,11 +7,9 @@
 }
 
 .user-item {
-  border: 1px solid #8B4513;
   border-radius: 10px;
   padding: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: #F5F5DC;
+  box-shadow: 0 4px 6px -1px #8B4513, 0 2px 4px -2px #8B4513;;
   text-align: center;
   margin: 20px 0; 
   box-sizing: border-box;
@@ -25,7 +23,7 @@
 }
 .user-info {
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   font-size: 1.2em;
   color: #800020;
 }
@@ -59,6 +57,103 @@
 }
 
 .user-button button:hover, .user-button button:focus {
-  background-color: #8B4513;
+  background-color:#800020;
   color: #F5F5DC;
+}
+
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.overlay-content {
+  position: relative;
+  background-color: #F5F5DC;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid #8B4513;
+  width: 400px;
+  text-align: left;
+}
+
+
+
+.user-view {
+  background-color: #800020; 
+  color: #F5F5DC; 
+  border: 1px solid #800020; 
+  box-shadow: 0px 4px 8px #8B4513; 
+  border-radius: 6px;
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+  display: inline-block;
+  font-size: 16px;
+  padding: 5px 20px;
+  text-align: center;
+  text-decoration: none;
+  margin: 9px;
+  transition: height 2s;
+} 
+
+.user-close {
+  background-color: #800020; 
+  color: #F5F5DC; 
+  border: 1px solid #800020; 
+  box-shadow: 0px 4px 8px #8B4513; 
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  width: 30px;
+  height: 30px;
+  line-height: 28px; 
+  text-align: center;
+  position: absolute;
+  top: 10px; 
+  right: 10px; 
+  
+}
+
+
+.user-view:hover,.user-close:hover {
+  background-color:#570116;
+  box-shadow: 0px 4px 8px #8B4513; 
+  color: white;
+
+}
+
+.subjects-content {
+  transition: height 2s;
+}
+
+.subject-content:hover {
+  height: 100%;
+}
+
+.user-search {
+  border-color: rgb(0, 0, 0);
+  margin: 0px 6px;
+  background-color: #eee;
+  border: none;
+  padding: 1rem;
+  font-size: 1rem;
+  width: 13em;
+  border-radius: 1rem;
+  color: lightcoral;
+  box-shadow: 0 0.4rem #dfd9d9;
+  cursor: pointer;
+}
+
+.user-search:focus {
+
+  outline-color: lightcoral;
 }

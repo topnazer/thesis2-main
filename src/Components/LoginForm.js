@@ -95,7 +95,7 @@ const LoginForm = ({ toggleSignUp }) => {
           </div>
         </div>
         <div className="auth-right">
-          <h1>"Growth starts with honest feedback. Evaluate to improve, not to criticize."</h1>
+          {/* <h1>"Growth starts with honest feedback. Evaluate to improve, not to criticize."</h1> */}
         </div>
       </div>
     </div>

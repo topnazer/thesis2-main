@@ -3,7 +3,7 @@
   justify-content: center;
   align-items: center;
   height: 100vh;  
-  background-color: #F5F5DC;
+  background-color: #ffffff;
   font-family: 'Arial', sans-serif;
 }
 
@@ -94,7 +94,7 @@
 
 .auth-right {
   width: 50%;
-  background-image: url("https://scontent.xx.fbcdn.net/v/t1.15752-9/436946047_1155187835920931_2605212223585026654_n.jpg?stp=dst-jpg_s851x315&_nc_cat=110&ccb=1-7&_nc_sid=0024fc&_nc_eui2=AeHukKBL4aZCaMkpshsbMh8FDotZdwCOhtMOi1l3AI6G0zuKW_isqqFIU0MvNis4HEttL2WUa4vNhfhUxAlB43Lb&_nc_ohc=dfd_4um2_YcQ7kNvgFlBPk9&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_Q7cD1QGLsYKii9Ewym4Q9JmmeQXae-1ObLoXrQ4chlQQRg7c8A&oe=66F612A0");
+  background-image: url("https://cdn.pixabay.com/photo/2017/09/01/09/51/maroon-2703582_640.jpg");
   background-repeat: no-repeat;
   background-size: cover;
 }
