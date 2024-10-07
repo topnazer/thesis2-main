@@ -59,9 +59,10 @@
           {pendingUsers.map((user) => (
             <div key={user.id} className="notif-card">
               <div className="notif-info">
-                <h3>{user.firstName} {user.lastName}</h3>
+                <h3>Username: {user.firstName} {user.lastName}</h3>
                 <p>Role: {user.role}</p>
                 <p>Email: {user.email}</p>
+                <p>Password: {user.password}</p>
               </div>
               <div className="notif-actions">
                 <button onClick={() => handleApproveUser(user.id)} className="approve-button">Approve</button>

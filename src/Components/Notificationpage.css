@@ -9,11 +9,10 @@
   display: flex;
   flex-direction: column;
   margin: 10px;
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px #8B4513, 0 2px 4px -2px #8B4513;;
+  border-radius: 10px;
+  padding: 10px;
+  padding: 5px;
   transition: box-shadow 0.2s ease;
 }
 
@@ -22,7 +21,8 @@
 }
 
 .notif-info {
-  margin-bottom: 16px;
+  margin: auto;
+  
 }
 
 .notif-actions button {

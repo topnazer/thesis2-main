@@ -43,8 +43,7 @@
   }
   
   .subject-actions button {
-    background: transparent;
-    border: 1px solid #800020;
+    background-color: #ffffff;
     border-radius: 6px;
     box-shadow: 1px 1px 1px black;
     color: black;

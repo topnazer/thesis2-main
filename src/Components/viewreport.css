@@ -1,11 +1,9 @@
 .faculty-card {
     width: 50%;
-    background-color: #F5F5DC; 
-    border: 1px solid #8B4513; 
+    box-shadow: 0 4px 6px -1px #8B4513, 0 2px 4px -2px #8B4513;
     border-radius: 10px;
     padding: 20px;
-    margin: 20px auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 30px auto;
     transition: transform 0.2s;
   }
   
@@ -37,32 +35,39 @@
   }
   
   .view-button:hover {
-    background-color: #FFFFFF;
-    color: #5c0016; 
+    background-color: #530115; 
+    color: #FFFFFF; 
   }
 
  
-  faculty-header input,
+  .faculty-header input {
+    background-color: #eee;
+    border: none;
+    padding: 1rem;
+    font-size: 1rem;
+    width: 13em;
+    margin: 10px;
+    border-radius: 1rem;
+    color: lightcoral;
+    outline-color: rgb(0, 0, 0);
+    box-shadow: 0 0.4rem #dfd9d9;
+    cursor: pointer;
+  }
+
   .faculty-header select {
-      margin: 0px 6px;
-      padding: 10px;
-      border: 1px solid #8B4513; 
-      border-radius: 5px;
-      background-color: #F5F5DC; 
-      color: #800020; 
-      font-size: 16px;
+
   }
   
   .faculty-header input::placeholder,
   .faculty-header select {
-      color: #333; 
+
   }
   
 
-  .faculty-header input:hover,
+ 
   .faculty-header select:hover {
-      border-color: #800020; 
-      background-color: #FFFFFF; 
+      border-color: #ffffff; 
+      outline-color: lightcoral;
   }
   
  

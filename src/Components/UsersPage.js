@@ -99,7 +99,7 @@ const UsersPage = () => {
         placeholder="Search users..." 
         value={searchTerm} 
         onChange={(e) => setSearchTerm(e.target.value)} 
-        style={{ marginBottom: '20px', padding: '10px', width: '50%' }}
+        className='user-search'
       />
 
       {filteredUsers.length === 0 ? (
