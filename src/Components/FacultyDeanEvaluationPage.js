@@ -247,7 +247,8 @@ const FacultyDeanEvaluationPage = () => {
 
    return (
     <div className="faculty-dean-evaluation-page">
-        {/* Faculty Form Section */}
+    
+        <div className="faculty-evaluation-tool">
         <h2>Create or Edit Evaluation Form for Faculty</h2>
         <div>
             <input
@@ -299,8 +300,9 @@ const FacultyDeanEvaluationPage = () => {
             </button>
             <button onClick={handleSaveForm}>Save Faculty Form</button>
         </div>
-
-        {/* Dean Form Section */}
+        </div>   
+        
+        <div className="dean-evaluation-tool">
         <h2>Create or Edit Evaluation Form for Dean</h2>
         <div>
             <input
@@ -352,6 +354,7 @@ const FacultyDeanEvaluationPage = () => {
             </button>
             <button onClick={handleSaveForm}>Save Dean Form</button>
         </div>
+    </div>
     </div>
 );
 };

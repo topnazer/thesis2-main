@@ -1,6 +1,4 @@
-/* viewreport.css */
 
-/* General page styles */
 .view-evaluation-page {
   width: 80%;
   margin: 20px auto;
@@ -12,7 +10,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Evaluation card styles */
+
 .evaluation-card {
   background-color: #fff;
   padding: 20px;
@@ -22,7 +20,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Table styles */
+/
 .evaluation-table {
   width: 100%;
   border-collapse: collapse;
@@ -38,13 +36,13 @@
 
 .evaluation-table th:first-child,
 .evaluation-table td:first-child {
-  width: 60%; /* Allocate more space for the Question column */
+  width: 60%; 
   text-align: left;
 }
 
 .evaluation-table th:not(:first-child),
 .evaluation-table td:not(:first-child) {
-  width: 8%; /* Allocate less space for rating columns */
+  width: 8%; 
 }
 
 .evaluation-table th {
@@ -70,7 +68,7 @@
   color: #555;
 }
 
-/* Button styles */
+* Button styles */
 button {
   padding: 10px 20px;
   background-color: #4CAF50; /* Green button background */

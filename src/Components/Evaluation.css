@@ -1,0 +1,43 @@
+html {
+    margin: 0%;
+    padding: 0%;
+}
+
+.evaluation-container {
+    height: 60vh;
+    margin: auto;
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+}
+
+.evaluation-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;   
+    
+}
+.subject-evaluation-button {
+  padding: 75px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.7), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  cursor: pointer; 
+  border-radius: 20px;
+  text-decoration: none;
+  color: black;
+  text-align: center;
+}
+
+.facultydean-evaluation-button {
+    padding: 75px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.7), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    cursor: pointer; 
+    text-decoration: none;
+    border-radius: 20px;
+    color: black;
+    text-align: center;
+}
+
+.subject-evaluation-button:hover, .facultydean-evaluation-button:hover {
+    opacity: 0.5;
+}
+

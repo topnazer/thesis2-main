@@ -1,8 +1,8 @@
 .faculty-dean-evaluation-page {
     font-family: Arial, sans-serif;
     padding: 20px;
-    display: grid;
-    grid-template-columns: 1fr 2fr; /* Two columns, left for input and category, right for questions */
+    display: flex;
+    flex-direction: row;
     gap: 40px;
     justify-items: center;
 }
