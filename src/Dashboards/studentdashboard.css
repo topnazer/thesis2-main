@@ -9,7 +9,7 @@ body {
 
 /* Navigation Bar */
 .student-dashboard nav {
-  background-color: #343a40;
+  background-color:rgb(69 10 10); 
   padding: 1rem;
   display: flex;
   justify-content: space-between;
@@ -49,7 +49,7 @@ body {
 }
 
 .student-dashboard table th {
-  background-color: #343a40;
+  background-color: rgb(69 10 10); 
   color: white;
 }
 
@@ -63,7 +63,7 @@ body {
 
 /* Evaluate button */
 .student-dashboard .table-evaluate-btn {
-  background-color: #007bff;
+  background-color: rgb(15, 2, 2); 
   color: white;
   padding: 0.5rem 1rem;
   border: none;
@@ -71,12 +71,12 @@ body {
 }
 
 .student-dashboard .table-evaluate-btn:hover {
-  background-color: #0056b3;
+  background-color:rgb(85, 31, 31); 
 }
 
 /* "Evaluation Done" message */
 .student-dashboard .evaluation-done {
-  color: #28a745; /* Green color for completed evaluations */
+  color:rgb(173, 55, 55);/* Green color for completed evaluations */
   font-weight: bold;
   padding: 0.5rem 1rem;
   display: inline-block;

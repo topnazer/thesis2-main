@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getFirestore, doc, getDoc, collection, onSnapshot, query, where, getDocs  } from "firebase/firestore";
+import { getFirestore, doc, getDoc, collection, onSnapshot, query, where, getDocs } from "firebase/firestore";
 import { auth } from "../firebase";
 import './facultydashboard.css';
 
@@ -12,7 +12,7 @@ const FacultyDashboard = () => {
   const [deanList, setDeanList] = useState([]);
   const [averageScore, setAverageScore] = useState(null);
   const [userName, setUserName] = useState("");
-  const [evaluationsDone, setEvaluationsDone] = useState({}); // Track completed evaluations
+  const [evaluationsDone, setEvaluationsDone] = useState({}); // Track completed evaluations for this user
 
   const navigate = useNavigate();
   const db = getFirestore();
@@ -78,6 +78,36 @@ const FacultyDashboard = () => {
       }
     };
 
+    const fetchEvaluationsDoneForUser = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      try {
+        const facultyEvaluationsCollection = collection(db, 'facultyEvaluations');
+        const evaluationsSnapshot = await getDocs(facultyEvaluationsCollection);
+        
+        const evaluationsMap = {};
+        
+        for (const facultyDoc of evaluationsSnapshot.docs) {
+          const facultyId = facultyDoc.id;
+          
+          // Query the `completed_evaluations` sub-collection for this faculty
+          const completedEvaluationsCollection = collection(db, 'facultyEvaluations', facultyId, 'completed_evaluations');
+          const completedEvaluationsSnapshot = await getDocs(completedEvaluationsCollection);
+          
+          // Check if the current user has an entry in `completed_evaluations`
+          const userEvaluated = completedEvaluationsSnapshot.docs.some(doc => doc.id === user.uid);
+          
+          // Mark this faculty as evaluated by the current user
+          evaluationsMap[facultyId] = userEvaluated;
+        }
+
+        setEvaluationsDone(evaluationsMap);
+      } catch (error) {
+        console.error('Error fetching completed evaluations:', error);
+      }
+    };
+
     const fetchDeansInDepartment = async () => {
       const user = auth.currentUser;
       if (!user) return;
@@ -98,60 +128,15 @@ const FacultyDashboard = () => {
       }
     };
 
-    const fetchEvaluationsDone = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const completedEvaluationsCollection = collection(db, `facultyEvaluations/${user.uid}/completed_evaluations`);
-      onSnapshot(completedEvaluationsCollection, (snapshot) => {
-        const evaluationsMap = {};
-        snapshot.docs.forEach(doc => {
-          evaluationsMap[doc.id] = true; // Mark as evaluated
-        });
-        setEvaluationsDone(evaluationsMap);
-      });
-    };
-
-    const fetchAverageScoresForSubjects = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      try {
-          // Fetch subjects handled by the faculty
-          const subjectsCollection = collection(db, 'facultyEvaluations', user.uid, 'subjects');
-          const subjectsSnapshot = await getDocs(subjectsCollection);
-          const subjectsData = subjectsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-          setSubjects(subjectsData);
-      } catch (error) {
-          console.error("Error fetching subject average scores for faculty:", error);
-      }
-  };
-
-  const fetchAverageScore = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const facultyEvaluationDoc = await getDoc(doc(db, "facultyEvaluations", user.uid));
-    if (facultyEvaluationDoc.exists()) {
-        setAverageScore(facultyEvaluationDoc.data().averageScore);
-    } else {
-        console.error("No average score found for this faculty.");
-    }
-};
-
-// Call all fetch functions
-fetchUserInfo();
-fetchEvaluationForm();
-fetchNotifications();
-fetchSubjects();
-fetchFacultyInDepartment();
-fetchAverageScore(); // Fetch the faculty's overall average score
-fetchEvaluationsDone(); // Fetch evaluations completed by the faculty
-fetchDeansInDepartment();
-fetchAverageScoresForSubjects(); // Fetch subject average scores
-}, [db]);
-
+    // Call all fetch functions
+    fetchUserInfo();
+    fetchEvaluationForm();
+    fetchNotifications();
+    fetchSubjects();
+    fetchFacultyInDepartment();
+    fetchEvaluationsDoneForUser(); // Fetch the user's completed evaluations for faculty
+    fetchDeansInDepartment();
+  }, [db]);
 
   const handleSignOut = async () => {
     try {
@@ -198,19 +183,19 @@ fetchAverageScoresForSubjects(); // Fetch subject average scores
             </tr>
           </thead>
           <tbody>
-            {facultyList.map((faculty) => (
-              <tr key={faculty.id}>
-                <td>{faculty.id}</td>
-                <td>{faculty.firstName} {faculty.lastName}</td>
-                <td>
-                  {evaluationsDone[faculty.id] ? (
-                    <span className="evaluation-done">Evaluation Done</span>
-                  ) : (
-                    <button onClick={() => handleEvaluateFaculty(faculty.id)}>Evaluate</button>
-                  )}
-                </td>
-              </tr>
-            ))}
+          {facultyList.map((faculty) => (
+            <tr key={faculty.id}>
+              <td>{faculty.id}</td>
+              <td>{faculty.firstName} {faculty.lastName}</td>
+              <td>
+                {evaluationsDone[faculty.id] ? (
+                  <span className="evaluation-done">Evaluation Done</span>
+                ) : (
+                  <button onClick={() => handleEvaluateFaculty(faculty.id)}>Evaluate</button>
+                )}
+              </td>
+            </tr>
+          ))}
           </tbody>
         </table>
       </section>
@@ -242,23 +227,24 @@ fetchAverageScoresForSubjects(); // Fetch subject average scores
       </section>
 
       <section>
-    <h2>Evaluation Report</h2>
-    {averageScore !== null ? (
-        <p>Your overall average score: {averageScore.toFixed(2)}</p>
-    ) : (
-        <p>No evaluations submitted yet.</p>
-    )}
-    <p>Subject Average Scores</p>
-    <ul>
-        {subjects.map((subject) => (
+        <h2>Evaluation Report</h2>
+        {averageScore !== null ? (
+          <p>Your overall average score: {averageScore.toFixed(2)}</p>
+        ) : (
+          <p>No evaluations submitted yet.</p>
+        )}
+        <p>Subject Average Scores</p>
+        <ul>
+          {subjects.map((subject) => (
             <li key={subject.id}>
-                {subject.id}: {subject.averageScore !== null ? subject.averageScore.toFixed(2) : 'No evaluations submitted yet.'}
+              {subject.id}: {subject.averageScore !== null ? subject.averageScore.toFixed(2) : 'No evaluations submitted yet.'}
             </li>
-        ))}
-    </ul>
-</section>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 };
 
 export default FacultyDashboard;
+  

@@ -1,137 +1,180 @@
-import React, { useEffect, useState } from 'react';
-import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, getDocs } from 'firebase/firestore';
+import './evaluationreportscoringpage.css';  // CSS for layout
 
-const EvaluationReportPage = () => {
-  const [facultyList, setFacultyList] = useState([]);
-  const [filteredFacultyList, setFilteredFacultyList] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState("");
-  const [departments, setDepartments] = useState([]);
+const EvaluationReportScoringPage = () => {
+  const [subjectWeight, setSubjectWeight] = useState(50); // Default 50%
+  const [facultyWeight, setFacultyWeight] = useState(50); // Default 50%
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
-
+  const [faculties, setFaculties] = useState([]); // Faculty list with their calculated scores
   const db = getFirestore();
 
-  useEffect(() => {
-    const fetchFaculty = async () => {
-      try {
-        setLoading(true);
-        const usersSnapshot = await getDocs(collection(db, 'users'));
-        const facultyData = [];
-        const deptSet = new Set();
-
-        for (let userDoc of usersSnapshot.docs) {
-          const userData = userDoc.data();
-          if (userData.role === 'Faculty') {
-            const facultyEvalDocRef = doc(db, 'facultyEvaluations', userDoc.id);
-            const facultyEvalDoc = await getDoc(facultyEvalDocRef);
-
-            facultyData.push({
-              ...userData,
-              facultyId: userDoc.id,
-              evaluation: facultyEvalDoc.exists() ? facultyEvalDoc.data() : null,
-            });
-
-            if (userData.department) {
-              deptSet.add(userData.department);
-            }
-          }
-        }
-
-        setFacultyList(facultyData);
-        setFilteredFacultyList(facultyData);
-        setDepartments(Array.from(deptSet));
-      } catch (error) {
-        setError("Failed to fetch faculty members. Please try again later.");
-        console.error("Error fetching faculty members: ", error);
-      } finally {
-        setLoading(false);
+  // Fetch existing weights from the database
+  const fetchWeights = useCallback(async () => {
+    try {
+      const weightsDoc = await getDoc(doc(db, 'settings', 'scoreWeights'));
+      if (weightsDoc.exists()) {
+        const data = weightsDoc.data();
+        setSubjectWeight(data.subjectWeight || 50);
+        setFacultyWeight(data.facultyWeight || 50);
       }
-    };
-
-    fetchFaculty();
+    } catch (error) {
+      console.error('Error fetching score weights:', error);
+    }
   }, [db]);
 
-  const handleSearch = (e) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
-    filterFaculty(query, departmentFilter);
+  // Fetch all faculties based on similar logic as in FacultyDashboard
+  const fetchFaculties = useCallback(() => {
+    // Subscribe to real-time updates using onSnapshot
+    const facultyQuery = query(collection(db, 'users'), where('role', '==', 'Faculty'));
+
+    const unsubscribe = onSnapshot(facultyQuery, (snapshot) => {
+      const facultyList = snapshot.docs.map((facultyDoc) => ({
+        id: facultyDoc.id,
+        ...facultyDoc.data(),
+      }));
+      setFaculties(facultyList);
+      setLoading(false);
+    }, (error) => {
+      console.error('Error fetching faculties:', error);
+      setLoading(false);
+    });
+
+    return unsubscribe; // Clean up subscription on component unmount
+  }, [db]);
+
+  // Save updated weights to the database
+  const handleSaveWeights = async () => {
+    if (subjectWeight + facultyWeight !== 100) {
+      alert('The total percentage must equal 100%.');
+      return;
+    }
+
+    try {
+      await setDoc(doc(db, 'settings', 'scoreWeights'), {
+        subjectWeight,
+        facultyWeight,
+      });
+      alert('Weights updated successfully.');
+    } catch (error) {
+      console.error('Error saving weights:', error);
+      alert('Failed to update weights.');
+    }
   };
 
-  const handleDepartmentChange = (e) => {
-    const selectedDepartment = e.target.value;
-    setDepartmentFilter(selectedDepartment);
-    filterFaculty(searchQuery, selectedDepartment);
+  // Calculate the final score for a faculty based on the weights
+  const calculateFinalScore = async (facultyId) => {
+    try {
+      const facultyEvaluationDoc = await getDoc(doc(db, 'facultyEvaluations', facultyId));
+      const facultyScore = facultyEvaluationDoc.exists() ? facultyEvaluationDoc.data().averageScore : 0;
+
+      const subjectEvaluationCollection = await getDocs(collection(db, 'facultyEvaluations', facultyId, 'subjects'));
+      let totalSubjectScore = 0;
+      let subjectCount = 0;
+
+      subjectEvaluationCollection.forEach((subjectDoc) => {
+        totalSubjectScore += subjectDoc.data().averageScore || 0;
+        subjectCount += 1;
+      });
+
+      const subjectScore = subjectCount > 0 ? totalSubjectScore / subjectCount : 0;
+
+      // Calculate final score using the weights
+      const finalScore = (subjectScore * (subjectWeight / 100)) + (facultyScore * (facultyWeight / 100));
+      return finalScore.toFixed(2);
+    } catch (error) {
+      console.error('Error calculating final score:', error);
+      return 0;
+    }
   };
 
-  const filterFaculty = (query, department) => {
-    const filtered = facultyList.filter(faculty =>
-      (faculty.firstName?.toLowerCase().includes(query) ||
-        faculty.lastName?.toLowerCase().includes(query) ||
-        faculty.email?.toLowerCase().includes(query) ||
-        faculty.facultyId?.toLowerCase().includes(query)) &&
-      (department ? faculty.department === department : true)
+  // Fetch faculty scores and recalculate when weights change
+  const updateFacultyScores = useCallback(async () => {
+    setLoading(true);
+    const updatedFaculties = await Promise.all(
+      faculties.map(async (faculty) => {
+        const finalScore = await calculateFinalScore(faculty.id);
+        return {
+          ...faculty,
+          finalScore,
+        };
+      })
     );
-    setFilteredFacultyList(filtered);
-  };
+    setFaculties(updatedFaculties);
+    setLoading(false);
+  }, [faculties, subjectWeight, facultyWeight]);
 
-  const handleViewEvaluation = (faculty) => {
-    navigate(`/view-evaluation/${faculty.facultyId}`, { state: { firstName: faculty.firstName, lastName: faculty.lastName } });
-  };
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchWeights();
+    fetchFaculties();
+  }, [fetchWeights, fetchFaculties]);
 
-  if (loading) return <p>Loading faculty data...</p>;
-  if (error) return <p>{error}</p>;
+  // Recalculate faculty scores whenever the weights change
+  useEffect(() => {
+    if (faculties.length > 0) {
+      updateFacultyScores();
+    }
+  }, [subjectWeight, facultyWeight, faculties, updateFacultyScores]);
 
   return (
-    <div>
-      <div className="faculty-header">
-      <h1>Faculty Evaluation Report</h1>
-      <input
-        type="text"
-        placeholder="Search faculty by name, email, or ID"
-        value={searchQuery}
-        onChange={handleSearch}
-        style={{ marginBottom: '20px', padding: '10px', width: '300px' }}
-      />
+    <div className="evaluation-report-scoring-page">
+      <h1>Evaluation Report Scoring Page</h1>
 
-      <select
-        value={departmentFilter}
-        onChange={handleDepartmentChange}
-        style={{ marginBottom: '20px', padding: '10px', width: '300px' }}
-      >
-        <option value="">All Departments</option>
-        {departments.map((dept, index) => (
-          <option key={index} value={dept}>
-            {dept}
-          </option>
-        ))}
-      </select>
+      <div className="weight-controls">
+        <h2>Set Score Weights</h2>
+        <form onSubmit={(e) => { e.preventDefault(); handleSaveWeights(); }}>
+          <div>
+            <label>Subject Score Weight (%):</label>
+            <input
+              type="number"
+              value={subjectWeight}
+              onChange={(e) => setSubjectWeight(Number(e.target.value))}
+              min="0"
+              max="100"
+            />
+          </div>
+          <div>
+            <label>Faculty Score Weight (%):</label>
+            <input
+              type="number"
+              value={facultyWeight}
+              onChange={(e) => setFacultyWeight(Number(e.target.value))}
+              min="0"
+              max="100"
+            />
+          </div>
+          <button type="submit">Save Weights</button>
+        </form>
       </div>
-      <div>
-        {filteredFacultyList.length > 0 ? (
-          filteredFacultyList.map((faculty, index) => (
-            <div className="faculty-card" key={index}>
-              <h3 className="faculty-name">
-                {faculty.firstName} {faculty.lastName} (ID: {faculty.facultyId})
-              </h3>
-              <p className="faculty-email">Email: {faculty.email}</p>
-              <p className="faculty-department">Department: {faculty.department}</p>
-              <p className="faculty-evaluation">
-                {faculty.evaluation
-                  ? `Average Score: ${faculty.evaluation.averageScore}, Completed Evaluations: ${faculty.evaluation.completedEvaluations}`
-                  : 'No evaluations available'}
-              </p>
-              <button className="view-button" onClick={() => handleViewEvaluation(faculty)}>View</button>
-            </div>
-          ))
+
+      <div className="faculty-list">
+        <h2>Faculty Scores</h2>
+        {loading ? (
+          <p>Loading faculty data...</p>
         ) : (
-          <p>No faculty members found.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Faculty Name</th>
+                <th>Department</th>
+                <th>Final Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {faculties.map((faculty) => (
+                <tr key={faculty.id}>
+                  <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
+                  <td>{faculty.department}</td>
+                  <td>{faculty.finalScore}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>
   );
 };
 
-export default EvaluationReportPage;
+export default EvaluationReportScoringPage;

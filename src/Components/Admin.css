@@ -34,18 +34,37 @@ html {
     align-items: center;
 }
 
+.notification-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.badge {
+    position: absolute;
+    top: 0; /* Adjust to move vertically */
+    right: -10px; /* Adjust to move horizontally */
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+    min-width: 20px;
+    text-align: center;
+}
+
 .Admin-links {
     position: relative;
     display: flex;
     flex-direction: column;
-    text-decoration: none;
     justify-content: start;
     gap: 20px;
     width: 100%;
-    
 }
 
-.Admin-links a{
+.Admin-links a {
     background-color: transparent; 
     color: #fdfdfd; 
     cursor: pointer;
@@ -53,37 +72,33 @@ html {
     padding: 12px 10px;
     max-width: 100%;
     text-decoration: none;
-    margin: 5px;
     font-weight: 600;
     display: flex;
     align-items: center;
-    margin: 0;
-    gap:5px;
+    gap: 5px;
 }
 
-.Admin-links button{
+.Admin-links button {
     border: none;
     background-color: transparent; 
     color: #fdfdfd; 
     cursor: pointer;
     font-size: 16px;
     padding: 12px 10px;
-    min-width: 100%;
-    max-width: 100%;
+    width: 100%;
     text-align: center;
-    text-decoration: none;
     position: absolute;
     bottom: -50%;
 }
 
-
-.Admin-links a:hover, .Admin-links button:hover  {
+.Admin-links a:hover, .Admin-links button:hover {
     background-color: #5c0017; 
-    color:#F5F5DC;
+    color: #F5F5DC;
 }
+
 .Admin-links a:focus {
     background-color: rgb(102, 1, 26); 
-    color:#fdfdfd;
+    color: #fdfdfd;
 }
 
 .Admin-navbar h1 {
@@ -106,18 +121,26 @@ html {
 .notification-link {
     position: relative;
     display: inline-block;
+    text-align: left;
 }
 
 .notification-link .badge {
     position: absolute;
-    top: -10px;
-    right: -10px;
-    background-color: rgb(255, 0, 0); 
+    top: -8px; /* Adjust to position the circle above the bell */
+    right: -5px; /* Adjust to align it with the right edge of the bell */
+    background-color: red;
     color: white;
     border-radius: 50%;
-    padding: 3px 7px;
-    font-size: 12px;
+    width: 15px;
+    height: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 2;
 }
+
 
 .line {
     height:1px;

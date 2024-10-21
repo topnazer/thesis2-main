@@ -20,55 +20,62 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/
+
 .evaluation-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
 }
 
-.evaluation-table th,
-.evaluation-table td {
+.evaluation-summary-table th,
+.evaluation-summary-table td {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 12px; /* Increased padding for better readability */
   text-align: center;
 }
 
-.evaluation-table th:first-child,
-.evaluation-table td:first-child {
-  width: 60%; 
-  text-align: left;
-}
-
-.evaluation-table th:not(:first-child),
-.evaluation-table td:not(:first-child) {
-  width: 8%; 
-}
-
-.evaluation-table th {
-  background-color: #4CAF50; /* Green header background */
+/* Header styling for the table */
+.evaluation-summary-table th {
+  background-color: #800020; /* Dark red header background */
   color: white;
   font-weight: bold;
+  text-transform: uppercase; /* Make header text uppercase */
 }
 
-.evaluation-table tbody tr:nth-child(even) {
+/* Row color alternation for better readability */
+.evaluation-summary-table tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-.evaluation-table tbody tr:nth-child(odd) {
-  background-color: #fff;
+.evaluation-summary-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
 }
 
-
-
-/* Comment section styles */
-.comment-section {
-  margin-top: 20px;
-  font-style: italic;
-  color: #555;
+/* For the first column (ID, Faculty Name) */
+.evaluation-summary-table th:first-child,
+.evaluation-summary-table td:first-child {
+  width: 40%; /* Adjust as needed */
+  text-align: left;
 }
 
-* Button styles */
+/* Status column should be narrower */
+.evaluation-summary-table td:nth-child(3) {
+  width: 20%;
+}
+
+/* Styling for "Done" status */
+.status-done {
+  color: green;
+  font-weight: bold;
+}
+
+/* Styling for "Not Done" status */
+.status-not-done {
+  color: red;
+  font-weight: bold;
+}
+
+/* Button styling */
 button {
   padding: 10px 20px;
   background-color: #4CAF50; /* Green button background */

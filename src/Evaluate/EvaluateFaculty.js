@@ -13,7 +13,7 @@ const EvaluateFaculty = () => {
   const [categories, setCategories] = useState([]); // New state for categories
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [responses, setResponses] = useState([]);
+  const [responses, setResponses] = useState({});
   const [comment, setComment] = useState("");
   const db = getFirestore();
 
@@ -47,10 +47,26 @@ const EvaluateFaculty = () => {
     }
   }, [db]);
 
+  const checkIfAlreadyEvaluated = useCallback(async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      const evaluationDoc = await getDoc(doc(db, 'facultyEvaluations', facultyId, 'completed_evaluations', user.uid));
+      if (evaluationDoc.exists()) {
+        alert('You have already evaluated this faculty member.');
+        navigate(location.state?.redirectTo || "/faculty-dashboard");
+      }
+    } catch (error) {
+      console.error("Error checking evaluation status:", error);
+    }
+  }, [db, facultyId, navigate, location.state?.redirectTo]);
+
   useEffect(() => {
     fetchFaculty();
     fetchEvaluationForm();
-  }, [fetchFaculty, fetchEvaluationForm]);
+    checkIfAlreadyEvaluated(); // Check if the current user has already evaluated this faculty
+  }, [fetchFaculty, fetchEvaluationForm, checkIfAlreadyEvaluated]);
 
   const handleResponseChange = (categoryIndex, questionIndex, value) => {
     const updatedResponses = { ...responses }; // Change responses to an object
@@ -58,21 +74,20 @@ const EvaluateFaculty = () => {
     updatedResponses[uniqueKey] = value;
     setResponses(updatedResponses);
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const totalScore = Object.values(responses).reduce((sum, score) => sum + parseInt(score), 0);
     const maxScore = evaluationForm.length * 5;
     const percentageScore = (totalScore / maxScore) * 100;
-  
+
     const user = auth.currentUser;
     if (!user) {
       alert('User not authenticated.');
       return;
     }
-  
+
     try {
       const evaluationRef = doc(collection(db, 'facultyEvaluations', facultyId, 'completed_evaluations'), user.uid);
       await setDoc(evaluationRef, {
@@ -83,16 +98,16 @@ const EvaluateFaculty = () => {
         percentageScore,
         createdAt: new Date(),
       });
-  
+
       const facultyEvaluationRef = doc(db, 'facultyEvaluations', facultyId);
       const facultyEvaluationDoc = await getDoc(facultyEvaluationRef);
       let newAverageScore;
-  
+
       if (facultyEvaluationDoc.exists()) {
         const existingAverageScore = facultyEvaluationDoc.data().averageScore || 0;
         const completedEvaluations = (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
         newAverageScore = ((existingAverageScore * (completedEvaluations - 1)) + percentageScore) / completedEvaluations;
-  
+
         await setDoc(facultyEvaluationRef, {
           averageScore: newAverageScore,
           completedEvaluations,
@@ -104,7 +119,13 @@ const EvaluateFaculty = () => {
           completedEvaluations: 1,
         });
       }
-  
+
+      // Mark evaluation as done
+      await setDoc(doc(db, 'facultyEvaluations', facultyId, 'completed_evaluations', user.uid), {
+        evaluated: true, // Mark as evaluated
+        timestamp: new Date(),
+      });
+
       alert('Evaluation submitted successfully!');
       navigate(location.state?.redirectTo || "/faculty-dashboard");
     } catch (error) {
@@ -150,7 +171,6 @@ const EvaluateFaculty = () => {
       </React.Fragment>
     ));
   };
-  
 
   return (
     <div className="evaluate-faculty-page evaluation-form">

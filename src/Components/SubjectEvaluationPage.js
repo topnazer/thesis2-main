@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getFirestore, doc, setDoc, collection, getDocs, getDoc } from "firebase/firestore";
 import './subjectevaluationpage.css';
-import FacultyDeanEvaluationPage from './FacultyDeanEvaluationPage';
+
 
 const SubjectEvaluationPage = () => {
     const [evaluationForms, setEvaluationForms] = useState({});

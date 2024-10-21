@@ -1,122 +1,126 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getFirestore, collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';
+import { auth } from '../firebase'; // Make sure to import the auth object if needed
 import './viewreport.css';
 
 const ViewEvaluationPage = () => {
-  const { facultyId } = useParams();
-  const location = useLocation();
+  const { facultyId } = useParams(); // facultyId is the ID of the user being checked
   const navigate = useNavigate();
-
-  const firstName = location.state?.firstName || 'N/A';
-  const lastName = location.state?.lastName || 'N/A';
-
-  const [evaluations, setEvaluations] = useState([]);
-  const [questions, setQuestions] = useState([]);
-  const [categories, setCategories] = useState([]); // Track categories for display
+  const [facultyList, setFacultyList] = useState([]);
+  const [evaluationsDone, setEvaluationsDone] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const db = getFirestore();
 
   useEffect(() => {
-    const fetchEvaluations = async () => {
+    const fetchFacultyInDepartment = async () => {
       try {
         setLoading(true);
-        const evaluationsSnapshot = await getDocs(collection(db, `facultyEvaluations/${facultyId}/completed_evaluations`));
-        const evaluationData = [];
-        evaluationsSnapshot.forEach((doc) => {
-          evaluationData.push({ id: doc.id, ...doc.data() });
-        });
-        setEvaluations(evaluationData);
-      } catch (error) {
-        setError('Failed to fetch evaluations.');
-        console.error('Error fetching evaluations:', error);
-      }
-    };
-
-    const fetchQuestions = async () => {
-      try {
-        const evaluationFormDoc = await getDoc(doc(db, 'evaluationForms', 'faculty'));
-        if (evaluationFormDoc.exists()) {
-          const data = evaluationFormDoc.data();
-          setQuestions(data.questions || []);
-          setCategories(data.categories || []); // Retrieve categories
-        } else {
-          setError('No questions found.');
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          throw new Error("User not authenticated");
         }
+
+        // Fetch the current user's document to get their role and department
+        const currentUserDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if (!currentUserDoc.exists()) {
+          throw new Error("Current user document not found.");
+        }
+
+        const currentUserData = currentUserDoc.data();
+        const currentUserRole = currentUserData.role;
+
+        let department;
+
+        // If the current user is an admin, fetch the department of the user being evaluated
+        if (currentUserRole === 'Admin') {
+          const evaluatedUserDoc = await getDoc(doc(db, "users", facultyId));
+          if (!evaluatedUserDoc.exists()) {
+            throw new Error("User being evaluated not found.");
+          }
+          const evaluatedUserData = evaluatedUserDoc.data();
+          department = evaluatedUserData.department;
+          if (!department) {
+            throw new Error("The user being evaluated does not have a department.");
+          }
+        } else {
+          // For non-admin users, fetch faculty from the current user's department
+          department = currentUserData.department;
+          if (!department) {
+            throw new Error("Department is not defined for the current user.");
+          }
+        }
+
+        // Fetch faculty members from the same department
+        const facultyQuery = query(
+          collection(db, "users"),
+          where("department", "==", department),
+          where("role", "==", "Faculty")
+        );
+
+        const facultySnapshot = await getDocs(facultyQuery);
+        const facultyData = facultySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setFacultyList(facultyData);
+
+        // Fetch completed evaluations for each faculty from `completed_evaluations` sub-collection
+        const evaluationsMap = {};
+        for (const faculty of facultyData) {
+          const completedEvaluationsCollection = collection(db, 'facultyEvaluations', faculty.id, 'completed_evaluations');
+          const completedEvaluationsSnapshot = await getDocs(completedEvaluationsCollection);
+
+          // Check if the `evaluated` field is `true` for the current user in this faculty's `completed_evaluations`
+          const userEvaluated = completedEvaluationsSnapshot.docs.some(doc => {
+            const data = doc.data();
+            return doc.id === currentUser.uid && data.evaluated === true;
+          });
+
+          // Mark this faculty as evaluated by the current user
+          evaluationsMap[faculty.id] = userEvaluated;
+        }
+
+        setEvaluationsDone(evaluationsMap);
       } catch (error) {
-        setError('Error fetching questions: ' + error.message);
+        setError(`Error fetching faculty list or evaluations: ${error.message}`);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchEvaluations();
-    fetchQuestions();
-    setLoading(false);
-  }, [facultyId, db]);
+    fetchFacultyInDepartment();
+  }, [db, facultyId]);
 
-  if (loading) return <p>Loading evaluations...</p>;
+  if (loading) return <p>Loading faculty and evaluations...</p>;
   if (error) return <p>{error}</p>;
-
-  const renderQuestionsByCategory = (evaluation) => {
-    return categories.map((category, categoryIndex) => (
-      <React.Fragment key={categoryIndex}>
-        <tr>
-          <th colSpan="6" className="category-header">{category}</th>
-        </tr>
-        {questions
-          .filter(question => question.category === category)
-          .map((question, questionIndex) => {
-            const uniqueKey = `${categoryIndex}-${questionIndex}`;
-            const score = evaluation.scores[uniqueKey];
-            return (
-              <tr key={uniqueKey}>
-                <td>{question.text}</td>
-                {[1, 2, 3, 4, 5].map((value) => (
-                  <td key={value}>
-                    {parseInt(score) === value ? (
-                      <span className="response-circle">&#x25CF;</span>
-                    ) : null}
-                  </td>
-                ))}
-              </tr>
-            );
-          })}
-      </React.Fragment>
-    ));
-  };
 
   return (
     <div className="view-evaluation-page">
-      <h1>Evaluation Details for Faculty: {firstName} {lastName}</h1>
-      {evaluations.length > 0 ? (
-        evaluations.map((evaluation) => (
-          <div className="evaluation-card" key={evaluation.id}>
-            <p><strong>Date:</strong> {new Date(evaluation.createdAt.seconds * 1000).toLocaleDateString()}</p>
-            <p><strong>Percentage Score:</strong> {evaluation.percentageScore}</p>
-            <p><strong>Rating:</strong> {evaluation.percentageScore >= 80 ? 'Good' : 'Bad'}</p>
-            <h3>Questions and Scores:</h3>
-            <table className="evaluation-table">
-              <thead>
-                <tr>
-                  <th>Question</th>
-                  <th>1</th>
-                  <th>2</th>
-                  <th>3</th>
-                  <th>4</th>
-                  <th>5</th>
-                </tr>
-              </thead>
-              <tbody>
-                {renderQuestionsByCategory(evaluation)}
-              </tbody>
-            </table>
-            <div className="comment-section">
-              <p><strong>Comment:</strong> {evaluation.comment}</p>
-            </div>
-          </div>
-        ))
+      <h2>Evaluation Status for Users</h2>
+      {facultyList.length > 0 ? (
+        <table className="evaluation-summary-table">
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Faculty Name</th>
+              <th>Evaluation Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {facultyList.map((faculty) => (
+              <tr key={faculty.id}>
+                <td>{faculty.id}</td>
+                <td>{faculty.firstName} {faculty.lastName}</td>
+                <td>
+                  <span className={evaluationsDone[faculty.id] ? 'status-done' : 'status-not-done'}>
+                    {evaluationsDone[faculty.id] ? 'Done' : 'Not Done'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       ) : (
-        <p>No evaluations available for this faculty member.</p>
+        <p>No faculty members available in this department.</p>
       )}
 
       <button onClick={() => navigate(-1)} style={{ padding: '10px', marginTop: '20px' }}>Back to Faculty List</button>

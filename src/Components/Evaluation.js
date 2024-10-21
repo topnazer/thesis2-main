@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Evaluation.css';
-import FacultyDeanEvaluationPage from './FacultyDeanEvaluationPage';
+import FacultyEvaluationPage from './FacultyEvaluationPage';
 import SubjectEvaluationPage from "./SubjectEvaluationPage";
 import AdminDashboard from "./AdminDashboard";
 import {FileCog} from 'lucide-react';
@@ -13,9 +13,15 @@ const Evaluation = () => (
                 <FileCog style={{ width: '50px', height: '50px', color: 'black' }} /> 
                 <p>Subject Tools</p>    
             </Link>
-            <Link to="/admin-dashboard/faculty-dean-evaluation" className='facultydean-evaluation-button'>
+
+            <Link to="/admin-dashboard/faculty-evaluation" className='faculty-evaluation-button'>
                 <FileCog style={{ width: '50px', height: '50px', color: 'black' }} />
                 <p>Faculty Tools</p>
+            </Link>
+
+            <Link to="/admin-dashboard/dean-evaluation" className='dean-evaluation-button'>
+                <FileCog style={{ width: '50px', height: '50px', color: 'black' }} />
+                <p>Dean Tools</p>
             </Link>
         </div>
         

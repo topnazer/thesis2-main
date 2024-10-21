@@ -27,7 +27,7 @@ html {
   text-align: center;
 }
 
-.facultydean-evaluation-button {
+.faculty-evaluation-button {
     padding: 75px;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.7), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     cursor: pointer; 
@@ -37,7 +37,17 @@ html {
     text-align: center;
 }
 
-.subject-evaluation-button:hover, .facultydean-evaluation-button:hover {
+.dean-evaluation-button {
+    padding: 75px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.7), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    cursor: pointer; 
+    text-decoration: none;
+    border-radius: 20px;
+    color: black;
+    text-align: center;
+}
+
+.subject-evaluation-button:hover, .faculty-evaluation-button:hover, .dean-evaluation-button:hover {
     opacity: 0.5;
 }
 

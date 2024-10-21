@@ -1,0 +1,32 @@
+.evaluation-report-scoring-page {
+    margin: 20px;
+    padding: 20px;
+  }
+  
+  .weight-controls {
+    margin-bottom: 40px;
+  }
+  
+  .weight-controls label {
+    margin-right: 10px;
+  }
+  
+  .faculty-list table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .faculty-list th, .faculty-list td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  
+  .faculty-list th {
+    background-color: #f4f4f4;
+  }
+  
+  .faculty-list tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  

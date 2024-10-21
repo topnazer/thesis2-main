@@ -9,10 +9,13 @@ import NotificationsPage from "./NotificationsPage";
 import Subjects from "./Subjects";
 import EvaluateSubject from '../Evaluate/EvaluateSubject';
 import EvaluationReportPage from "./EvaluationReportPage";
-import FacultyDeanEvaluationPage from './FacultyDeanEvaluationPage';
+import FacultyEvaluationPage from './FacultyEvaluationPage';
 import SubjectEvaluationReport from "./SubjectEvaluationReport";
 import Evaluation from "./Evaluation";
 import Evaluationreport from "./Evaluationreport";
+import DeanEvaluationPage from "./DeanEvaluationPage";
+import EvaluationReportScoringPage from './EvaluationReportScoringPage'; 
+
 
 import './Admin.css';
 import { CircleUserRound, Hammer, FileCheck , Bell, BookCopy  } from 'lucide-react';
@@ -62,22 +65,23 @@ const AdminDashboard = () => {
   return (
     <div className="whole-container">
       <div className="Admin-header">
-      <p>bayot ventic </p>
+      <p>bayot ventic ugh uwu </p>
       </div>
       <div className="content-container">
       <div className="Admin-navbar">
         <h1>Dashboard</h1>
         <div className="Admin-links">
+        <Link to="notifications" className="notification-link">
+        <Bell/>  Notifications 
+    {pendingUsersCount > 0 && (
+      <span className="badge">{pendingUsersCount}</span>
+    )}
+  </Link>
           <Link to="users" > <CircleUserRound />   Users</Link>
-          <Link to="notifications" className="notification-link">
-           <Bell/>   Notifications
-            {pendingUsersCount > 0 && (
-              <span className="badge">{pendingUsersCount}</span>
-            )}
-          </Link>
+          <Link to="subjects"><BookCopy/>   Subjects</Link>
           <Link to="Evaluation"><Hammer/>   Evaluation Tools</Link> 
           <Link to="evaluation-report"> <FileCheck /> Evaluation Report</Link>
-          <Link to="subjects"><BookCopy/>   Subjects</Link>
+          <Link to="/admin/evaluation-report">Evaluation Report Scoring</Link>
           <div className="line"></div>  
           <button onClick={handleLogout}>Log Out</button>
         </div>
@@ -86,7 +90,7 @@ const AdminDashboard = () => {
        <Routes>
         <Route path="users" element={<UsersPage />} />
         <Route path="subject-evaluation" element={<SubjectEvaluationPage />} />
-        <Route path="faculty-dean-evaluation" element={<FacultyDeanEvaluationPage />} />
+        <Route path="faculty-evaluation" element={<FacultyEvaluationPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="subjects" element={<Subjects />} />
         <Route path="evaluate-subject/:subjectId" element={<EvaluateSubject />} />
@@ -94,6 +98,8 @@ const AdminDashboard = () => {
         <Route path="evaluation-report" element={<Evaluationreport />} />
         <Route path="Evaluation" element={<Evaluation />} />
         <Route path="evaluation-reports" element={<EvaluationReportPage />} />
+        <Route path="dean-evaluation" element={<DeanEvaluationPage />} />
+        <Route path="/admin/evaluation-report" element={<EvaluationReportScoringPage />} />
        </Routes>
       </div>  
     </div>

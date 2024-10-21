@@ -1,0 +1,134 @@
+.faculty-evaluation-page {
+    padding: 10px;
+}
+
+.faculty-evaluation-card {
+    margin-bottom: 10px;
+    padding: 15px;
+    background-color: #F5F5DC;
+    border-radius: 5px;
+    border: 1px solid #8B4513;
+}
+
+.faculty-evaluation-header {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #800020;
+    text-align: center;
+}
+
+.faculty-category-section,
+.faculty-question-form {
+    margin-bottom: 15px;
+}
+
+.faculty-category-input {
+    padding: 10px;
+    width: 80%;
+    border-radius: 5px;
+    margin-right: 10px;
+    border: 1px solid #8B4513;
+    background-color: #F5F5DC;
+    color: #800020;
+}
+
+.faculty-evaluation-select {
+    margin: 0px 6px;
+    padding: 8px;
+    border: 1px solid #8B4513;
+    border-radius: 5px;
+    background-color: #F5F5DC;
+    color: #800020;
+    font-size: 16px;
+}
+
+.faculty-questions-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.faculty-questions-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FFFFFF;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    border: 1px solid #8B4513;
+}
+
+.faculty-operation-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.faculty-operation-buttons button {
+    background-color: #F5F5DC;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.faculty-edit-button {
+    background-color: #800020;
+    color: white;
+}
+
+.faculty-edit-button:hover {
+    background-color: #A52A2A;
+}
+
+.faculty-delete-button {
+    background-color: #8B4513;
+    color: white;
+}
+
+.faculty-delete-button:hover {
+    background-color: #CD853F;
+}
+
+.faculty-question-input {
+    width: 80%;
+    padding: 10px;
+    margin: 10px auto;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: none;
+}
+
+.faculty-buttons-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.faculty-buttons-container button {
+    padding: 8px 16px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.faculty-save-button {
+    background-color: #800020;
+    color: white;
+}
+
+.faculty-save-button:hover {
+    background-color: #A52A2A;
+}
+
+.faculty-cancel-button {
+    background-color: #8B4513;
+    color: white;
+}
+
+.faculty-cancel-button:hover {
+    background-color: #CD853F;
+}

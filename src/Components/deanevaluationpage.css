@@ -1,0 +1,134 @@
+.dean-evaluation-page {
+    padding: 10px;
+}
+
+.dean-evaluation-card {
+    margin-bottom: 10px;
+    padding: 15px;
+    background-color: #F5F5DC;
+    border-radius: 5px;
+    border: 1px solid #8B4513;
+}
+
+.dean-evaluation-header {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #800020;
+    text-align: center;
+}
+
+.dean-category-section,
+.dean-question-form {
+    margin-bottom: 15px;
+}
+
+.dean-category-input {
+    padding: 10px;
+    width: 80%;
+    border-radius: 5px;
+    margin-right: 10px;
+    border: 1px solid #8B4513;
+    background-color: #F5F5DC;
+    color: #800020;
+}
+
+.dean-evaluation-select {
+    margin: 0px 6px;
+    padding: 8px;
+    border: 1px solid #8B4513;
+    border-radius: 5px;
+    background-color: #F5F5DC;
+    color: #800020;
+    font-size: 16px;
+}
+
+.dean-questions-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dean-questions-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FFFFFF;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    border: 1px solid #8B4513;
+}
+
+.dean-operation-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.dean-operation-buttons button {
+    background-color: #F5F5DC;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.dean-edit-button {
+    background-color: #800020;
+    color: white;
+}
+
+.dean-edit-button:hover {
+    background-color: #A52A2A;
+}
+
+.dean-delete-button {
+    background-color: #8B4513;
+    color: white;
+}
+
+.dean-delete-button:hover {
+    background-color: #CD853F;
+}
+
+.dean-question-input {
+    width: 80%;
+    padding: 10px;
+    margin: 10px auto;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: none;
+}
+
+.dean-buttons-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dean-buttons-container button {
+    padding: 8px 16px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.dean-save-button {
+    background-color: #800020;
+    color: white;
+}
+
+.dean-save-button:hover {
+    background-color: #A52A2A;
+}
+
+.dean-cancel-button {
+    background-color: #8B4513;
+    color: white;
+}
+
+.dean-cancel-button:hover {
+    background-color: #CD853F;
+}
