@@ -73,7 +73,7 @@ const AdminDashboard = () => {
         <div className="Admin-links">
         <Link to="notifications" className="notification-link">
         <Bell/>  Notifications 
-    {pendingUsersCount > 0 && (
+        {pendingUsersCount > 0 && (
       <span className="badge">{pendingUsersCount}</span>
     )}
   </Link>

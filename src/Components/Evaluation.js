@@ -1,9 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Evaluation.css';
-import FacultyEvaluationPage from './FacultyEvaluationPage';
-import SubjectEvaluationPage from "./SubjectEvaluationPage";
-import AdminDashboard from "./AdminDashboard";
 import {FileCog} from 'lucide-react';
 
 const Evaluation = () => (

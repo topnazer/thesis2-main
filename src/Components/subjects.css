@@ -1,66 +1,213 @@
-.subject-card-container {
-    display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-    column-gap: 50px; 
-    margin: 0 auto; 
-    max-width: 650px; 
-  }
-  
-  .subject-card {
-    border: 1px solid #8B4513;
-    border-radius: 10px;
-    padding: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background-color: #F5F5DC;
-    text-align: center;
-    margin: 10px auto;
-    box-sizing: border-box;
-    width: 50%;
-  }
-  
-  .subject-card:hover {
-    box-shadow: 0 2px 4px rgba(139, 69, 19, 0.85);
-    transition: box-shadow 0.2s ease;
-  }
-  
-  .subject-info {
-    font-weight: bold;
-    margin-bottom: 10px;
-    font-size: 1.2em;
-    color: #800020;
-  }
-  
-  .subject-info p {
-    color: yellowgreen;
-  }
-  
-  .subject-actions {
-    font-size: 1em;
-    color: #666;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-  }
-  
-  .subject-actions button {
-    background-color: #ffffff;
-    border-radius: 6px;
-    box-shadow: 1px 1px 1px black;
-    color: black;
-    cursor: pointer;
-    padding: 7px 25px;
-    text-align: center;
-    text-decoration: none;
-    font-size: 16px;
-  }
-  
-  .subject-edit:hover {
-    background-color: #4caf50;
-    color: white;
-  }
+.manage-subject-container {
+  display: flex;
+  flex-direction: row;
+}
 
-  .subject-delete:hover {
-    background-color: #f44336;
-    color: white;
-  } 
+.manage-subject-left {
+  width: 50%; 
+  height: 100vh;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.manage-subject-right {
+  width: 50%; 
+  height: 100vh;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+.search-subject h1 {
+  margin: 20px;
+}
+
+.subject-list {
+  margin: 10px;
+  margin-top: 20px;
+  height: 68vh;
+  border-radius: 7px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+}
+.subject-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px; 
+}
+
+.subject-card {
+  padding: 20px 60px ;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  margin: 10px auto;
+}
+
+
+.subject-card p {
+  margin-bottom: 10px;
+}
+
+.subject-actions {
+  font-size: 1em;
+  color: #666;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.viewed-subject-details {
+  margin-top: 20px;
+  padding: 20px;
   
+}
+
+.viewed-subject-details h1 {
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 1.5em;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  
+}
+
+.details-item {
+  padding: 15px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.details-item strong {
+  font-weight: 600;
+  color: #333;
+}
+
+.details-item span {
+  font-weight: 400;
+  color: #555;
+}
+
+
+.tools-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.add-subject {
+  width: 520px;
+  height: 20rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  margin: 20px auto;
+}
+.edit-subject{
+  width: 520px;
+  height: 20rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  margin: 60px auto;
+}
+.subject-grid,
+.editsubj-grid {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 15px 10px; 
+}
+
+.subject-grid input,
+.edit-subject input,
+.subject-grid select,
+.edit-subject select {
+  border: 0.5px solid rgb(0, 0, 0);
+  padding: 0.7rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  box-shadow: 0 0.4rem #dfd9d9;
+}
+
+.subject-grid input,
+.edit-subject input {
+  width: 12.5em;
+  margin: auto auto;
+}
+
+.subject-grid select,
+.edit-subject select {
+  width: 14em;
+  cursor: pointer;
+  margin: auto auto;
+  
+}
+.editsubj-button {
+  margin: 30px px;
+  margin-top: 40px;
+  width: 100%;
+}
+
+.editsubj-button button {
+  margin: 20px;
+}
+
+.addsubj-button {
+  margin: 30px 0;
+  width: 100%;
+}
+
+.addsubj-h1 {
+  margin: 30px;
+}
+
+.subject-name {
+  margin: 10px;
+  padding: 0.7rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  box-shadow: 0 0.4px #dfd9d9;
+}
+
+.subj-dept-button {
+  background-color: transparent;
+  border-radius: 4px;
+  box-shadow: 1px 1px 1px black;
+  color: black;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 16px;
+  padding: 7px 15px;
+  text-align: center;
+  text-decoration: none;
+  margin: 5px;
+}
+
+.subject-delete-button {
+  margin: 5px;
+  background-color:#800020;
+  color: #F5F5DC;
+}
+.edit-buttons {
+  margin: 10px;
+  margin-left: 50px;
+  display: flex;
+  flex-direction: row;
+}
+.edit-buttons button {
+  margin: 10px;
+}
+
+.subject-delete-button:hover, .subj-dept-button:hover {
+  background-color:#800100;
+  color: #F5F5DC;
+}
+.subject-delete-button:focus, .subj-dept-button:focus {
+  background-color:#800100;
+  color: #F5F5DC;
+}
+.subject-edit-button {
+  margin: 5px;
+  background-color:#21ab02;
+  color: #F5F5DC;
+}

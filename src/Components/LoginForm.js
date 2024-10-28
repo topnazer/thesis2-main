@@ -86,16 +86,17 @@ const LoginForm = ({ toggleSignUp }) => {
             </div>
             <button type="submit" className="login-button">Login</button>
           </form>
-          <button onClick={toggleSignUp} className="signup-button">Sign up</button>
+          <span>Dont have account? </span><span onClick={toggleSignUp} className="signup-button">Sign up</span>
           <div className="social-links">
-            <span>Follow</span>
-            <a href="#"> <i className="fab fa-facebook-f"></i> </a>
-            <a href="#"> <i className="fab fa-twitter"></i> </a>
-            <a href="#"> <i className="fab fa-instagram"></i> </a>
+              <div><img src="spc.png"/></div>
+              <div><img src="spc.png"/></div>
+              <div><img src="spc.png"/></div>
           </div>
         </div>
         <div className="auth-right">
-          {/* <h1>"Growth starts with honest feedback. Evaluate to improve, not to criticize."</h1> */}
+          <div className="logo">  
+            <img src="spc.png"/>
+          </div>
         </div>
       </div>
     </div>

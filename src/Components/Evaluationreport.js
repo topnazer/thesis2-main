@@ -1,9 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Evaluationreport.css';
-import FacultyDeanEvaluationPage from './FacultyEvaluationPage';
-import SubjectEvaluationPage from "./SubjectEvaluationPage";
-import AdminDashboard from "./AdminDashboard";
+
 import {FileChartColumn} from 'lucide-react';
 
 const Evaluationreport = () => (

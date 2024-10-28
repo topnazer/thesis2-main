@@ -10,12 +10,12 @@ const SubjectEvaluationReport = () => {
     const db = getFirestore();
     const navigate = useNavigate();
 
-    // Navigate to the ViewSubjectEvaluation page
+    
     const handleViewEvaluation = (subjectId) => {
         navigate(`/view-subject-evaluation/${subjectId}`);
     };
 
-    // Fetch users by department (only faculty)
+    
     const fetchUsersByDepartment = useCallback(async (department) => {
         try {
             const q = query(

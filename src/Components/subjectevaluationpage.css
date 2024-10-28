@@ -24,6 +24,11 @@
     margin-bottom: 15px; /* Reduced margin */
 }
 
+.subject-category-block {
+    margin-top: 20px; /* Adjust the value as needed */
+}
+
+
 .subject-evaluation-select {
     margin: 0px 6px;
     padding: 8px; /* Reduced padding */
@@ -57,7 +62,7 @@
 }
 
 .subject-operation-buttons button {
-    background-color: #F5F5DC;
+    background-color: #8b0000;
     border: none;
     cursor: pointer;
     font-size: 14px;
@@ -66,7 +71,7 @@
 }
 
 .subject-edit-button {
-    background-color: #800020;
+    background-color: #A52A2A;
     color: white;
 }
 
@@ -123,4 +128,17 @@
 
 .subject-cancel-button:hover {
     background-color: #CD853F; 
+}
+
+
+.delete-category-button {
+    background-color: #8b0000;
+    color: white;
+    padding: 6px; /* Reduced padding */
+    font-size: 12px; /* Smaller font size */
+    border: none;
+    border-radius: 5px; /* Adjusted border-radius for smaller size */
+    cursor: pointer;
+    margin-left: 20px;
+    margin-bottom: 20px;
 }

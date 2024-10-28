@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getFirestore, doc, setDoc, collection, getDocs, getDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, collection, getDocs, getDoc, deleteDoc } from "firebase/firestore";
 import './subjectevaluationpage.css';
-
 
 const SubjectEvaluationPage = () => {
     const [evaluationForms, setEvaluationForms] = useState({});
@@ -13,6 +12,7 @@ const SubjectEvaluationPage = () => {
     const [categories, setCategories] = useState([]);
     const [newCategory, setNewCategory] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
+    const [expirationDate, setExpirationDate] = useState(""); // New expiration date state
 
     const db = getFirestore();
 
@@ -39,7 +39,7 @@ const SubjectEvaluationPage = () => {
             }
             return [...prevCategories, newCategory];
         });
-        setNewCategory(""); // Clear input field
+        setNewCategory("");
     };
 
     const addQuestion = () => {
@@ -90,10 +90,68 @@ const SubjectEvaluationPage = () => {
         if (selectedSubject) {
             try {
                 const formRef = doc(db, "evaluationForms", selectedSubject);
-                await setDoc(formRef, { questions: evaluationForms[selectedSubject] || [], categories });
+                await setDoc(formRef, {
+                    questions: evaluationForms[selectedSubject] || [],
+                    categories,
+                    expirationDate: expirationDate || null, // Save expiration date
+                });
                 alert("Subject evaluation form saved successfully!");
             } catch (error) {
                 console.error("Error saving form:", error);
+            }
+        }
+    };
+
+    const deleteCategory = (categoryToDelete) => {
+        setCategories((prevCategories) => 
+            prevCategories.filter((category) => category !== categoryToDelete)
+        );
+        setEvaluationForms((prevForms) => {
+            const updatedForms = { ...prevForms };
+            if (selectedSubject && updatedForms[selectedSubject]) {
+                updatedForms[selectedSubject] = updatedForms[selectedSubject].filter(
+                    (question) => question.category !== categoryToDelete
+                );
+            }
+            return updatedForms;
+        });
+    };
+
+    const checkExpiration = useCallback(async () => {
+        try {
+            const now = new Date();
+            const formsCollection = collection(db, "evaluationForms");
+            const formsSnapshot = await getDocs(formsCollection);
+
+            formsSnapshot.forEach(async (formDoc) => {
+                const formData = formDoc.data();
+                if (formData.expirationDate) {
+                    const expiration = new Date(formData.expirationDate.seconds * 1000);
+                    if (expiration < now) {
+                        await deleteDoc(doc(db, "evaluationForms", formDoc.id));
+                        setEvaluationForms((prevForms) => {
+                            const updatedForms = { ...prevForms };
+                            delete updatedForms[formDoc.id];
+                            return updatedForms;
+                        });
+                        alert(`Evaluation form for subject ${formDoc.id} has expired and was deleted.`);
+                    }
+                }
+            });
+        } catch (error) {
+            console.error("Error checking for expired forms:", error);
+        }
+    }, [db]);
+
+    const handleExtendExpiration = async (newDate) => {
+        if (selectedSubject) {
+            try {
+                const formRef = doc(db, "evaluationForms", selectedSubject);
+                await setDoc(formRef, { expirationDate: new Date(newDate) }, { merge: true });
+                setExpirationDate(newDate);
+                alert("Expiration date extended successfully!");
+            } catch (error) {
+                console.error("Error extending expiration date:", error);
             }
         }
     };
@@ -110,6 +168,7 @@ const SubjectEvaluationPage = () => {
                             [selectedSubject]: formSnap.data().questions || [],
                         }));
                         setCategories(formSnap.data().categories || []);
+                        setExpirationDate(formSnap.data().expirationDate?.toDate() || ""); // Load expiration date
                     } else {
                         setEvaluationForms((prevForms) => ({
                             ...prevForms,
@@ -128,7 +187,9 @@ const SubjectEvaluationPage = () => {
 
     useEffect(() => {
         fetchSubjects();
-    }, [fetchSubjects]);
+        const intervalId = setInterval(checkExpiration, 3600000); // Check every hour
+        return () => clearInterval(intervalId); // Cleanup interval on unmount
+    }, [fetchSubjects, checkExpiration]);
 
     return (
         <div className="subject-evaluation-page">
@@ -153,7 +214,7 @@ const SubjectEvaluationPage = () => {
                         onChange={(e) => setNewCategory(e.target.value)}
                         placeholder="Add new category"
                     />
-                    <button onClick={addCategory}>Add Category</button>
+                    <button onClick={addCategory} style={{ marginLeft: '10px', backgroundColor: '#8b0000' }}>Add Category</button>
                 </div>
 
                 <div className="subject-question-form">
@@ -174,16 +235,33 @@ const SubjectEvaluationPage = () => {
                     </select>
                 </div>
 
+                <div className="expiration-date">
+                    <label>Expiration Date:</label>
+                    <input
+                        type="date"
+                        value={expirationDate}
+                        onChange={(e) => setExpirationDate(e.target.value)}
+                    />
+                    <button onClick={() => handleExtendExpiration(expirationDate)}>Extend Expiration</button>
+                </div>
+
                 <div className="subject-questions-container">
                     {categories.map((category, categoryIndex) => (
                         <div key={categoryIndex} className="subject-category-block">
-                            <h3>{category}</h3>
+                            <h3>{category}
+                                <button 
+                                    className="delete-category-button"
+                                    onClick={() => deleteCategory(category)}
+                                >
+                                    Delete
+                                </button>
+                            </h3>
                             <ul className="subject-questions-list">
                                 {(evaluationForms[selectedSubject] || []).map((question, absoluteIndex) => {
                                     if (question.category === category) {
                                         return (
                                             <li key={absoluteIndex}>
-                                                {question.text} (Weight: {question.weight})
+                                                {question.text} ({question.weight})
                                                 <div className="subject-operation-buttons">
                                                     <button className="subject-edit-button" onClick={() => handleEditQuestion(absoluteIndex)}>Edit</button>
                                                     <button className="subject-delete-button" onClick={() => deleteQuestion(absoluteIndex)}>Delete</button>

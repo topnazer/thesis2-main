@@ -22,6 +22,7 @@ body {
 }
 
 .student-dashboard nav button {
+  margin-left: 10px; /* Space between the buttons */
   background-color: #dc3545;
   color: white;
   padding: 0.5rem 1rem;
@@ -81,4 +82,44 @@ body {
   padding: 0.5rem 1rem;
   display: inline-block;
   font-size: 1rem;
+}
+
+.notification-icon {
+  margin-left: 40px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+
+}
+
+.notifications-dropdown {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 250px;
+  padding: 10px;
+  z-index: 100;
+}
+
+.notifications-dropdown ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notifications-dropdown ul li {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.notifications-dropdown ul li:last-child {
+  border-bottom: none;
+}
+
+.notifications-dropdown ul li {
+  color: #333;
 }

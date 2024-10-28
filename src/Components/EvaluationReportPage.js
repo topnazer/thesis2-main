@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, getDocs } from 'firebase/firestore';
-import './evaluationreportscoringpage.css';  // CSS for layout
+import './evaluationreportscoringpage.css';
 
 const EvaluationReportScoringPage = () => {
-  const [subjectWeight, setSubjectWeight] = useState(50); // Default 50%
-  const [facultyWeight, setFacultyWeight] = useState(50); // Default 50%
+  const [subjectWeight, setSubjectWeight] = useState(50);
+  const [facultyWeight, setFacultyWeight] = useState(50);
   const [loading, setLoading] = useState(true);
-  const [faculties, setFaculties] = useState([]); // Faculty list with their calculated scores
+  const [faculties, setFaculties] = useState([]);
   const db = getFirestore();
 
   // Fetch existing weights from the database
@@ -25,7 +25,6 @@ const EvaluationReportScoringPage = () => {
 
   // Fetch all faculties based on similar logic as in FacultyDashboard
   const fetchFaculties = useCallback(() => {
-    // Subscribe to real-time updates using onSnapshot
     const facultyQuery = query(collection(db, 'users'), where('role', '==', 'Faculty'));
 
     const unsubscribe = onSnapshot(facultyQuery, (snapshot) => {
@@ -40,7 +39,7 @@ const EvaluationReportScoringPage = () => {
       setLoading(false);
     });
 
-    return unsubscribe; // Clean up subscription on component unmount
+    return unsubscribe;
   }, [db]);
 
   // Save updated weights to the database
@@ -63,7 +62,7 @@ const EvaluationReportScoringPage = () => {
   };
 
   // Calculate the final score for a faculty based on the weights
-  const calculateFinalScore = async (facultyId) => {
+  const calculateFinalScore = useCallback(async (facultyId) => {
     try {
       const facultyEvaluationDoc = await getDoc(doc(db, 'facultyEvaluations', facultyId));
       const facultyScore = facultyEvaluationDoc.exists() ? facultyEvaluationDoc.data().averageScore : 0;
@@ -78,15 +77,13 @@ const EvaluationReportScoringPage = () => {
       });
 
       const subjectScore = subjectCount > 0 ? totalSubjectScore / subjectCount : 0;
-
-      // Calculate final score using the weights
       const finalScore = (subjectScore * (subjectWeight / 100)) + (facultyScore * (facultyWeight / 100));
       return finalScore.toFixed(2);
     } catch (error) {
       console.error('Error calculating final score:', error);
       return 0;
     }
-  };
+  }, [subjectWeight, facultyWeight]);
 
   // Fetch faculty scores and recalculate when weights change
   const updateFacultyScores = useCallback(async () => {
@@ -102,7 +99,7 @@ const EvaluationReportScoringPage = () => {
     );
     setFaculties(updatedFaculties);
     setLoading(false);
-  }, [faculties, subjectWeight, facultyWeight]);
+  }, [faculties, calculateFinalScore]);
 
   // Fetch data on component mount
   useEffect(() => {

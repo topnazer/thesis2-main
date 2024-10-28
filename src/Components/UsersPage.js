@@ -60,7 +60,7 @@ const UsersPage = () => {
   const hideOverlay = () => {
     setOverlayVisible(false);
     setSelectedUser(null);
-    setSubjectsOverlayVisible(false);  // Close subjects overlay when the main overlay is closed
+    setSubjectsOverlayVisible(false);  
   };
 
   const showSubjectsOverlay = () => {
@@ -121,7 +121,7 @@ const UsersPage = () => {
       {isOverlayVisible && selectedUser && (
         <div className="overlay">
           <div className="overlay-content">
-            <button className="user-close" onClick={hideOverlay}>X</button>
+            <button className="user-close" onClick={hideOverlay}></button>
             <h2>Details for {selectedUser.firstName} {selectedUser.lastName}</h2>
             <p><strong>Email:</strong> {selectedUser.email}</p>
             <p><strong>Password:</strong> {selectedUser.password}</p>
@@ -135,7 +135,7 @@ const UsersPage = () => {
               <div className="subjects-overlay">
                 <div className="subjects-content">
                   <h3>Subjects for {selectedUser.firstName} {selectedUser.lastName}</h3>
-                  <p>{userSubjects[selectedUser.id]?.join(", ") || "No subjects"}</p>
+                  <p>{userSubjects[selectedUser.id]?.join(", ")  || "No subjects"}</p>
                   <button className="close-subjects" onClick={hideSubjectsOverlay}>Close Subjects</button>
                 </div>
               </div>

@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { 
-  getFirestore, collection, deleteDoc, updateDoc, onSnapshot, doc, setDoc, query, where, getDocs, getDoc 
+import {
+  getFirestore,
+  collection,
+  deleteDoc,
+  updateDoc,
+  onSnapshot,
+  doc,
+  setDoc,
+  query,
+  where,
+  getDocs,
+  arrayUnion
 } from "firebase/firestore";
 import './subjects.css';
 
@@ -10,75 +20,95 @@ const Subjects = () => {
   const [newSubjectId, setNewSubjectId] = useState("");
   const [editSubjectName, setEditSubjectName] = useState("");
   const [subjectIdToEdit, setSubjectIdToEdit] = useState(null);
-  const [role, setRole] = useState("student");
-  const [userEmail, setUserEmail] = useState("");
-  const [foundUser, setFoundUser] = useState(null);
   const [facultyList, setFacultyList] = useState([]);
   const [selectedFaculty, setSelectedFaculty] = useState("");
-
+  const [selectedEditFaculty, setSelectedEditFaculty] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [foundUser, setFoundUser] = useState(null);
+  const [role, setRole] = useState("student");
+  const [viewedSubject, setViewedSubject] = useState(null);
+  const [selectedSemester, setSelectedSemester] = useState("");
+  const [selectedEditSemester, setSelectedEditSemester] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedEditDepartment, setSelectedEditDepartment] = useState("");
+  const [filterDepartment, setFilterDepartment] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const departments = ["CCS", "COC", "CED", "CASS", "COE", "CBA"];
   const db = getFirestore();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "subjects"), (snapshot) => {
-      const subjectsList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setSubjects(subjectsList);
+        const subjectsList = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+        setSubjects(subjectsList);
     });
-
-    const fetchFacultyList = async () => {
-      const q = query(collection(db, "users"), where("role", "==", "Faculty"));
-      const querySnapshot = await getDocs(q);
-      const facultyData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setFacultyList(facultyData);
-    };
-
-    fetchFacultyList();
-    return () => unsubscribe();
+  
+    fetchFacultyList(); 
+  
+    return () => unsubscribe(); 
   }, [db]);
+  
+const fetchFacultyList = async () => {
+  const q = query(collection(db, "users"), where("role", "==", "Faculty"));
+  const querySnapshot = await getDocs(q);
+  const facultyData = querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  setFacultyList(facultyData);
+};
 
-  const handleAddSubject = async () => {
-    if (!newSubjectName.trim() || !newSubjectId.trim()) {
-      alert("Subject name and ID cannot be empty.");
-      return;
-    }
+const handleAddSubject = async () => {
+  if (!newSubjectName.trim() || !newSubjectId.trim()) {
+    alert("Subject name and ID cannot be empty.");
+    return;
+  }
 
-    if (!selectedFaculty) {
-      alert("Please select a faculty member for this subject.");
-      return;
-    }
+  if (!selectedFaculty || !selectedSemester || !selectedDepartment) {
+    alert("Please select all required fields (Faculty, Semester, Department).");
+    return;
+  }
 
-    const sectionId = `${newSubjectId}-sec-${Date.now()}`;
+  try {
+    await setDoc(doc(db, "subjects", newSubjectId), {
+      id: newSubjectId,
+      name: newSubjectName,
+      facultyId: selectedFaculty,
+      semester: selectedSemester,
+      department: selectedDepartment,
+      createdAt: new Date(),
+    });
+    setNewSubjectName("");
+    setNewSubjectId("");
+    setSelectedFaculty(""); 
+    setSelectedSemester(""); 
+    setSelectedDepartment(""); 
+    alert("Subject added successfully!");
+  } catch (error) {
+    console.error("Error adding subject:", error);
+  }
+};
 
-    try {
-      await setDoc(doc(db, "subjects", newSubjectId), {
-        id: newSubjectId,
-        name: newSubjectName,
-        facultyId: selectedFaculty,
-        sectionId,
-        createdAt: new Date(),
-      });
-      setNewSubjectName("");
-      setNewSubjectId("");
-      alert("Subject added with section ID!");
-    } catch (error) {
-      console.error("Error adding subject:", error);
-    }
-  };
 
   const handleEditSubject = async () => {
     if (!editSubjectName.trim() || !subjectIdToEdit) {
       alert("Subject name and ID cannot be empty.");
       return;
-    }
-
+    } 
     try {
       await updateDoc(doc(db, "subjects", subjectIdToEdit), {
         name: editSubjectName,
-        facultyId: selectedFaculty,
+        facultyId: selectedEditFaculty,
+        semester: selectedEditSemester,
+        department: selectedEditDepartment,
       });
+      alert("Subject updated successfully!");
       setEditSubjectName("");
+      setSelectedEditFaculty(""); 
+      setSelectedEditSemester(""); 
+      setSelectedEditDepartment(""); 
       setSubjectIdToEdit(null);
     } catch (error) {
       console.error("Error editing subject:", error);
@@ -86,56 +116,28 @@ const Subjects = () => {
   };
 
   const handleDeleteSubject = async (subjectId) => {
-    try {
-      await deleteDoc(doc(db, "subjects", subjectId));
-
-      const studentsQuery = query(collection(db, "students"));
-      const studentsSnapshot = await getDocs(studentsQuery);
-
-      for (const studentDoc of studentsSnapshot.docs) {
-        const studentId = studentDoc.id;
-        const subjectRef = doc(db, `students/${studentId}/subjects`, subjectId);
-
-        const subjectSnapshot = await getDoc(subjectRef);
-        if (subjectSnapshot.exists()) {
-          await deleteDoc(subjectRef);
-          console.log(`Deleted subject ${subjectId} from student ${studentId}'s subjects.`);
+    const confirmed = window.confirm("Are you sure you want to delete this subject?");
+    if (confirmed) {
+      try {
+        await deleteDoc(doc(db, "subjects", subjectId));   
+        setSubjects((prevSubjects) => prevSubjects.filter((subject) => subject.id !== subjectId));               
+        if (viewedSubject && viewedSubject.id === subjectId) {
+          setViewedSubject(null);
+        }     
+        if (subjectIdToEdit === subjectId) {
+          setSubjectIdToEdit(null);
+          setEditSubjectName("");
+          setSelectedEditFaculty("");
+          setSelectedEditSemester("");
+          setSelectedEditDepartment("");
         }
+        alert("Subject deleted successfully.");
+      } catch (error) {
+        console.error("Error deleting subject:", error);
       }
-
-      alert("Subject deleted successfully and removed from all students' dashboards.");
-    } catch (error) {
-      console.error("Error deleting subject or removing from students:", error);
     }
   };
-
-  const handleAssignSubjectToUser = async (subjectId) => {
-    if (!foundUser) {
-      alert("Please search for and select a user first.");
-      return;
-    }
-
-    try {
-      const subjectData = subjects.find((subject) => subject.id === subjectId);
-      if (!subjectData || !subjectData.sectionId) {
-        alert("Error: Subject or section ID not found.");
-        return;
-      }
-
-      const userCollection = role === "student" ? "students" : "faculty";
-      const subjectRef = doc(db, `${userCollection}/${foundUser.id}/subjects`, subjectId);
-
-      await setDoc(subjectRef, {
-        name: subjectData.name,
-        sectionId: subjectData.sectionId,
-        assignedAt: new Date(),
-      });
-
-      alert("Subject assigned successfully to the user!");
-    } catch (error) {
-      console.error("Error assigning subject:", error);
-    }
-  };
+  
 
   const handleSearchUserByEmail = async () => {
     if (!userEmail.trim()) {
@@ -159,99 +161,251 @@ const Subjects = () => {
     }
   };
 
+  const cancelEdit = () => {
+    setEditSubjectName("");           
+    setSelectedEditFaculty("");         
+    setSelectedEditSemester("");        
+    setSelectedEditDepartment("");      
+    setSubjectIdToEdit(null);
+    
+  };
+  const CancelView = () => {
+    setViewedSubject(null);
+  };
+
+  const handleEnrollStudent = async (subjectId) => {
+    if (!foundUser) {
+      alert("Please search for a user to enroll.");
+      return;
+    }
+  
+    const subjectToEnroll = subjects.find(subject => subject.id === subjectId);
+    if (!subjectToEnroll) {
+      alert("Subject not found.");
+      return;
+    }
+  
+    const studentSubjectsRef = collection(db, `students/${foundUser.id}/subjects`);
+  
+    try {
+      console.log("Enrolling student in subject:", subjectToEnroll);
+  
+      // Ensure facultyId and other relevant fields are included
+      await setDoc(doc(studentSubjectsRef, subjectId), {
+        name: subjectToEnroll.name,
+        facultyId: subjectToEnroll.facultyId || null,  // Add facultyId
+        sectionId: subjectToEnroll.sectionId || "default_section",  // Ensure sectionId is included
+        semester: subjectToEnroll.semester || "",      // Optional: add semester if needed
+        department: subjectToEnroll.department || "",  // Optional: add department if needed
+      });
+      alert(`Successfully enrolled ${foundUser.email} in the subject.`);
+    } catch (error) {
+      console.error("Error enrolling student in subject:", error);
+      alert("There was an error enrolling the student. Please try again.");
+    }
+  };
+  
+
+  const filteredSubjects = subjects
+  .filter(subject => 
+    (filterDepartment ? subject.department === filterDepartment : true) && 
+    (searchTerm ? subject.name.toLowerCase().includes(searchTerm.toLowerCase()) : true)
+  );
+
   return (
-    <div>
-      <h2>Manage Subjects</h2>
+    <div className="manage-subject-container">
+      <div className="manage-subject-right">
+        <div className="search-subject">
+          <h1>SUBJECT LIST</h1>
+             {/* Search Input for Subjects */}
+        <input
+          className="subject-name"
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search by subject name"
+        />
+        </div>
+        <div className="department-filter-buttons">
+          <button onClick={() => setFilterDepartment("")}>ALL</button>
+          {departments.map((department) => (
+            <button className="subj-dept-button" key={department} onClick={() => setFilterDepartment(department)}>
+              {department}
+            </button>
+          ))}
+        </div>
 
-      <input
-        type="text"
-        value={newSubjectName}
-        onChange={(e) => setNewSubjectName(e.target.value)}
-        placeholder="New subject name"
-      />
-      <input
-        type="text"
-        value={newSubjectId}
-        onChange={(e) => setNewSubjectId(e.target.value)}
-        placeholder="Offer number"
-      />
-      <select
-        value={selectedFaculty}
-        onChange={(e) => setSelectedFaculty(e.target.value)}
-      >
-        <option value="">Select Faculty</option>
-        {facultyList.map(faculty => (
-          <option key={faculty.id} value={faculty.id}>
-            {faculty.email}
-          </option>
-        ))}
-      </select>
-      <button onClick={handleAddSubject}>Add Subject</button>
-
-      <div>
-        {subjects.map((subject) => (
-          <div key={subject.id} className="subject-card">
-            <div className="subject-info">
-              <p>{subject.name} (ID: {subject.id}) - {subject.facultyId ? facultyList.find(f => f.id === subject.facultyId)?.email : "No faculty assigned"}</p>
-            </div>
-            <div className="subject-actions">
-              <button className="subject-edit" onClick={() => {
-                setEditSubjectName(subject.name);
-                setSubjectIdToEdit(subject.id);
-                setSelectedFaculty(subject.facultyId);
-              }}>Edit</button>
-              <button  className="subject-delete" onClick={() => handleDeleteSubject(subject.id)}>Delete</button>
-
-              {foundUser && (
-                <button onClick={() => handleAssignSubjectToUser(subject.id)}>Assign to User</button>
-              )}
-            </div>
+        <div className="subject-list">
+          <div className="subject-grid">
+            {filteredSubjects.map((subject) => (
+              <div key={subject.id} className="subject-card">
+                <p>
+                  {subject.name} (ID: {subject.id})
+                </p>
+                <button onClick={() => {setViewedSubject(subject);cancelEdit();}} className="subject-view-button">View</button>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
 
-      {subjectIdToEdit && (
-        <div>
-          <h3>Edit Subject</h3>
-          <input
-            type="text"
-            value={editSubjectName}
-            onChange={(e) => setEditSubjectName(e.target.value)}
-            placeholder="Edit subject name"
-          />
-          <select
-            value={selectedFaculty}
-            onChange={(e) => setSelectedFaculty(e.target.value)}
-          >
-            <option value="">Select Faculty</option>
-            {facultyList.map(faculty => (
-              <option key={faculty.id} value={faculty.id}>
-                {faculty.email}
-              </option>
-            ))}
-          </select>
-          <button onClick={handleEditSubject}>Update Subject</button>
-        </div>
-      )}
-
-      <div>
-        <h3>Assign Subject to User</h3>
-        <input
-          type="text"
-          value={userEmail}
-          onChange={(e) => setUserEmail(e.target.value)}
-          placeholder="Enter user email"
-        />
-        <button onClick={handleSearchUserByEmail}>Search User</button>
-        {foundUser && (
-          <div>
-            <p>User Found: {foundUser.email} (ID: {foundUser.id})</p>
-            <select onChange={(e) => setRole(e.target.value)} value={role}>
-              <option value="student">Student</option>
-              <option value="faculty">Faculty</option>
+      <div className="manage-subject-left">
+        <div className="add-subject">
+          <div className="addsubj-h1">
+            <h1>ADD SUBJECT</h1>
+          </div>
+          <div className="subject-grid">
+            <input
+              type="text"
+              value={newSubjectName}
+              onChange={(e) => setNewSubjectName(e.target.value)}
+              placeholder="New subject name"
+            />
+            <input
+              type="text"
+              value={newSubjectId}
+              onChange={(e) => setNewSubjectId(e.target.value)}
+              placeholder="Offer number"
+            />
+            <select
+              value={selectedFaculty}
+              onChange={(e) => setSelectedFaculty(e.target.value)}
+            >
+              <option value="">Select Faculty</option>
+              {facultyList.map((faculty) => (
+                <option key={faculty.id} value={faculty.id}>
+                  {faculty.email}
+                </option>
+              ))}
+            </select>
+            <select
+              value={selectedSemester}
+              onChange={(e) => setSelectedSemester(e.target.value)}
+            >
+              <option value="">Select Semester</option>
+              <option value="First">First Semester</option>
+              <option value="Second">Second Semester</option>
+            </select>
+            <select
+              value={selectedDepartment}
+              onChange={(e) => setSelectedDepartment(e.target.value)}
+            >
+              <option value="">Select Department</option>
+              {departments.map((department) => (
+                <option key={department} value={department}>
+                  {department}
+                </option>
+              ))}
             </select>
           </div>
+          <div className="addsubj-button">
+            <button onClick={handleAddSubject}>Add Subject</button>
+          </div>
+
+          <div className="edit-subject">
+            {subjectIdToEdit && (
+              <div className="editsubj-tool">
+                <div className="addsubj-h1">
+                  <h1>EDIT SUBJECT</h1>
+                </div>
+                <div className="editsubj-grid">
+                  <input
+                    type="text"
+                    value={editSubjectName}
+                    onChange={(e) => setEditSubjectName(e.target.value)}
+                    placeholder="Edit subject name"
+                  />
+                  <select
+                    value={selectedEditFaculty}
+                    onChange={(e) => setSelectedEditFaculty(e.target.value)}
+                  >
+                    <option value="">Select Faculty</option>
+                    {facultyList.map((faculty) => (
+                      <option key={faculty.id} value={faculty.id}>
+                        {faculty.email}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={selectedEditSemester}
+                    onChange={(e) => setSelectedEditSemester(e.target.value)}
+                  >
+                    <option value="">Select Semester</option>
+                    <option value="First">First Semester</option>
+                    <option value="Second">Second Semester</option>
+                  </select>
+                  <select
+                    value={selectedEditDepartment}
+                    onChange={(e) => setSelectedEditDepartment(e.target.value)}
+                  >
+                    <option value="">Select Department</option>
+                    {departments.map((department) => (
+                      <option key={department} value={department}>
+                        {department}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="editsubj-button">
+                  <button onClick={handleEditSubject}>Update Subject</button>
+                  <button onClick={cancelEdit}>Cancel</button>
+                </div>
+                
+      
+              </div>
+            )}
+
+            {viewedSubject && (
+              <div className="viewed-subject-details">
+                <h1>Subject Details</h1>
+                <div className="details-grid">
+                  <div className="details-item">
+                    <strong>Name:</strong> <span>{viewedSubject.name}</span>
+                  </div>
+                  <div className="details-item">
+                    <strong>ID:</strong> <span>{viewedSubject.id}</span>
+                  </div>
+                  <div className="details-item">
+                    <strong>Faculty:</strong> <span>{facultyList.find((f) => f.id === viewedSubject.facultyId)?.email || "No faculty assigned"}</span>
+                  </div>
+                  <div className="details-item">
+                    <strong>Semester:</strong> <span>{viewedSubject.semester}</span>
+                  </div>
+                  <div className="details-item">
+                    <strong>Department:</strong> <span>{viewedSubject.department || "No department assigned"}</span>
+                  </div>
+                </div>
+                <div className="edit-buttons"> 
+                <button onClick={() => {
+                  setEditSubjectName(viewedSubject.name);
+                  setSubjectIdToEdit(viewedSubject.id);
+                  setSelectedEditFaculty(viewedSubject.facultyId);
+                  setSelectedEditSemester(viewedSubject.semester);
+                  setSelectedEditDepartment(viewedSubject.department);
+                  CancelView();
+                }} className="subject-edit-button">Edit</button>               
+                <button disabled={!!subjectIdToEdit} className="subject-delete-button" onClick={() => handleDeleteSubject(viewedSubject.id)}>Delete</button>
+                <input
+            className="subject-user-email"
+            type="text"
+            value={userEmail}
+            onChange={(e) => setUserEmail(e.target.value)}
+            placeholder="Enter user email"
+          />
+          <button onClick={handleSearchUserByEmail}>Search User</button>
+        
+        {foundUser && (
+          <div>
+            <p>User found: {foundUser.email}</p>
+          </div>
         )}
+                <button onClick={() => handleEnrollStudent(viewedSubject.id)}>Enroll Student</button>                
+              </div> 
+              </div>      
+            )}
+           
+          </div>
+        </div>
       </div>
     </div>
   );
