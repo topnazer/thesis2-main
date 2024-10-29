@@ -19,7 +19,7 @@
 }
 
 .subject-list {
-  margin: 10px;
+  margin: 10px 20px;
   margin-top: 20px;
   height: 68vh;
   border-radius: 7px;
@@ -30,15 +30,14 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px; 
+  margin: 20px 10px;
 }
 
 .subject-card {
-  width: 250px; /* Set a fixed width */
-  height: 100px; /* Set a fixed height */
+  height: 100%; /* Ensure the card takes full height of grid cell */
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
-  margin: 5px auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -47,9 +46,10 @@
   box-sizing: border-box;
 }
 
-
 .subject-card p {
-  margin-bottom: 10px;
+  margin: 0;
+  max-width: 100%; 
+ 
 }
 
 .subject-actions {

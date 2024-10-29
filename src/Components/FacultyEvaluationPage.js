@@ -150,9 +150,9 @@ const FacultyEvaluationPage = () => {
 
     return (
         <div className="faculty-evaluation-container">
-            <div className="faculty-evaluation-tools">
                 <div className="faculty-left">
-                <h2 className="faculty-evaluation-header">Create or Edit Evaluation Form for Faculty</h2>
+                <div className="question-tool">
+                <h2>Create or Edit Evaluation Form for Faculty</h2>
                 <div className="faculty-category-section">
                     <div className='faculty-category'>
                     <h3> ADD CATEGORY</h3>
@@ -200,14 +200,16 @@ const FacultyEvaluationPage = () => {
                     </select>
                 </div>
                 </div>
+                </div>
+
                 <div className="faculty-right">
                 <div className="faculty-questions">
                     {renderQuestionsByCategory()}
                 </div>
 
                 </div>
-            </div>
-        </div>
+           </div>
+       
     );
 };
 

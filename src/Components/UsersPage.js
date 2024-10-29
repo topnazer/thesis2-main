@@ -3,7 +3,7 @@ import { getFirestore, collection, getDocs, query, where } from "firebase/firest
 import './User.css';
 
 const UsersPage = () => {
-  const [isOverlayVisible, setOverlayVisible] = useState(false);
+  const [userDetail, setUserDetail] = useState(false);
   const [isSubjectsOverlayVisible, setSubjectsOverlayVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [users, setUsers] = useState([]);
@@ -14,7 +14,11 @@ const UsersPage = () => {
 
   const fetchUsersByDepartment = useCallback(async (department) => {
     try {
-      const q = query(collection(db, "users"), where("department", "==", department), where("status", "==", "Approved"));
+      const q = query(
+        collection(db, "users"), 
+        where("department", "==", department), 
+        where("status", "==", "Approved")
+      );
       const userSnapshot = await getDocs(q);
       const usersList = [];
       const subjectsList = {};
@@ -35,7 +39,9 @@ const UsersPage = () => {
 
   const fetchUserSubjects = useCallback(async (role, userId) => {
     try {
-      const collectionPath = role === "Student" ? `students/${userId}/subjects` : `${role.toLowerCase()}/${userId}/subjects`;
+      const collectionPath = role === "Student" 
+        ? `students/${userId}/subjects` 
+        : `${role.toLowerCase()}/${userId}/subjects`;
       const subjectsRef = collection(db, collectionPath);
       const subjectSnapshot = await getDocs(subjectsRef);
       const subjects = subjectSnapshot.docs.map(doc => doc.data().name);
@@ -54,11 +60,11 @@ const UsersPage = () => {
 
   const showOverlay = (user) => {
     setSelectedUser(user);
-    setOverlayVisible(true);
+    setUserDetail(true);
   };
 
   const hideOverlay = () => {
-    setOverlayVisible(false);
+    setUserDetail(false);
     setSelectedUser(null);
     setSubjectsOverlayVisible(false);  
   };
@@ -81,71 +87,91 @@ const UsersPage = () => {
   return (
     <div className='user-page-container'>
       <div className='user-page-left'>
-      <div className='user-button'>
-        {departments.map((dept) => (
-          <button 
-            key={dept}
-            onClick={() => setSelectedDepartment(dept)}
-            className={selectedDepartment === dept ? "active-department" : ""}
-          >
-            {dept}
-          </button>
-        ))}
-      </div>
-      <div className="user-list"> 
-      <input 
-        type="text" 
-        placeholder="Search users..." 
-        value={searchTerm} 
-        onChange={(e) => setSearchTerm(e.target.value)} 
-        className='user-search'
-      />
-
-      {filteredUsers.length === 0 ? (
-        <p>No users found in {selectedDepartment} department.</p>
-      ) : (
-        <div className="user-card">
-          {filteredUsers.map((user) => (
-            <div key={user.id} className="user-item">
-            <div className="user-info">
-                {user.firstName} {user.lastName}
-                <p>({user.role})</p>
-            </div>
-            <button className="user-view" onClick={() => showOverlay(user)}>View</button>
-        </div>
-           ))}
-        </div>
-      )}
-      </div>
-
-      {isOverlayVisible && selectedUser && (
-        <div className="overlay">
-          <div className="overlay-content">
-            <button className="user-close" onClick={hideOverlay}></button>
-            <h2>Details for {selectedUser.firstName} {selectedUser.lastName}</h2>
-            <p><strong>Email:</strong> {selectedUser.email}</p>
-            <p><strong>Password:</strong> {selectedUser.password}</p>
-            <p><strong>Role:</strong> {selectedUser.role}</p>
-            <p><strong>Status:</strong> {selectedUser.status}</p>
-
-          
-            <button className="show-subjects" onClick={showSubjectsOverlay}>Show Subjects</button>
-            {isSubjectsOverlayVisible && (
-              <div className="subjects-overlay">
-                <div className="subjects-content">
-                  <h3>Subjects for {selectedUser.firstName} {selectedUser.lastName}</h3>
-                  <p>{userSubjects[selectedUser.id]?.join(", ")  || "No subjects"}</p>
-                  <button className="close-subjects" onClick={hideSubjectsOverlay}>Close Subjects</button>
-                </div>
-              </div>
-            )}
+        <div className="user-list"> 
+          <div className='user-button'>
+            {departments.map((dept) => (
+              <button 
+                key={dept}
+                onClick={() => setSelectedDepartment(dept)}
+                className={selectedDepartment === dept ? "active-department" : ""}
+              >
+                {dept}
+              </button>
+            ))}
           </div>
+          <input 
+            type="text" 
+            placeholder="Search users..." 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
+            className='user-search'
+          />
+          {filteredUsers.length === 0 ? (
+            <p>No users found in {selectedDepartment} department.</p>
+          ) : (
+            <div className="user-card">
+              {filteredUsers.map((user) => (
+                <div key={user.id} className="user-item">
+                  <div className="user-info">
+                    <strong>{user.firstName} {user.lastName}</strong>
+                    <strong><p>({user.role})</p></strong>
+                    <p>Department: {user.department}</p> {/* Displaying department here */}
+                  </div>
+                  <button className="user-view" onClick={() => showOverlay(user)}>View</button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
       </div>
       <div className="user-page-right">
+        <div>
+          {userDetail && selectedUser && (
+            <div className="user-detail">
+              <h1>Details for {selectedUser.firstName} {selectedUser.lastName}</h1>
+              <div className="subject-content-grid">
+                <div className="grid-item">
+                  <strong>Email:</strong> {selectedUser.email}
+                </div>
+                <div className="grid-item">
+                  <strong>Password:</strong> {selectedUser.password}
+                </div>
+                <div className="grid-item">
+                  <strong>Role:</strong> {selectedUser.role}
+                </div>
+                <div className="grid-item">
+                  <strong>Department:</strong> {selectedUser.department} {/* Displaying department in details */}
+                </div>
+                <div className="grid-item">
+                  <strong>Status:</strong> {selectedUser.status}
+                </div>
+              </div>
+              <div className="user-subject-button">
+                  <button className="user-close" onClick={hideOverlay}>Close</button>                         
+                  <button className="show-subjects" onClick={showSubjectsOverlay}>Show Subjects</button>
+              </div>
+              {isSubjectsOverlayVisible && (
+                <div className="subjects-overlay">
+                  <h3>Subjects for {selectedUser.firstName} {selectedUser.lastName}</h3>
+                  <div className="subject-content-grid">
+                    {userSubjects[selectedUser.id]?.length > 0 ? (
+                    userSubjects[selectedUser.id].map((subject, index) => (
+                    <div className="grid-item" key={index}>
+                      <p>{subject}</p>
+                    </div>
+                      ))
+                      ) : null} 
+                  </div>
+                      {userSubjects[selectedUser.id]?.length === 0 && (
+                      <p>No subjects</p> // Display message outside the grid
+                      )}
+                  <button className="close-subjects" onClick={hideSubjectsOverlay}>Close Subjects</button> 
+                </div>
+              )}
+            </div>            
+          )}
+        </div>
       </div>
-
     </div>
   );
 };

@@ -23,9 +23,9 @@ const Subjects = () => {
   const [facultyList, setFacultyList] = useState([]);
   const [selectedFaculty, setSelectedFaculty] = useState("");
   const [selectedEditFaculty, setSelectedEditFaculty] = useState("");
-  const [userEmail, setUserEmail] = useState("");
+  const [searchFirstName, setSearchFirstName] = useState("");
+  const [searchLastName, setSearchLastName] = useState("");
   const [foundUser, setFoundUser] = useState(null);
-  const [role, setRole] = useState("student");
   const [viewedSubject, setViewedSubject] = useState(null);
   const [Enroll, setEnroll] = useState(null);
   const [showEnrolledStudents, setShowEnrolledStudents] = useState(null);
@@ -55,21 +55,21 @@ const Subjects = () => {
 
   const fetchEnrolledStudents = async (subjectId) => {
     try {
-        const studentsQuery = query(
-            collection(db, "students"),
-            where("subjects", "array-contains", subjectId)
-        );
-        const querySnapshot = await getDocs(studentsQuery);
+        const enrolledStudentsRef = collection(db, `subjects/${subjectId}/enrolledStudents`);
+        const querySnapshot = await getDocs(enrolledStudentsRef);
+
         const studentsList = querySnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
         }));
+
         setEnrolledStudents(studentsList);
-        setShowEnrolledStudents(true);  
+        setShowEnrolledStudents(true);
     } catch (error) {
         console.error("Error fetching enrolled students:", error);
     }
 };
+
 
 const fetchFacultyList = async () => {
   const q = query(collection(db, "users"), where("role", "==", "Faculty"));
@@ -136,42 +136,69 @@ const handleAddSubject = async () => {
     }
   };
 
-  const handleDeleteSubject = async (subjectId) => {
+ const handleDeleteSubject = async (subjectId) => {
     const confirmed = window.confirm("Are you sure you want to delete this subject?");
-    if (confirmed) {
-      try {
-        await deleteDoc(doc(db, "subjects", subjectId));   
-        setSubjects((prevSubjects) => prevSubjects.filter((subject) => subject.id !== subjectId));               
-        if (viewedSubject && viewedSubject.id === subjectId) {
-          setViewedSubject(null);
-        }     
-        if (subjectIdToEdit === subjectId) {
-          setSubjectIdToEdit(null);
-          setEditSubjectName("");
-          setSelectedEditFaculty("");
-          setSelectedEditSemester("");
-          setSelectedEditDepartment("");
-        }
-        alert("Subject deleted successfully.");
-      } catch (error) {
-        console.error("Error deleting subject:", error);
-      }
-    }
-  };
-  
-
-  const handleSearchUserByEmail = async () => {
-    if (!userEmail.trim()) {
-      alert("Please enter a user email.");
-      return;
-    }
+    if (!confirmed) return;
 
     try {
-      const usersQuery = query(collection(db, "users"), where("email", "==", userEmail));
-      const querySnapshot = await getDocs(usersQuery);
+        // Fetch enrolled students from the subject's enrolledStudents subcollection
+        const enrolledStudentsRef = collection(db, `subjects/${subjectId}/enrolledStudents`);
+        const enrolledStudentsSnapshot = await getDocs(enrolledStudentsRef);
+        
+        // Delete each document in the enrolledStudents subcollection
+        const deleteEnrolledStudentsPromises = enrolledStudentsSnapshot.docs.map((doc) =>
+            deleteDoc(doc.ref)
+        );
+        await Promise.all(deleteEnrolledStudentsPromises);
 
+        // Remove the subject from each student's subjects subcollection
+        const enrolledStudentIds = enrolledStudentsSnapshot.docs.map((doc) => doc.id);
+        const deleteFromStudentProfilesPromises = enrolledStudentIds.map((studentId) =>
+            deleteDoc(doc(db, `students/${studentId}/subjects/${subjectId}`))
+        );
+        await Promise.all(deleteFromStudentProfilesPromises);
+
+        // Delete the subject document itself
+        await deleteDoc(doc(db, "subjects", subjectId));
+
+        // Update the local subjects state
+        setSubjects((prevSubjects) => prevSubjects.filter((subject) => subject.id !== subjectId));
+        
+        // Reset view if the deleted subject is currently viewed or edited
+        if (viewedSubject && viewedSubject.id === subjectId) setViewedSubject(null);
+        if (subjectIdToEdit === subjectId) {
+            setSubjectIdToEdit(null);
+            setEditSubjectName("");
+            setSelectedEditFaculty("");
+            setSelectedEditSemester("");
+            setSelectedEditDepartment("");
+        }
+
+        alert("Subject and all associated records deleted successfully.");
+    } catch (error) {
+        console.error("Error deleting subject and associated data:", error);
+    }
+};
+
+
+  const handleSearchUserByFullName = async () => {
+    if (!searchFirstName.trim() || !searchLastName.trim()) {
+      alert("Please enter both first and last names.");
+      return;
+    }
+  
+    try {
+      // Query to search for users by both first name and last name
+      const usersQuery = query(
+        collection(db, "users"),
+        where("firstName", "==", searchFirstName),
+        where("lastName", "==", searchLastName)
+      );
+  
+      const querySnapshot = await getDocs(usersQuery);
+  
       if (querySnapshot.empty) {
-        alert("No user found with this email.");
+        alert("No user found with this first and last name.");
         setFoundUser(null);
       } else {
         const userDoc = querySnapshot.docs[0];
@@ -181,6 +208,7 @@ const handleAddSubject = async () => {
       console.error("Error searching for user:", error);
     }
   };
+
 
   const cancelEdit = () => {
     setEditSubjectName("");           
@@ -201,36 +229,40 @@ const handleAddSubject = async () => {
 
   const handleEnrollStudent = async (subjectId) => {
     if (!foundUser) {
-      alert("Please search for a user to enroll.");
-      return;
+        alert("Please search for a user to enroll.");
+        return;
     }
-  
+
     const subjectToEnroll = subjects.find(subject => subject.id === subjectId);
     if (!subjectToEnroll) {
-      alert("Subject not found.");
-      return;
+        alert("Subject not found.");
+        return;
     }
-  
-    const studentSubjectsRef = collection(db, `students/${foundUser.id}/subjects`);
-  
-    try {
-      console.log("Enrolling student in subject:", subjectToEnroll);
-  
-     
-      await setDoc(doc(studentSubjectsRef, subjectId), {
-        name: subjectToEnroll.name,
-        facultyId: subjectToEnroll.facultyId || null,  
-        sectionId: subjectToEnroll.sectionId || "default_section",  
-        semester: subjectToEnroll.semester || "",      
-        department: subjectToEnroll.department || "",  
-      });
-      alert(`Successfully enrolled ${foundUser.email} in the subject.`);
+    const studentSubjectsRef = doc(db, `students/${foundUser.id}/subjects/${subjectId}`);
+    const subjectEnrolledStudentRef = doc(db, `subjects/${subjectId}/enrolledStudents/${foundUser.id}`);
+    try {    
+        await setDoc(studentSubjectsRef, {
+            id: subjectId,
+            name: subjectToEnroll.name,
+            facultyId: subjectToEnroll.facultyId || null,  
+            sectionId: subjectToEnroll.sectionId || "default_section",  
+            semester: subjectToEnroll.semester || "",      
+            department: subjectToEnroll.department || "",  
+        });
+        console.log(`Enrolled subject ${subjectId} added to student ${foundUser.id}'s profile.`);
+        await setDoc(subjectEnrolledStudentRef, {
+            id: foundUser.id,
+            email: foundUser.email,
+            name: foundUser.name || "Unknown",
+        });
+        console.log(`Enrolled student ${foundUser.id} added to subject ${subjectId}'s enrolledStudents subcollection.`);
+
+        alert(`Successfully enrolled ${foundUser.email} in the subject.`);
     } catch (error) {
-      console.error("Error enrolling student in subject:", error);
-      alert("There was an error enrolling the student. Please try again.");
+        console.error("Error enrolling student in subject:", error);
+        alert("There was an error enrolling the student. Please try again.");
     }
-  };
-  
+};
 
   const filteredSubjects = subjects
   .filter(subject => 
@@ -424,12 +456,18 @@ const handleAddSubject = async () => {
             <div className="enroll-tool">
             <h1>Enroll Student in {Enroll.name}</h1>
             <input
-              type="text"
-              value={userEmail}
-              onChange={(e) => setUserEmail(e.target.value)}
-              placeholder="Enter user email"
-            />
-            <button onClick={handleSearchUserByEmail}>Search User</button>
+  type="text"
+  value={searchFirstName}
+  onChange={(e) => setSearchFirstName(e.target.value)}
+  placeholder="Enter First Name"
+/>
+<input
+  type="text"
+  value={searchLastName}
+  onChange={(e) => setSearchLastName(e.target.value)}
+  placeholder="Enter Last Name"
+/>
+<button onClick={handleSearchUserByFullName}>Search User</button>
             </div>
             <div className="enroll-buttons">
             <button onClick={() => handleEnrollStudent(Enroll.id)}>Enroll Student</button>
