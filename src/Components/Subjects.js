@@ -27,6 +27,9 @@ const Subjects = () => {
   const [foundUser, setFoundUser] = useState(null);
   const [role, setRole] = useState("student");
   const [viewedSubject, setViewedSubject] = useState(null);
+  const [Enroll, setEnroll] = useState(null);
+  const [showEnrolledStudents, setShowEnrolledStudents] = useState(null);
+  const [enrolledStudents, setEnrolledStudents] = useState([]);
   const [selectedSemester, setSelectedSemester] = useState("");
   const [selectedEditSemester, setSelectedEditSemester] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
@@ -49,7 +52,25 @@ const Subjects = () => {
   
     return () => unsubscribe(); 
   }, [db]);
-  
+
+  const fetchEnrolledStudents = async (subjectId) => {
+    try {
+        const studentsQuery = query(
+            collection(db, "students"),
+            where("subjects", "array-contains", subjectId)
+        );
+        const querySnapshot = await getDocs(studentsQuery);
+        const studentsList = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+        setEnrolledStudents(studentsList);
+        setShowEnrolledStudents(true);  
+    } catch (error) {
+        console.error("Error fetching enrolled students:", error);
+    }
+};
+
 const fetchFacultyList = async () => {
   const q = query(collection(db, "users"), where("role", "==", "Faculty"));
   const querySnapshot = await getDocs(q);
@@ -171,6 +192,11 @@ const handleAddSubject = async () => {
   };
   const CancelView = () => {
     setViewedSubject(null);
+    
+  };
+
+  const CancelEnroll = () => {
+    setEnroll(null);
   };
 
   const handleEnrollStudent = async (subjectId) => {
@@ -190,13 +216,13 @@ const handleAddSubject = async () => {
     try {
       console.log("Enrolling student in subject:", subjectToEnroll);
   
-      // Ensure facultyId and other relevant fields are included
+     
       await setDoc(doc(studentSubjectsRef, subjectId), {
         name: subjectToEnroll.name,
-        facultyId: subjectToEnroll.facultyId || null,  // Add facultyId
-        sectionId: subjectToEnroll.sectionId || "default_section",  // Ensure sectionId is included
-        semester: subjectToEnroll.semester || "",      // Optional: add semester if needed
-        department: subjectToEnroll.department || "",  // Optional: add department if needed
+        facultyId: subjectToEnroll.facultyId || null,  
+        sectionId: subjectToEnroll.sectionId || "default_section",  
+        semester: subjectToEnroll.semester || "",      
+        department: subjectToEnroll.department || "",  
       });
       alert(`Successfully enrolled ${foundUser.email} in the subject.`);
     } catch (error) {
@@ -217,7 +243,7 @@ const handleAddSubject = async () => {
       <div className="manage-subject-right">
         <div className="search-subject">
           <h1>SUBJECT LIST</h1>
-             {/* Search Input for Subjects */}
+             
         <input
           className="subject-name"
           type="text"
@@ -242,7 +268,7 @@ const handleAddSubject = async () => {
                 <p>
                   {subject.name} (ID: {subject.id})
                 </p>
-                <button onClick={() => {setViewedSubject(subject);cancelEdit();}} className="subject-view-button">View</button>
+                <button onClick={() => {setViewedSubject(subject);cancelEdit(); CancelEnroll();}} className="subject-view-button">View</button>
               </div>
             ))}
           </div>
@@ -374,6 +400,10 @@ const handleAddSubject = async () => {
                   <div className="details-item">
                     <strong>Department:</strong> <span>{viewedSubject.department || "No department assigned"}</span>
                   </div>
+                  <button onClick={() => {fetchEnrolledStudents(viewedSubject.id); CancelView();}}>
+                  Show Enrolled Students
+                  </button>
+                 
                 </div>
                 <div className="edit-buttons"> 
                 <button onClick={() => {
@@ -385,25 +415,48 @@ const handleAddSubject = async () => {
                   CancelView();
                 }} className="subject-edit-button">Edit</button>               
                 <button disabled={!!subjectIdToEdit} className="subject-delete-button" onClick={() => handleDeleteSubject(viewedSubject.id)}>Delete</button>
-                <input
-            className="subject-user-email"
-            type="text"
-            value={userEmail}
-            onChange={(e) => setUserEmail(e.target.value)}
-            placeholder="Enter user email"
-          />
-          <button onClick={handleSearchUserByEmail}>Search User</button>
-        
-        {foundUser && (
-          <div>
-            <p>User found: {foundUser.email}</p>
-          </div>
-        )}
-                <button onClick={() => handleEnrollStudent(viewedSubject.id)}>Enroll Student</button>                
+                <button onClick={() => {setEnroll(viewedSubject);CancelView();}}>Enroll Student</button>                
               </div> 
               </div>      
             )}
-           
+           {Enroll && (
+          <div className="enroll-student">
+            <div className="enroll-tool">
+            <h1>Enroll Student in {Enroll.name}</h1>
+            <input
+              type="text"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              placeholder="Enter user email"
+            />
+            <button onClick={handleSearchUserByEmail}>Search User</button>
+            </div>
+            <div className="enroll-buttons">
+            <button onClick={() => handleEnrollStudent(Enroll.id)}>Enroll Student</button>
+            <button onClick={() => {setEnroll(null);}}>Cancel</button>
+            </div>
+            <div>
+            {foundUser && (
+              <div>
+                <p>User found: {foundUser.email}</p>
+              </div>
+            )}
+            </div>
+          </div>
+        )}
+{showEnrolledStudents && (
+  <div className="enrolled-students-list">
+    <h3>Enrolled Students</h3>
+    {enrolledStudents.length > 0 ? (
+      enrolledStudents.map((student) => (
+        <p key={student.id}>{student.email}</p>
+      ))
+    ) : (
+      <p>No students enrolled in this subject.</p>
+    )}
+    <button onClick={() => setShowEnrolledStudents(false)}>Close</button>
+  </div>
+)}
           </div>
         </div>
       </div>

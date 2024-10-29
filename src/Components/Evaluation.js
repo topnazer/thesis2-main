@@ -8,17 +8,17 @@ const Evaluation = () => (
         <div className="evaluation-buttons">
             <Link to="/admin-dashboard/subject-evaluation" className='subject-evaluation-button'>
                 <FileCog style={{ width: '50px', height: '50px', color: 'black' }} /> 
-                <p>Subject Tools</p>    
+                <p>Student Tools</p>    
             </Link>
 
             <Link to="/admin-dashboard/faculty-evaluation" className='faculty-evaluation-button'>
                 <FileCog style={{ width: '50px', height: '50px', color: 'black' }} />
-                <p>Faculty Tools</p>
+                <p>Peer-to-peer Tools</p>
             </Link>
 
             <Link to="/admin-dashboard/dean-evaluation" className='dean-evaluation-button'>
                 <FileCog style={{ width: '50px', height: '50px', color: 'black' }} />
-                <p>Dean Tools</p>
+                <p>Dean/Acaf Tools</p>
             </Link>
         </div>
         

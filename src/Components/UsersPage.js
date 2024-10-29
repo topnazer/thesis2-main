@@ -79,7 +79,8 @@ const UsersPage = () => {
   });
 
   return (
-    <div>
+    <div className='user-page-container'>
+      <div className='user-page-left'>
       <div className='user-button'>
         {departments.map((dept) => (
           <button 
@@ -91,9 +92,7 @@ const UsersPage = () => {
           </button>
         ))}
       </div>
-
-      <h2>{selectedDepartment} Department Users</h2>
-
+      <div className="user-list"> 
       <input 
         type="text" 
         placeholder="Search users..." 
@@ -108,15 +107,16 @@ const UsersPage = () => {
         <div className="user-card">
           {filteredUsers.map((user) => (
             <div key={user.id} className="user-item">
-              <div className="user-info">
-                {user.firstName} {user.lastName} 
+            <div className="user-info">
+                {user.firstName} {user.lastName}
                 <p>({user.role})</p>
-              </div>
-              <button className="user-view" onClick={() => showOverlay(user)}>View</button>
             </div>
-          ))}
+            <button className="user-view" onClick={() => showOverlay(user)}>View</button>
+        </div>
+           ))}
         </div>
       )}
+      </div>
 
       {isOverlayVisible && selectedUser && (
         <div className="overlay">
@@ -127,7 +127,6 @@ const UsersPage = () => {
             <p><strong>Password:</strong> {selectedUser.password}</p>
             <p><strong>Role:</strong> {selectedUser.role}</p>
             <p><strong>Status:</strong> {selectedUser.status}</p>
-    
 
           
             <button className="show-subjects" onClick={showSubjectsOverlay}>Show Subjects</button>
@@ -143,6 +142,10 @@ const UsersPage = () => {
           </div>
         </div>
       )}
+      </div>
+      <div className="user-page-right">
+      </div>
+
     </div>
   );
 };

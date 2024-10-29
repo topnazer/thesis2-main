@@ -1,35 +1,43 @@
+.user-page-container {
+  display:flex;
+  flex-direction: row;
+}
+.user-page-left {
+  width: 50%;
+  height: 100vh;
+}
+.user-page-right {
+  width: 50%;
+  height: 100vh;
+}
 .user-card {
-  display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-  column-gap: 50px; 
-  margin: 0 auto; 
-  max-width: 650px; 
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
 .user-item {
-  border-radius: 10px;
-  padding: 10px;
-  box-shadow: 0 4px 6px -1px #8B4513, 0 2px 4px -2px #8B4513;;
-  text-align: center;
-  margin: 20px 0; 
-  box-sizing: border-box;
-  width: 100%;
+  padding: 16px auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0 6px;
 }
 
-.user-item:hover {
-  box-shadow: 0 2px 4px #8B4513(228, 6, 6, 0.853);
-  transition: box-shadow 0.2s ease;
-  ;
-}
 .user-info {
-  font-weight: bold;
-  margin-bottom: 5px;
-  font-size: 1.2em;
-  color: #800020;
+  margin-bottom: 8px;
 }
 
-.user-info p {
-  color: yellowgreen;
+.user-view {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.user-view:hover {
+  background-color: #0056b3;
 }
 
 .user-subjects {
@@ -43,25 +51,29 @@
 
 .user-button button {
   background: transparent;
-  border: 1px solid #800020;
   border-radius: 6px;
   box-shadow: 1px 1px 1px black;
   color: black;
   cursor: pointer;
   display: inline-block;
   font-size: 16px;
-  padding: 10px 30px;
+  padding: 9px 10px;
   text-align: center;
   text-decoration: none;
-  margin: 9px;
+  margin: 4px;
 }
 
 .user-button button:hover, .user-button button:focus {
   background-color:#800020;
   color: #F5F5DC;
 }
-
-
+.user-list {
+  margin: auto 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  height: 90vh;
+  max-height: 90vh;
+  border-radius: 7px;
+}
 .overlay {
   position: fixed;
   top: 0;
@@ -140,20 +152,10 @@
 }
 
 .user-search {
-  border-color: rgb(0, 0, 0);
-  margin: 0px 6px;
-  background-color: #eee;
-  border: none;
-  padding: 1rem;
+  border: 0.5px solid rgb(0, 0, 0);
+  padding: 0.7rem;
   font-size: 1rem;
-  width: 13em;
-  border-radius: 1rem;
-  color: lightcoral;
+  border-radius: 5px;
   box-shadow: 0 0.4rem #dfd9d9;
-  cursor: pointer;
 }
 
-.user-search:focus {
-
-  outline-color: lightcoral;
-}
