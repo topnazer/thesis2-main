@@ -1,235 +1,448 @@
-/* Dean Evaluation */
-.evaluate-dean-page .evaluation-form {
-  margin: 20px;
-}
 
-.evaluate-dean-page .rating-legend {
-  font-weight: bold;
-  margin-bottom: 10px;
+.evaluate-dean-page .evaluation-form {
+  margin: 10px auto;
+  padding: 10px 20px;
+  max-width: 800px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  position: relative;
 }
 
 .evaluate-dean-page table {
   width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: #f0f2f5;
+  border-radius: 8px;
+  overflow: hidden;
+  table-layout: fixed;
 }
 
 .evaluate-dean-page table th, 
 .evaluate-dean-page table td {
-  border: 1px solid #ddd;
-  padding: 8px;
+  padding: 12px;
   text-align: center;
+  font-size: 15px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.evaluate-dean-page table thead th {
+  font-size: 15px;
+  font-weight: bold;
+  background-color: #b8b9bf;
+  color: #000000;
+  padding: 18px;
+  text-align: center;
+}
+
+.evaluate-dean-page table th {
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #d9d9d9;
+  color: #000000;
 }
 
 .evaluate-dean-page table th:first-child,
 .evaluate-dean-page table td:first-child {
-  width: 60%; /* Allocate more space for the Question column */
-  text-align: left; /* Align questions to the left */
+  width: 40%;
+  text-align: left;
 }
 
 .evaluate-dean-page table th:not(:first-child), 
 .evaluate-dean-page table td:not(:first-child) {
-  width: 8%; /* Allocate less space for rating columns */
+  width: 8%;
+  padding: 8px;
 }
 
-.evaluate-dean-page table th {
-  background-color: #4CAF50;
-  color: white;
+.evaluate-dean-page table tbody tr {
+  background-color: #f0f2f5;
+}
+
+.evaluate-dean-page table tbody tr td {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Category Header Styling */
+.evaluate-dean-page .category-header {
+  background-color: #d9d9d9;
   font-weight: bold;
-}
-
-.evaluate-dean-page table tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.evaluate-dean-page table tbody tr:nth-child(odd) {
-  background-color: #fff;
-}
-
-.evaluate-dean-page textarea {
-  width: 100%;
-  height: 100px;
+  font-size: 18px;
+  font-family: Arial, Helvetica, sans-serif;
   padding: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  color: #000000;
+  text-align: center;
 }
 
-.evaluate-dean-page button {
-  padding: 10px 20px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.evaluate-dean-page button:hover {
-  background-color: #45a049;
-}
-
-.evaluate-dean-page button:focus {
-  background-color: blue;
+/* Radio Button Styling */
+.evaluate-dean-page input[type="radio"] {
+  accent-color: #6c757d;
 }
 
 /* Faculty Evaluation */
 .evaluate-faculty-page .evaluation-form {
-  margin: 20px; 
-}
-
-.evaluate-faculty-page .rating-legend {
-  font-weight: bold;
-  margin-bottom: 10px;
+  margin: 10px auto;
+  padding: 10px 20px;
+  max-width: 800px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  position: relative;
 }
 
 .evaluate-faculty-page table {
   width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: #f0f2f5;
+  border-radius: 8px;
+  overflow: hidden;
+  table-layout: fixed;
 }
 
 .evaluate-faculty-page table th, 
 .evaluate-faculty-page table td {
-  border: 1px solid #ddd;
-  padding: 8px;
+  padding: 12px;
   text-align: center;
+  font-size: 15px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.evaluate-faculty-page table thead th {
+  font-size: 15px;
+  font-weight: bold;
+  background-color: #b8b9bf;
+  color: #000000;
+  padding: 18px;
+  text-align: center;
+}
+
+.evaluate-faculty-page table th {
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #d9d9d9;
+  color: #000000;
 }
 
 .evaluate-faculty-page table th:first-child,
 .evaluate-faculty-page table td:first-child {
-  width: 60%; /* Allocate more space for the Question column */
-  text-align: left; /* Align questions to the left */
-}
-
-.evaluate-faculty-page table thead th {
-background-color: #305c31;
-}
-
-.evaluate-dean-page table thead th {
-  background-color: #305c31;
+  width: 40%;
+  text-align: left;
 }
 
 .evaluate-faculty-page table th:not(:first-child), 
 .evaluate-faculty-page table td:not(:first-child) {
-  width: 8%; /* Allocate less space for rating columns */
+  width: 8%;
+  padding: 8px;
 }
 
-.evaluate-faculty-page table th {
-  background-color: #4CAF50;
-  color: white;
+.evaluate-faculty-page table tbody tr {
+  background-color: #f0f2f5;
+}
+
+.evaluate-faculty-page table tbody tr td {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Category Header Styling */
+.evaluate-faculty-page .category-header {
+  background-color: #d9d9d9;
   font-weight: bold;
+  font-size: 18px;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 10px;
+  color: #000000;
+  text-align: center;
+}
+
+/* Radio Button Styling */
+.evaluate-faculty-page input[type="radio"] {
+  accent-color: #6c757d;
+}
+
+
+
+/* Subject Evaluation  */
+.logo-container {
+  position: absolute;
+  top: 0; /* Aligns the logo to the top of the header */
+  right: 0; /* Aligns the logo to the right of the header */
+  margin-right: 15px;
+  margin-top: 2px;
+}
+
+.logo {
+  width: 80px;
+  height: auto;
+  border-radius: 50%;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Main form container */
+.evaluate-subject-page .evaluation-form {
+  margin: 10px auto;
+  padding: 10px 20px;
+  max-width: 800px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  position: relative; /* Ensures other absolutely positioned elements within stay relative to this container */
+}
+
+/* Header Container */
+.header-container {
+  margin-left: 5px;
+  padding-top: 20px;
+  margin-right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+  position: relative; /* Allows absolute positioning of the logo within */
+  box-shadow: 0px 4px 8px rgba(44, 18, 18, 0.15),
+  0px 4px 18px rgba(47, 22, 22, 0.1),
+  0px 4px 28px rgba(43, 12, 12, 0.05),
+  0px 4px 38px rgba(46, 8, 8, 0.02);
+  background: linear-gradient(45deg, rgba(29, 17, 17, 0.15), rgba(30, 12, 12, 0.1), rgba(30, 12, 12, 0));
+
+  border: 2px solid #ddd; /* Border to give box-like appearance */
+  border-radius: 8px;
   
 }
 
-.evaluate-faculty-page table tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
+/* Form header content */
+.form-header {
+margin-left: 20px;
+
 }
 
-.evaluate-faculty-page table tbody tr:nth-child(odd) {
-  background-color: #fff;
+.form-header h1 {
+  font-size: 27px;
+  color: #0b0a0a;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.evaluate-faculty-page textarea {
-  width: 100%;
-  height: 100px;
-  padding: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.form-header h2 {
+  font-size: 18px;
+  color: #0b0a0a;
+  margin: 5px 0;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.evaluate-faculty-page button {
-  padding: 10px 20px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+.form-header p {
+  font-size: 14px;
+  color: #333;
+  margin: 5px 0;
 }
 
-.evaluate-faculty-page button:hover {
-  background-color: #45a049;
-}
 
-.evaluate-faculty-page button:focus {
-  background-color: blue;
-}
+/* Styling for the rating legend */
 
-/* Subject Evaluation */
-.evaluate-subject-page .evaluation-form {
-  margin: 20px;
-}
 
-.evaluate-subject-page .rating-legend {
-  font-weight: bold;
-  margin-bottom: 10px;
+/* Table Section */
+.form-table-section {
+  margin-bottom: 20px;
 }
 
 .evaluate-subject-page table {
   width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: #f0f2f5; /* Consistent background color */
+  border-radius: 8px;
+  overflow: hidden;
+  table-layout: fixed;
 }
 
+/* Table header styling */
 .evaluate-subject-page table th, 
 .evaluate-subject-page table td {
-  border: 1px solid #ddd;
-  padding: 8px;
+  padding: 12px;
   text-align: center;
+  font-size: 15px;
+  font-family:Arial, Helvetica, sans-serif
 }
 
-.evaluate-subject-page table th:first-child,
-.evaluate-subject-page table td:first-child {
-  width: 60%; /* Allocate more space for the Question column */
-  text-align: left; /* Align questions to the left */
+.evaluate-subject-page table thead th {
+  font-size: 15px;
+  font-weight: bold;
+  background-color: #b8b9bf; /* Darker gray for main header */
+  color: #000000;
+  padding: 18px;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+
 }
 
-.evaluate-subject-page table th:not(:first-child), 
-.evaluate-subject-page table td:not(:first-child) {
-  width: 8%; /* Allocate less space for rating columns */
-}
+
 
 .evaluate-subject-page table th {
-  background-color: #4CAF50;
-  color: white;
+  font-size: 14px;
   font-weight: bold;
+  background-color: #d9d9d9; /* Light gray color for headers */
+  color: #000000;
+
 }
 
-.evaluate-subject-page table tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
+/* First column styling for questions */
+.evaluate-subject-page table th:first-child,
+.evaluate-subject-page table td:first-child {
+  width: 40%; /* Allocate more space for the Question column */
+  text-align: left;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.evaluate-subject-page table tbody tr:nth-child(odd) {
-  background-color: #fff;
+/* Styling for rating header columns */
+.evaluate-subject-page table th:not(:first-child), 
+.evaluate-subject-page table td:not(:first-child) {
+  width: 8%; /* Equal spacing for each option */
+  padding: 8px;
+}
+
+/* Set uniform color for all question rows */
+.evaluate-subject-page table tbody tr {
+  background-color: #f0f2f5; /* Consistent light gray background */
+}
+
+.evaluate-subject-page table tbody tr td {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Styling for the category header row */
+.evaluate-subject-page .category-header {
+  background-color: #d9d9d9; /* Matching gray for category headers */
+  font-weight: bold;
+  font-size: 18px;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 10px;
+  color: #000000;
+  text-align: center; 
+}
+
+/* Radio button styling */
+.evaluate-subject-page input[type="radio"] {
+  accent-color: #6c757d; /* Dark gray for radio buttons */
+}
+
+/* Comments Section */
+.form-comments-section {
+  width: 100%; /* Full width of parent container */
+  max-width: 600px; /* Limits width on larger screens */
+  margin: 0 auto 20px auto; /* Centers horizontally */
+  padding: 15px; /* Inner padding for the container */
+  border-radius: 10px; /* Rounded corners */
+  background: linear-gradient(45deg, rgba(29, 17, 17, 0.15), rgba(30, 12, 12, 0.1), rgba(30, 12, 12, 0));
+  box-shadow: 5px 12px 10px rgba(44, 18, 18, 0.15),
+  5px 12px 20px rgba(47, 22, 22, 0.1),
+  5px 12px 30px rgba(43, 12, 12, 0.05),
+  5px 12px 40px rgba(46, 8, 8, 0.02);
+  border: 2px solid #ddd;
+}
+
+.form-comments-section label {
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: block;
+  color: #333;
+}
+
+.form-comments-section textarea {
+  width: 100%; /* Full width of the container */
+  height: 120px; /* Sets a reasonable height for comments */
+  padding: 10px;
+  font-size: 1rem; /* Text size for readability */
+  border: 1px solid #ccc; /* Border around textarea */
+  border-radius: 5px; /* Rounded corners to match container */
+  resize: vertical; /* Allows resizing only vertically */
+  box-sizing: border-box; /* Ensures padding doesn't exceed container width */
 }
 
 .evaluate-subject-page textarea {
   width: 100%;
   height: 100px;
-  padding: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 12px;
+  margin-top: 5px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  resize: vertical;
+  font-size: 14px;
 }
 
-.evaluate-subject-page button {
+/* Submit Button Section */
+.form-submit-section {
+  text-align: right; /* Aligns the button to the right */
+  background-color: #6c757d; /* Dark gray color */
+}
+
+.form-submit-section button {
   padding: 10px 20px;
-  background-color: #4CAF50;
+  background-color: #6c757d; /* Dark gray color */
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
 }
 
-.evaluate-subject-page button:hover {
-  background-color: #45a049;
+.form-submit-section button:hover {
+  background-color: #5a6268; /* Slightly darker shade on hover */
 }
 
-.evaluate-subject-page button:focus {
-  background-color: blue;
+.form-submit-section button:focus {
+  outline: none;
+  background-color: #495057;
+}
+/* Outer container for the form */
+.form-container {
+  max-width: 1500px; /* Set maximum width for the form container */
+  margin-right: 20px; /* Center the container with space on left and right */
+  margin-left: 20px;
+  margin-bottom: 20px;
+  padding: 10px; /* Add padding inside the container */
+  border: 2px solid #ddd; /* Border to give box-like appearance */
+  border-radius: 8px; /* Optional: rounded corners */
+  background: linear-gradient(45deg, rgba(29, 17, 17, 0.15), rgba(30, 12, 12, 0.1), rgba(30, 12, 12, 0));
+  box-shadow: 5px 12px 10px rgba(44, 18, 18, 0.15),
+  5px 12px 20px rgba(47, 22, 22, 0.1),
+  5px 12px 30px rgba(43, 12, 12, 0.05),
+  5px 12px 40px rgba(46, 8, 8, 0.02);
+}
+
+.pagination-controls {
+  text-align: left; /* Align buttons to the right */
+  margin-top: 20px;
+}
+
+.pagination-controls .next-button,
+.pagination-controls .previous-button,
+.pagination-controls .submit-button {
+  padding: 10px 20px;
+  background: linear-gradient(45deg, rgba(29, 17, 17, 0.15), rgba(30, 12, 12, 0.1), rgba(30, 12, 12, 0)); /* Gradient to match theme */
+  color: rgb(0, 0, 0); /* Text color for contrast */
+  font-weight: bold;
+  font-family: Arial, Helvetica, sans-serif;
+  border: none;
+  border-radius: 8px; /* Rounded corners for cohesive design */
+  cursor: pointer;
+  font-size: 16px;
+  margin: 0 5px; /* Small spacing between buttons */
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.pagination-controls .next-button:hover,
+.pagination-controls .previous-button:hover,
+.pagination-controls .submit-button:hover {
+  background: linear-gradient(45deg, rgba(29, 17, 17, 0.25), rgba(30, 12, 12, 0.2), rgba(30, 12, 12, 0.1)); /* Darker shade on hover */
+  transform: scale(1.05); /* Slightly enlarges on hover */
+}
+
+.pagination-controls .next-button:focus,
+.pagination-controls .previous-button:focus,
+.pagination-controls .submit-button:focus {
+  outline: none;
+  background: linear-gradient(45deg, rgba(29, 17, 17, 0.3), rgba(30, 12, 12, 0.25), rgba(30, 12, 12, 0.15)); /* Focus effect */
 }
 

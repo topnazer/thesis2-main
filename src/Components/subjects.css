@@ -1,42 +1,71 @@
+::-webkit-scrollbar {
+  width:0px;
+}
+
+
 .manage-subject-container {
   display: flex;
   flex-direction: row;
+  width: 98%;
+  height: 95%;
+  gap: 20px;
+  padding: 20px;
+}
+
+.manage-subject-container h1 {
+  color: rgb(133, 5, 5);
+}
+
+.manage-subject-right {
+  display: flex;
+  flex-direction: column;
+  width: 50%; 
+  height: 100%;
+  gap: 20px;
 }
 
 .manage-subject-left {
   width: 50%; 
-  height: 100vh;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  height: 100%;
 }
 
-.manage-subject-right {
-  width: 50%; 
-  height: 100vh;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
 .search-subject h1 {
   margin: 20px;
 }
 
 .subject-list {
-  margin: 10px 20px;
-  margin-top: 20px;
-  height: 68vh;
+  width: 100%;
+  height: 72%;
   border-radius: 7px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   overflow-y: auto;
+  
 }
 .subject-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px; 
-  margin: 20px 10px;
+  grid-template-columns: repeat(2, 1fr); 
+  grid-template-rows: repeat(2, 1fr); 
+  gap: 10px; 
+  margin: 10px;
 }
-
+.add-subject-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  width:100%;
+  gap: 10px;
+}
+.editsubj-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  width:100%;
+  gap: 10px;
+}
 .subject-card {
-  height: 100%; /* Ensure the card takes full height of grid cell */
+  height: 100%; 
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
@@ -47,10 +76,10 @@
 }
 
 .subject-card p {
-  margin: 0;
-  max-width: 100%; 
- 
+  font-size: 20px;
+  max-width: 100%;  
 }
+
 
 .subject-actions {
   font-size: 1em;
@@ -61,9 +90,7 @@
 }
 
 .viewed-subject-details {
-  margin-top: 20px;
-  padding: 20px;
-  
+  width: 100%;
 }
 
 .viewed-subject-details h1 {
@@ -73,18 +100,18 @@
 }
 
 .details-grid {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  
+  gap: 20px;
 }
 
 .details-item {
-  padding: 15px;
+  padding: 15px 10px;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   display: flex;
-  justify-content: space-between;
+  gap: 30px;
   align-items: center;
 }
 
@@ -98,61 +125,69 @@
   color: #555;
 }
 
-
-.tools-container {
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-}
-
 .add-subject {
-  width: 520px;
-  height: 20rem;
+  display: flex;
+  flex-direction: column;
+  height:auto;
+  padding:16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   border-radius: 20px;
-  margin: 20px auto;
+  width: 95%;
 }
+
+
 .edit-subject{
-  width: 520px;
-  height: 20rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  border-radius: 20px;
-  margin-top: 55px;
-}
-.subject-grid,
-.editsubj-grid {
   display: grid;
-  grid-template-columns: auto auto;
-  gap: 15px 10px; 
+  width: 95%;
+  height: 51%;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+
 }
 
 .subject-grid input,
-.edit-subject input,
 .subject-grid select,
-.edit-subject select {
+.add-subject-grid input,
+.add-subject-grid select {
   border: 0.5px solid rgb(0, 0, 0);
-  padding: 0.7rem;
+  padding: 0.7rem 0rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  box-shadow: 0 0.4rem #dfd9d9;
+  width: 100%;
+}
+
+.add-subject-grid textarea, .editsubj-grid textarea {
+  resize: none;
+  width: 99%;
+  border: 0.5px solid rgb(0, 0, 0);
+  font-size: 1rem;
+  border-radius: 5px;
+}
+.enroll-search-bar {
+  border: 0.5px solid rgb(0, 0, 0);
+  padding: 0.3rem 0.2rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  margin: 10px;
+}
+.editsubj-grid select,.editsubj-grid input {
+  border: 0.5px solid rgb(0, 0, 0);
+  padding: 0.7rem 0.5rem;
   font-size: 1rem;
   border-radius: 5px;
   box-shadow: 0 0.4rem #dfd9d9;
 }
 
-.subject-grid input,
-.edit-subject input {
-  width: 12.5em;
-  margin: auto auto;
-}
 
-.subject-grid select,
-.edit-subject select {
+.subject-grid select {
   width: 14em;
   cursor: pointer;
   margin: auto auto;
   
 }
 .editsubj-button {
-  margin: 30px px;
-  margin-top: 40px;
   width: 100%;
 }
 
@@ -161,8 +196,6 @@
 }
 
 .addsubj-button {
-  margin: 30px 0;
-  width: 100%;
 }
 
 .addsubj-h1 {
@@ -192,18 +225,19 @@
 }
 
 .subject-delete-button {
-  margin: 5px;
+
   background-color:#800020;
   color: #F5F5DC;
 }
 .edit-buttons {
-  margin: 10px;
-  margin-left: 50px;
+  gap: 5px;
   display: flex;
   flex-direction: row;
+  margin: 10px;
+  gap: 25px;
 }
 .edit-buttons button {
-  margin: 10px;
+  padding:10px 20px;
 }
 
 .subject-delete-button:hover, .subj-dept-button:hover {
@@ -214,19 +248,64 @@
   background-color:#800100;
   color: #F5F5DC;
 }
-.subject-edit-button {
-  margin: 5px;
-  background-color:#21ab02;
-  color: #F5F5DC;
-}
-
 .enroll-student {
  display: flex;
  flex-direction: column;
 }
-.enroll-tool h1, button, input {
-margin: 10px;
+.enroll-tool h1, .enroll-buttons button{
+  margin: 10px
 }
 .enroll-buttons {
   bottom: 0;
+}
+
+.enroll-tool input {
+  margin: 15px;
+}
+
+.enrolled-student-buttons {
+  margin: 10px;
+}
+.student-item-container {
+  height: 200px;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: auto;
+}
+
+.student-checkboxes {
+  height: 90%;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.student-checkbox {
+  align-items: center;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.student-checkbox input {
+  margin-right: 10px;
+}
+
+.enrolled-students-container {
+  height:50%; 
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+
+.enrolled-students-container button {
+  margin: 10px;
+}
+
+.student-item {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.student-item p {
+  margin: 0;
 }

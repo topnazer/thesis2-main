@@ -50,7 +50,7 @@
     }, [fetchPendingUsers]);
 
     return (
-      <div>
+      <div className='notification-container'>
       <h2>Pending User Registrations</h2>
       {pendingUsers.length === 0 ? (
         <p>No pending users to approve.</p>

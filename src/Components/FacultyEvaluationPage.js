@@ -124,7 +124,7 @@ const FacultyEvaluationPage = () => {
         return facultyCategories.map((category, categoryIndex) => (
             <div key={categoryIndex}>
                 <h3>{category}
-                    <button onClick={() => deleteCategory(category)} style={{ marginLeft: '10px', color: 'red' }}>
+                    <button onClick={() => deleteCategory(category)} className="delete-category-btn">
                         Delete Category
                     </button>
                 </h3>
@@ -132,8 +132,8 @@ const FacultyEvaluationPage = () => {
                     {facultyQuestions.map((question, absoluteIndex) => {
                         if (question.category === category) {
                             return (
-                                <div key={absoluteIndex}>
-                                    {question.text} (Weight: {question.weight})
+                                <div key={absoluteIndex} className="question-item">
+                                    {question.text}
                                     <div className="operation-buttons">
                                         <button onClick={() => handleEditQuestionForFaculty(absoluteIndex)}>Edit</button>
                                         <button onClick={() => deleteQuestion(absoluteIndex)}>Delete</button>
@@ -150,66 +150,52 @@ const FacultyEvaluationPage = () => {
 
     return (
         <div className="faculty-evaluation-container">
-                <div className="faculty-left">
-                <div className="question-tool">
+            <div className="faculty-evaluation-form">
                 <h2>Create or Edit Evaluation Form for Faculty</h2>
-                <div className="faculty-category-section">
-                    <div className='faculty-category'>
-                    <h3> ADD CATEGORY</h3>
+                
+                <div className="category-section">
+                    <h3>Add Category</h3>
                     <input
-                        className="faculty-category-input"
                         type="text"
                         value={newFacultyCategory}
                         onChange={(e) => setNewFacultyCategory(e.target.value)}
                         placeholder="Add or Edit category"
+                        className="input-category"
                     />
                     <button onClick={addOrEditCategoryForFaculty}>
                         {editingCategoryIndex !== null ? "Update Category" : "Add Category"}
                     </button>
-                    </div>
-                    <div>
-                        <h3>CREATE QUESTION</h3>
-                    <div className="faculty-question-form">
+                </div>
+
+                <div className="question-section">
+                    <h3>Create Question</h3>
                     <textarea
-                        className="faculty-question-input"
                         value={newQuestion}
                         onChange={(e) => setNewQuestion(e.target.value)}
                         placeholder={editingIndex !== null ? "Edit the question" : "Add a new question"}
+                        className="input-question"
                     />
-                    <div className="faculty-buttons-container">
-                        <button className="faculty-save-button" onClick={addOrEditQuestionForFaculty}>
-                            {editingIndex !== null ? "Update Question" : "Add Question"}
-                        </button>
-                        
-                    </div>
-                    </div>
-                    <button className="faculty-save-button" onClick={handleSaveForm}>Save Faculty Form</button>
-                </div>
-                </div>
-
-                <div className="faculty-question-form">
                     <select
-                        className="faculty-evaluation-select"
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="select-category"
                     >
                         <option value="" disabled>Select a category</option>
                         {facultyCategories.map((category, index) => (
                             <option key={index} value={category}>{category}</option>
                         ))}
                     </select>
+                    <button onClick={addOrEditQuestionForFaculty}>
+                        {editingIndex !== null ? "Update Question" : "Add Question"}
+                    </button>
                 </div>
-                </div>
-                </div>
+                <button onClick={handleSaveForm} className="save-form-btn">Save Faculty Form</button>
+            </div>
 
-                <div className="faculty-right">
-                <div className="faculty-questions">
-                    {renderQuestionsByCategory()}
-                </div>
-
-                </div>
-           </div>
-       
+            <div className="faculty-evaluation-preview">
+                {renderQuestionsByCategory()}
+            </div>
+        </div>
     );
 };
 

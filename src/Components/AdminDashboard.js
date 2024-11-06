@@ -70,6 +70,7 @@ const AdminDashboard = () => {
       <div className="content-container">
       <div className="Admin-navbar">
         <h1>Dashboard</h1>
+        <img src="/spc.png" alt="Description of the image" />
         <div className="Admin-links">
         <Link to="notifications" className="notification-link">
         <Bell/>  Notifications 

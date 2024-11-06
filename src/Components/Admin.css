@@ -12,7 +12,7 @@ html {
 .content-container {
     display: flex;
     flex-direction: row;
-    height: 100vh;
+    height: 98vh;
     background-color:rgb(69 10 10); 
 }
 
@@ -28,7 +28,7 @@ html {
 .Admin-navbar {
     background-color:rgb(69 10 10); 
     width: 280px;
-    height: 97vh;
+    height: 98vh;
     align-items: center;
     display: flex;
     flex-direction: column;
@@ -107,13 +107,19 @@ html {
     font-size: 32px;
     color: #ffffff; 
 }
+.Admin-navbar img {
+    width: 100px;
+    height: 100px;
+    background-color: transparent;
+    border-radius: 100%;
+}
 
 .route-container {
     text-align: center;
     background-color: rgb(255, 255, 255); 
     align-items: center;
     width: 100%;
-    height: 100vh;
+    height: 95vh;
     max-height:100vh;
     border-radius: 20px 0 0 20px;
     overflow-y: auto;

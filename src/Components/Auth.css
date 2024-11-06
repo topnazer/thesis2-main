@@ -176,14 +176,14 @@
   color: black;
 }
 
-.logo {
+.auth-logo {
   margin: 50px auto;
   width: 250px;
   height: 250px;
   border-radius: 100%;
 }
 
-.logo img {
+.auth-logo img {
   height: 250px;
   width: 250px;
   margin: auto;

@@ -3,9 +3,7 @@ import { getFirestore, doc, setDoc, collection, getDocs, getDoc, deleteDoc } fro
 import './subjectevaluationpage.css';
 
 const SubjectEvaluationPage = () => {
-    const [evaluationForms, setEvaluationForms] = useState({});
-    const [subjects, setSubjects] = useState([]);
-    const [selectedSubject, setSelectedSubject] = useState("");
+    const [evaluationForms, setEvaluationForms] = useState([]);  // Use a single form state instead of by subject
     const [newQuestion, setNewQuestion] = useState("");
     const [newWeight, setNewWeight] = useState("");
     const [editingIndex, setEditingIndex] = useState(null);
@@ -15,20 +13,6 @@ const SubjectEvaluationPage = () => {
     const [expirationDate, setExpirationDate] = useState(""); // New expiration date state
 
     const db = getFirestore();
-
-    const fetchSubjects = useCallback(async () => {
-        try {
-            const subjectsCollection = collection(db, "subjects");
-            const subjectsSnapshot = await getDocs(subjectsCollection);
-            const subjectsList = subjectsSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            setSubjects(subjectsList);
-        } catch (error) {
-            console.error("Error fetching subjects:", error);
-        }
-    }, [db]);
 
     const addCategory = () => {
         if (!newCategory.trim()) return;
@@ -56,15 +40,12 @@ const SubjectEvaluationPage = () => {
 
         setEvaluationForms((prevForms) => {
             const updatedQuestions = editingIndex !== null
-                ? prevForms[selectedSubject].map((question, index) =>
+                ? prevForms.map((question, index) =>
                     index === editingIndex ? questionWithWeight : question
                 )
-                : [...(prevForms[selectedSubject] || []), questionWithWeight];
+                : [...prevForms, questionWithWeight];
 
-            return {
-                ...prevForms,
-                [selectedSubject]: updatedQuestions,
-            };
+            return updatedQuestions;
         });
 
         setNewQuestion("");
@@ -73,32 +54,27 @@ const SubjectEvaluationPage = () => {
     };
 
     const deleteQuestion = (absoluteIndex) => {
-        setEvaluationForms((prevForms) => {
-            const updatedQuestions = prevForms[selectedSubject].filter((_, i) => i !== absoluteIndex);
-            return { ...prevForms, [selectedSubject]: updatedQuestions };
-        });
+        setEvaluationForms((prevForms) => prevForms.filter((_, i) => i !== absoluteIndex));
     };
 
     const handleEditQuestion = (absoluteIndex) => {
-        setNewQuestion(evaluationForms[selectedSubject][absoluteIndex].text);
-        setNewWeight(evaluationForms[selectedSubject][absoluteIndex].weight);
-        setSelectedCategory(evaluationForms[selectedSubject][absoluteIndex].category);
+        setNewQuestion(evaluationForms[absoluteIndex].text);
+        setNewWeight(evaluationForms[absoluteIndex].weight);
+        setSelectedCategory(evaluationForms[absoluteIndex].category);
         setEditingIndex(absoluteIndex);
     };
 
     const handleSaveForm = async () => {
-        if (selectedSubject) {
-            try {
-                const formRef = doc(db, "evaluationForms", selectedSubject);
-                await setDoc(formRef, {
-                    questions: evaluationForms[selectedSubject] || [],
-                    categories,
-                    expirationDate: expirationDate || null, // Save expiration date
-                });
-                alert("Subject evaluation form saved successfully!");
-            } catch (error) {
-                console.error("Error saving form:", error);
-            }
+        try {
+            const formRef = doc(db, "evaluationForms", "commonEvaluationForm"); // Use a common ID for single form
+            await setDoc(formRef, {
+                questions: evaluationForms || [],
+                categories,
+                expirationDate: expirationDate || null, // Save expiration date
+            });
+            alert("Subject evaluation form saved successfully!");
+        } catch (error) {
+            console.error("Error saving form:", error);
         }
     };
 
@@ -106,95 +82,65 @@ const SubjectEvaluationPage = () => {
         setCategories((prevCategories) => 
             prevCategories.filter((category) => category !== categoryToDelete)
         );
-        setEvaluationForms((prevForms) => {
-            const updatedForms = { ...prevForms };
-            if (selectedSubject && updatedForms[selectedSubject]) {
-                updatedForms[selectedSubject] = updatedForms[selectedSubject].filter(
-                    (question) => question.category !== categoryToDelete
-                );
-            }
-            return updatedForms;
-        });
+        setEvaluationForms((prevForms) => prevForms.filter(
+            (question) => question.category !== categoryToDelete
+        ));
     };
 
     const checkExpiration = useCallback(async () => {
         try {
             const now = new Date();
-            const formsCollection = collection(db, "evaluationForms");
-            const formsSnapshot = await getDocs(formsCollection);
+            const formRef = doc(db, "evaluationForms", "commonEvaluationForm");
+            const formDoc = await getDoc(formRef);
 
-            formsSnapshot.forEach(async (formDoc) => {
-                const formData = formDoc.data();
-                if (formData.expirationDate) {
-                    const expiration = new Date(formData.expirationDate.seconds * 1000);
-                    if (expiration < now) {
-                        await deleteDoc(doc(db, "evaluationForms", formDoc.id));
-                        setEvaluationForms((prevForms) => {
-                            const updatedForms = { ...prevForms };
-                            delete updatedForms[formDoc.id];
-                            return updatedForms;
-                        });
-                        alert(`Evaluation form for subject ${formDoc.id} has expired and was deleted.`);
-                    }
+            if (formDoc.exists() && formDoc.data().expirationDate) {
+                const expiration = new Date(formDoc.data().expirationDate.seconds * 1000);
+                if (expiration < now) {
+                    await deleteDoc(formRef);
+                    setEvaluationForms([]);
+                    alert(`The common evaluation form has expired and was deleted.`);
                 }
-            });
+            }
         } catch (error) {
             console.error("Error checking for expired forms:", error);
         }
     }, [db]);
 
     const handleExtendExpiration = async (newDate) => {
-        if (selectedSubject) {
-            try {
-                const formRef = doc(db, "evaluationForms", selectedSubject);
-                await setDoc(formRef, { expirationDate: new Date(newDate) }, { merge: true });
-                setExpirationDate(newDate);
-                alert("Expiration date extended successfully!");
-            } catch (error) {
-                console.error("Error extending expiration date:", error);
-            }
+        try {
+            const formRef = doc(db, "evaluationForms", "commonEvaluationForm");
+            await setDoc(formRef, { expirationDate: new Date(newDate) }, { merge: true });
+            setExpirationDate(newDate);
+            alert("Expiration date extended successfully!");
+        } catch (error) {
+            console.error("Error extending expiration date:", error);
         }
     };
 
     useEffect(() => {
-        if (selectedSubject) {
-            const fetchQuestionsForSubject = async () => {
-                try {
-                    const formRef = doc(db, "evaluationForms", selectedSubject);
-                    const formSnap = await getDoc(formRef);
-                    if (formSnap.exists()) {
-                        setEvaluationForms((prevForms) => ({
-                            ...prevForms,
-                            [selectedSubject]: formSnap.data().questions || [],
-                        }));
-                        setCategories(formSnap.data().categories || []);
-                        setExpirationDate(formSnap.data().expirationDate?.toDate() || ""); // Load expiration date
-                    } else {
-                        setEvaluationForms((prevForms) => ({
-                            ...prevForms,
-                            [selectedSubject]: [],
-                        }));
-                        setCategories([]);
-                    }
-                } catch (error) {
-                    console.error("Error fetching evaluation form:", error);
+        const fetchForm = async () => {
+            try {
+                const formRef = doc(db, "evaluationForms", "commonEvaluationForm");
+                const formSnap = await getDoc(formRef);
+                if (formSnap.exists()) {
+                    setEvaluationForms(formSnap.data().questions || []);
+                    setCategories(formSnap.data().categories || []);
+                    setExpirationDate(formSnap.data().expirationDate?.toDate() || ""); // Load expiration date
                 }
-            };
+            } catch (error) {
+                console.error("Error fetching evaluation form:", error);
+            }
+        };
 
-            fetchQuestionsForSubject();
-        }
-    }, [selectedSubject, db]);
-
-    useEffect(() => {
-        fetchSubjects();
+        fetchForm();
         const intervalId = setInterval(checkExpiration, 3600000); // Check every hour
         return () => clearInterval(intervalId); // Cleanup interval on unmount
-    }, [fetchSubjects, checkExpiration]);
+    }, [checkExpiration]);
 
     return (
         <div className="subject-evaluation-page">
             <div className="subject-evaluation-card">
-                <h2 className="subject-evaluation-header">Create or Edit Evaluation Form for Subjects</h2>
+                <h2 className="subject-evaluation-header">Create or Edit Evaluation Form</h2>
 
                 <div className="subject-category-section">
                     <label>Select Category:</label>
@@ -215,24 +161,6 @@ const SubjectEvaluationPage = () => {
                         placeholder="Add new category"
                     />
                     <button onClick={addCategory} style={{ marginLeft: '10px', backgroundColor: '#8b0000' }}>Add Category</button>
-                </div>
-
-                <div className="subject-question-form">
-                    <label>Select Subject:</label>
-                    <select
-                        className="subject-evaluation-select"
-                        value={selectedSubject}
-                        onChange={(e) => {
-                            setSelectedSubject(e.target.value);
-                        }}
-                    >
-                        <option value="" disabled>Select a subject</option>
-                        {subjects.map((subject) => (
-                            <option key={subject.id} value={subject.id}>
-                                {subject.name} (Section ID: {subject.id})
-                            </option>
-                        ))}
-                    </select>
                 </div>
 
                 <div className="expiration-date">
@@ -257,7 +185,7 @@ const SubjectEvaluationPage = () => {
                                 </button>
                             </h3>
                             <ul className="subject-questions-list">
-                                {(evaluationForms[selectedSubject] || []).map((question, absoluteIndex) => {
+                                {(evaluationForms || []).map((question, absoluteIndex) => {
                                     if (question.category === category) {
                                         return (
                                             <li key={absoluteIndex}>

@@ -25,10 +25,10 @@ const StudentDashboard = () => {
         fetchNotifications(user);
         fetchSubjects(user);
       } else {
-        navigate("/"); // Redirect if not authenticated
+        navigate("/"); 
       }
     });
-    return unsubscribe; // Cleanup on unmount
+    return unsubscribe; 
   }, [db, navigate]);
 
   const fetchUserInfo = async (user) => {

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getFirestore, doc, getDoc, setDoc, collection } from 'firebase/firestore';
 import { auth } from '../firebase';
-import './Evaluate.css'; // Add the new CSS file
+import './Evaluate.css';
 
 const EvaluateDean = () => {
   const { deanId } = useParams();
@@ -10,10 +10,11 @@ const EvaluateDean = () => {
   const location = useLocation();
   const [dean, setDean] = useState(null);
   const [evaluationForm, setEvaluationForm] = useState([]);
-  const [categories, setCategories] = useState([]); // New state for categories
+  const [categories, setCategories] = useState([]);
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [responses, setResponses] = useState([]);
+  const [responses, setResponses] = useState({});
   const [comment, setComment] = useState("");
   const db = getFirestore();
 
@@ -38,7 +39,7 @@ const EvaluateDean = () => {
       if (evaluationDoc.exists()) {
         const data = evaluationDoc.data();
         setEvaluationForm(data.questions || []);
-        setCategories(data.categories || []); // Set categories state
+        setCategories(data.categories || []);
       } else {
         setError('No evaluation form found for dean.');
       }
@@ -52,16 +53,48 @@ const EvaluateDean = () => {
     fetchEvaluationForm();
   }, [fetchDean, fetchEvaluationForm]);
 
-
   const handleResponseChange = (categoryIndex, questionIndex, value) => {
-    const updatedResponses = { ...responses }; // Change responses to an object
+    const updatedResponses = { ...responses };
     const uniqueKey = `${categoryIndex}-${questionIndex}`;
-    updatedResponses[uniqueKey] = value;
+    updatedResponses[uniqueKey] = String(value);
     setResponses(updatedResponses);
   };
-  
+
+  const isCurrentCategoryComplete = () => {
+    const category = categories[currentCategoryIndex];
+    const categoryQuestions = evaluationForm.filter(
+      (question) => question.category === category
+    );
+
+    return categoryQuestions.every((_, questionIndex) => {
+      const uniqueKey = `${currentCategoryIndex}-${questionIndex}`;
+      return responses[uniqueKey] !== undefined;
+    });
+  };
+
+  const handleNext = () => {
+    if (!isCurrentCategoryComplete()) {
+      alert("Please answer all questions in this category before proceeding.");
+      return;
+    }
+    if (currentCategoryIndex < categories.length - 1) {
+      setCurrentCategoryIndex(currentCategoryIndex + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentCategoryIndex > 0) {
+      setCurrentCategoryIndex(currentCategoryIndex - 1);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!isCurrentCategoryComplete()) {
+      alert("Please answer all questions in this category before submitting.");
+      return;
+    }
 
     const totalScore = Object.values(responses).reduce((sum, score) => sum + parseInt(score), 0);
     const maxScore = evaluationForm.length * 5;
@@ -77,9 +110,9 @@ const EvaluateDean = () => {
       const evaluationRef = doc(collection(db, 'deanEvaluations', deanId, 'completed_evaluations'), user.uid);
       await setDoc(evaluationRef, {
         userId: user.uid,
-        deanId: deanId,
+        deanId,
         scores: responses,
-        comment: comment,
+        comment,
         percentageScore,
         createdAt: new Date(),
       });
@@ -109,7 +142,42 @@ const EvaluateDean = () => {
       navigate(location.state?.redirectTo || "/dean-dashboard");
     } catch (error) {
       alert('Failed to submit evaluation. Please try again.');
+      console.error("Error submitting evaluation:", error.message);
     }
+  };
+
+  const renderQuestionsForCurrentCategory = () => {
+    const category = categories[currentCategoryIndex];
+    const categoryQuestions = evaluationForm.filter(
+      (question) => question.category === category
+    );
+
+    return (
+      <React.Fragment>
+        <tr>
+          <td colSpan="6" className="category-header"><strong>{category}</strong></td>
+        </tr>
+        {categoryQuestions.map((question, questionIndex) => {
+          const uniqueKey = `${currentCategoryIndex}-${questionIndex}`;
+          return (
+            <tr key={uniqueKey}>
+              <td>{question.text}</td>
+              {["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"].map((label, value) => (
+                <td key={value}>
+                  <input
+                    type="radio"
+                    name={`question-${uniqueKey}`}
+                    value={value + 1}
+                    checked={responses[uniqueKey] === String(value + 1)}
+                    onChange={(e) => handleResponseChange(currentCategoryIndex, questionIndex, e.target.value)}
+                  />
+                </td>
+              ))}
+            </tr>
+          );
+        })}
+      </React.Fragment>
+    );
   };
 
   if (loading) {
@@ -120,70 +188,59 @@ const EvaluateDean = () => {
     return <p>{error}</p>;
   }
 
-  const renderQuestionsByCategory = () => {
-    return categories.map((category, categoryIndex) => (
-      <React.Fragment key={categoryIndex}>
-        <tr>
-        <td colSpan="6" className="category-header"><strong>{category}</strong></td>
-        </tr>
-        {evaluationForm
-          .filter(question => question.category === category)
-          .map((question, questionIndex) => {
-            const uniqueKey = `${categoryIndex}-${questionIndex}`;
-            return (
-              <tr key={uniqueKey}>
-                <td>{question.text}</td>
-                {[1, 2, 3, 4, 5].map(value => (
-                  <td key={value}>
-                    <input
-                      type="radio"
-                      name={`question-${uniqueKey}`}
-                      value={value}
-                      checked={responses[uniqueKey] === String(value)}
-                      onChange={(e) => handleResponseChange(categoryIndex, questionIndex, e.target.value)}
-                    />
-                  </td>
-                ))}
-              </tr>
-            );
-          })}
-      </React.Fragment>
-    ));
-  };
-
   return (
     <div className="evaluate-dean-page evaluation-form">
-      <h1>Evaluate {dean ? `${dean.firstName} ${dean.lastName}` : 'Dean'}</h1>
-      <div className="rating-legend">
-        <p>Rating Legend</p>
-        <p>1 - Strongly Disagree | 2 - Disagree | 3 - Neutral | 4 - Agree | 5 - Strongly Agree</p>
-      </div>
-      <form onSubmit={handleSubmit}>
-        <table>
-          <thead>
-            <tr>
-              <th>Question</th>
-              <th>1</th>
-              <th>2</th>
-              <th>3</th>
-              <th>4</th>
-              <th>5</th>
-            </tr>
-          </thead>
-          <tbody>
-            {renderQuestionsByCategory()}
-          </tbody>
-        </table>
-        <div>
-          <label>Comments/Feedback</label>
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Enter your comments about the dean here"
-          />
+      <div className="header-container">
+        <div className="form-header">
+          <h1>Evaluate {dean ? `${dean.firstName} ${dean.lastName}` : "Dean"}</h1>
+          <h2>Department: {dean ? dean.department : "No department available"}</h2>
+          <div className="logo-container">
+            <img src="/spc.png" alt="Logo" className="logo" />
+          </div>
         </div>
-        <button type="submit">Submit Evaluation</button>
-      </form>
+      </div>
+
+      <div className="form-container">
+        <form onSubmit={handleSubmit}>
+          <div className="form-table-section">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rating Legend</th>
+                  <th>Strongly disagree</th>
+                  <th>Disagree</th>
+                  <th>Neutral</th>
+                  <th>Agree</th>
+                  <th>Strongly agree</th>
+                </tr>
+              </thead>
+              <tbody>
+                {renderQuestionsForCurrentCategory()}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="pagination-controls">
+            {currentCategoryIndex > 0 && (
+              <button type="button" className="previous-button" onClick={handlePrevious}>Previous</button>
+            )}
+            {currentCategoryIndex < categories.length - 1 ? (
+              <button type="button" className="next-button" onClick={handleNext}>Next</button>
+            ) : (
+              <button type="submit" className="submit-button">Submit Evaluation</button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div className="form-comments-section">
+        <label>Comments/Feedback</label>
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="Enter your comments about the dean here"
+        />
+      </div>
     </div>
   );
 };

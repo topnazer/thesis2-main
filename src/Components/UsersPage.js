@@ -153,19 +153,24 @@ const UsersPage = () => {
               {isSubjectsOverlayVisible && (
                 <div className="subjects-overlay">
                   <h3>Subjects for {selectedUser.firstName} {selectedUser.lastName}</h3>
+                  {userSubjects[selectedUser.id]?.length === 0 && (
+                      <p>No subjects</p> 
+                      )}
+                  <div className='user-subject-content'>
                   <div className="subject-content-grid">
                     {userSubjects[selectedUser.id]?.length > 0 ? (
                     userSubjects[selectedUser.id].map((subject, index) => (
                     <div className="grid-item" key={index}>
                       <p>{subject}</p>
                     </div>
+                    
                       ))
                       ) : null} 
                   </div>
-                      {userSubjects[selectedUser.id]?.length === 0 && (
-                      <p>No subjects</p> // Display message outside the grid
-                      )}
-                  <button className="close-subjects" onClick={hideSubjectsOverlay}>Close Subjects</button> 
+                  </div>
+                      <div className="user-subject-button">
+                      <button className="close-subjects" onClick={hideSubjectsOverlay}>Close Subjects</button>
+                      </div>
                 </div>
               )}
             </div>            

@@ -94,7 +94,7 @@ const LoginForm = ({ toggleSignUp }) => {
           </div>
         </div>
         <div className="auth-right">
-          <div className="logo">  
+          <div className="auth-logo">  
             <img src="spc.png"/>
           </div>
         </div>
