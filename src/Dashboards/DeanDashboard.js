@@ -115,6 +115,7 @@ const DeanDashboard = () => {
       <nav>
         <h1>Dean Dashboard</h1>
         <div>
+        <p>sad</p>
           <span>{userName}</span>
           <button onClick={handleSignOut}>Sign Out</button>
         </div>
