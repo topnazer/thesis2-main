@@ -1,32 +1,113 @@
-.evaluation-report-scoring-page {
-    margin: 20px;
-    padding: 20px;
-  }
+
+/* Main container for the Evaluation Scoring Page */
+.eval-scoring-page {
+  margin: 0;
+  padding: 0;
+}
+
+/* Centralized container for page content */
+.eval-scoring-page .scoringcontainer {
+  max-width: 1500px; /* Limits the width of the content */
+  margin: 0 auto; /* Centers the content */
+  padding: 0 20px; /* Adds space on the sides */
+}
+
+/* Faculty list section */
+.eval-scoring-page .faculty-list {
+  margin-top: 20px; /* Space from top */
+}
+
+/* Faculty table styling */
+.eval-scoring-page .faculty-list table {
+  width: 100%; /* Makes the table span full width */
+  border-collapse: collapse; /* Removes gaps between table cells */
+}
+
+/* Table cell styling */
+.eval-scoring-page .faculty-list th,
+.eval-scoring-page .faculty-list td {
+  padding: 10px; /* Adds padding for better readability */
+  border: 1px solid #ccc; /* Adds border around cells */
+  text-align: left; /* Aligns text to the left */
+  background-color: #f4f4f4; /* Light gray background for cells */
+}
+
+/* Table header row styling */
+.eval-scoring-page .faculty-list th {
+  background-color: #e0e0e0; /* Slightly darker gray background */
+}
+
+/* Alternating row background */
+.eval-scoring-page .faculty-list tr:nth-child(even) {
+  background-color: #f9f9f9; /* Lighter gray background for alternating rows */
+}
+
+/* Navbar styling */
+.eval-scoring-page .navbar {
+  background-color: rgb(69, 10, 10); 
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid rgba(0, 0, 0, 0.5); 
+  color: rgb(247, 245, 245);
+  border-radius: 2px; /* Adds rounded corners */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Navbar title styling */
+.eval-scoring-page .navbar h1 {
+  font-size: 1.5rem;
+  margin-left: 90px;
   
-  .weight-controls {
-    margin-bottom: 40px;
-  }
-  
-  .weight-controls label {
-    margin-right: 10px;
-  }
-  
-  .faculty-list table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .faculty-list th, .faculty-list td {
-    padding: 10px;
-    border: 1px solid #ccc;
-    text-align: left;
-  }
-  
-  .faculty-list th {
-    background-color: #f4f4f4;
-  }
-  
-  .faculty-list tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
+}
+
+.eval-scoring-page .faculty-list h2{
+  margin-bottom: 20px;
+}
+
+/* Modal background styling */
+.eval-scoring-page .modal {
+  position: fixed; /* Ensures it overlays the entire page */
+  top: 0;
+  left: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+  display: flex; /* Centers the modal content */
+  justify-content: center;
+  align-items: center;
+}
+
+/* Modal content styling */
+.eval-scoring-page .modal-content {
+  background: rgb(229, 220, 220); /* White background for the modal */
+  padding: 20px; /* Adds internal padding */
+  border-radius: 10px; /* Rounded corners */
+  width: 400px; /* Fixed width for the modal */
+  text-align: center; /* Centers text in the modal */
+}
+
+/* Weight control styles */
+.eval-scoring-page .weight-controls {
+  margin-bottom: 40px; /* Adds spacing below the controls */
+}
+
+/* Label spacing inside the weight controls */
+.eval-scoring-page .weight-controls label {
+  margin-right: 10px; /* Adds space to the right of labels */
+}
+.dashboardlogoscoring-container {
+  position: absolute;
+  top: 0; /* Aligns the logo to the top of the header */
+  left: 0; /* Aligns the logo to the right of the header */
+  margin-left: 15px;
+  margin-top: 13px;
+}
+
+.dashboardlogoscoring {
+  width: 80px;
+  height: auto;
+  border-radius: 50%;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
