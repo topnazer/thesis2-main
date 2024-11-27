@@ -83,39 +83,51 @@ const Subjects = () => {
     setFacultyList(facultyData);
   };
 
-  const handleEnrollStudent = async (subjectId, studentId) => {
-    const student = allStudents.find((student) => student.id === studentId);
+  const handleEnrollStudent = async (subjectId, studentIds) => {
     const subjectToEnroll = subjects.find((subject) => subject.id === subjectId);
-    if (!student || !subjectToEnroll) {
-      alert("Student or subject not found.");
+    if (!subjectToEnroll) {
+      alert("Subject not found.");
       return;
     }
+    const studentsToEnroll = allStudents.filter((student) => studentIds.includes(student.id));
+    if (studentsToEnroll.length === 0) {
+      alert("No valid students selected.");
+      return;
+    }
+    const enrollmentPromises = studentsToEnroll.map(async (student) => {
+      const studentSubjectsRef = doc(db, `students/${student.id}/subjects/${subjectId}`);
+      const subjectEnrolledStudentRef = doc(db, `subjects/${subjectId}/enrolledStudents/${student.id}`);
   
-    const studentSubjectsRef = doc(db, `students/${student.id}/subjects/${subjectId}`);
-    const subjectEnrolledStudentRef = doc(db, `subjects/${subjectId}/enrolledStudents/${student.id}`);
+      try {
+        await Promise.all([
+          setDoc(studentSubjectsRef, {
+            id: subjectId,
+            name: subjectToEnroll.name,
+            facultyId: subjectToEnroll.facultyId || null,
+            sectionId: subjectToEnroll.sectionId || "default_section",
+            semester: subjectToEnroll.semester || "",
+            department: subjectToEnroll.department || "",
+          }),
+          setDoc(subjectEnrolledStudentRef, {
+            id: student.id,
+            email: student.email,
+            name: `${student.firstName} ${student.lastName}` || "Unknown",
+          })
+        ]);
+      } catch (error) {
+        console.error(`Error enrolling student ${student.email}:`, error);
+      }
+    });
   
     try {
-      await setDoc(studentSubjectsRef, {
-        id: subjectId,
-        name: subjectToEnroll.name,
-        facultyId: subjectToEnroll.facultyId || null,
-        sectionId: subjectToEnroll.sectionId || "default_section",
-        semester: subjectToEnroll.semester || "",
-        department: subjectToEnroll.department || "",
-      });
-  
-      await setDoc(subjectEnrolledStudentRef, {
-        id: student.id,
-        email: student.email,
-        name: `${student.firstName} ${student.lastName}` || "Unknown",
-      });
-      alert(`Successfully enrolled ${student.email} in the subject.`);
+      await Promise.all(enrollmentPromises);
+      const enrolledEmails = studentsToEnroll.map(student => student.email).join(", ");
+      alert(`Successfully enrolled the following students: ${enrolledEmails}`);
     } catch (error) {
-      console.error("Error enrolling student in subject:", error);
-      alert("There was an error enrolling the student. Please try again.");
+      console.error("Error enrolling students in subject:", error);
+      alert("There was an error enrolling the students. Please try again.");
     }
   };
-
   
   const fetchEnrolledStudents = async (subjectId) => {
     try {
@@ -126,7 +138,7 @@ const Subjects = () => {
         ...doc.data(),
       }));
       setEnrolledStudents(studentsList);
-      setShowEnrolledStudents(true); // Show the list of enrolled students
+      setShowEnrolledStudents(true); 
     } catch (error) {
       console.error("Error fetching enrolled students:", error);
       alert("There was an error fetching enrolled students. Please try again.");
@@ -268,7 +280,9 @@ const Subjects = () => {
     
   );
   const filteredStudents = allStudents.filter(student =>
-    student.email.toLowerCase().includes(searchStudent.toLowerCase())
+    student.email.toLowerCase().includes(searchStudent.toLowerCase()) || 
+    student.id.toLowerCase().includes(searchStudent.toLowerCase()) || 
+    `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchStudent.toLowerCase()) 
   );
 
 
@@ -286,7 +300,7 @@ const Subjects = () => {
           />
         </div>
         <div className="department-filter-buttons">
-          <button onClick={() => setFilterDepartment("")}>ALL</button>
+          <button className="subj-dept-button" onClick={() => setFilterDepartment("")}>ALL</button>
           {departments.map((department) => (
             <button className="subj-dept-button" key={department} onClick={() => setFilterDepartment(department)}>
               {department}
@@ -401,8 +415,53 @@ const Subjects = () => {
       </div>
     </form>
   </div>
-        <div className="edit-subject">
-        {subjectIdToEdit && (
+  
+          {viewedSubject && (
+            <div className="viewed-subject-details">
+              <h1>Subject Details</h1>
+              <div className="details-grid">
+                <div className="details-item">
+                  <strong>Name:</strong><span>{viewedSubject.name}</span>
+                </div>
+                <div className="details-item">
+                  <strong>ID:</strong> <span>{viewedSubject.id}</span>
+                </div>
+                <div className="details-item">
+                  <strong>School Year:</strong> <span>{viewedSubject.schoolYear}</span>
+                </div>
+                <div className="details-item">
+                  <strong>Faculty:</strong> <span>{facultyList.find((f) => f.id === viewedSubject.facultyId)?.email || "No faculty assigned"}</span>
+                </div>
+                <div className="details-item">
+                  <strong>Semester:</strong> <span>{viewedSubject.semester}</span>
+                </div>
+                <div className="details-item">
+                  <strong>Department:</strong> <span>{viewedSubject.department || "No department assigned"}</span>
+                </div>
+                <div className="details-item">
+                  <strong>Description: </strong>{viewedSubject.description}
+                </div>
+              </div>
+              <div className="edit-buttons"> 
+              <button onClick={() => {
+  setEditSubjectName(viewedSubject.name);
+  setSubjectIdToEdit(viewedSubject.id);
+  setSelectedEditFaculty(viewedSubject.facultyId);
+  setSelectedEditSemester(viewedSubject.semester);
+  setSelectedEditDepartment(viewedSubject.department);
+  setEditSubjectDescription(viewedSubject.description); 
+  CancelView();
+}}>
+  Edit
+</button>              
+                <button disabled={!!subjectIdToEdit} className="subject-delete-button" onClick={() => handleDeleteSubject(viewedSubject.id)}>Delete</button>
+                <button onClick={() => { setEnroll(viewedSubject); CancelView(); }}>Enroll Student</button>
+                <button onClick={() => { fetchEnrolledStudents(viewedSubject.id); CancelView(); CancelEnroll(); }}>Enrolled Students</button>         
+                <button onClick={() => { CancelView();}}>Cancel</button>       
+              </div> 
+            </div>      
+          )}
+          {subjectIdToEdit && (
     <div className="editsubj-tool">
       <div className="addsubj-h1">
         <h1>EDIT SUBJECT</h1>
@@ -465,56 +524,10 @@ const Subjects = () => {
       </div>
     </div>
   )}
-  
-          {viewedSubject && (
-            <div className="viewed-subject-details">
-              <h1>Subject Details</h1>
-              <div className="details-grid">
-                <div className="details-item">
-                  <strong>Name:</strong><span>{viewedSubject.name}</span>
-                </div>
-                <div className="details-item">
-                  <strong>ID:</strong> <span>{viewedSubject.id}</span>
-                </div>
-                <div className="details-item">
-                  <strong>School Year:</strong> <span>{viewedSubject.schoolYear}</span>
-                </div>
-                <div className="details-item">
-                  <strong>Faculty:</strong> <span>{facultyList.find((f) => f.id === viewedSubject.facultyId)?.email || "No faculty assigned"}</span>
-                </div>
-                <div className="details-item">
-                  <strong>Semester:</strong> <span>{viewedSubject.semester}</span>
-                </div>
-                <div className="details-item">
-                  <strong>Department:</strong> <span>{viewedSubject.department || "No department assigned"}</span>
-                </div>
-                <div className="details-item">
-                  <strong>Description: </strong>{viewedSubject.description}
-                </div>
-              </div>
-              <div className="edit-buttons"> 
-              <button onClick={() => {
-  setEditSubjectName(viewedSubject.name);
-  setSubjectIdToEdit(viewedSubject.id);
-  setSelectedEditFaculty(viewedSubject.facultyId);
-  setSelectedEditSemester(viewedSubject.semester);
-  setSelectedEditDepartment(viewedSubject.department);
-  setEditSubjectDescription(viewedSubject.description); 
-  CancelView();
-}}>
-  Edit
-</button>              
-                <button disabled={!!subjectIdToEdit} className="subject-delete-button" onClick={() => handleDeleteSubject(viewedSubject.id)}>Delete</button>
-                <button onClick={() => { setEnroll(viewedSubject); CancelView(); }}>Enroll Student</button>
-                <button onClick={() => { fetchEnrolledStudents(viewedSubject.id); CancelView(); CancelEnroll(); }}>Enrolled Students</button>         
-                <button onClick={() => { CancelView();}}>Cancel</button>       
-              </div> 
-            </div>      
-          )}
           
           {Enroll && (
-            <div className="enroll-student">
-              <div className="enroll-tool">
+  <div className="enroll-student">
+    <div className="enroll-tool">
       <h1>Enroll Students in {Enroll.name}</h1>
       <div className="student-checkboxes">
         {filteredStudents.map((student) => (
@@ -526,37 +539,37 @@ const Subjects = () => {
               checked={selectedStudents.includes(student.id)}
               onChange={(e) => {
                 if (e.target.checked) {
-                  setSelectedStudents((prev) => [...prev, student.id]); // Add student to selected
+                  setSelectedStudents((prev) => [...prev, student.id]); 
                 } else {
-                  setSelectedStudents((prev) => prev.filter(id => id !== student.id)); // Remove student from selected
+                  setSelectedStudents((prev) => prev.filter(id => id !== student.id)); 
                 }
               }}
             />
             <label htmlFor={`student-${student.id}`}>
-              {student.firstName} {student.lastName} - {student.email}
+              {student.firstName} {student.lastName} - {student.email} - (ID: {student.id})
             </label>
           </div>
         ))}
       </div>
       <div className="enroll-buttons">
-              <input
-        type="text"
-        value={searchStudent}
-        onChange={(e) => setSearchStudent(e.target.value)}
-        placeholder="Search by email"
-        className="enroll-search-bar" 
-      />
-                <button onClick={() => {
-                  selectedStudents.forEach(studentId => handleEnrollStudent(Enroll.id, studentId));
-                  setSelectedStudents([]); 
-                }}>
-                  Enroll Students
-                </button>
-                <button onClick={() => { setEnroll(null); }}>Cancel</button>
-              </div>
+        <input
+          type="text"
+          value={searchStudent}
+          onChange={(e) => setSearchStudent(e.target.value)}
+          placeholder="Search by email, ID, or name"
+          className="enroll-search-bar" 
+        />
+        <button onClick={() => {
+          selectedStudents.forEach(studentId => handleEnrollStudent(Enroll.id, studentId));
+          setSelectedStudents([]); 
+        }}>
+          Enroll Students
+        </button>
+        <button onClick={() => { setEnroll(null); }}>Cancel</button>
       </div>
-        </div>
-          )}
+    </div>
+  </div>
+)}
   
   {showEnrolledStudents && (
   <div className="enrolled-students-list">
@@ -565,30 +578,34 @@ const Subjects = () => {
       type="text"
       value={searchStudent}
       onChange={(e) => setSearchStudent(e.target.value)}
-      placeholder="Search by email"
+      placeholder="Search by email or name"
       className="enroll-search-bar"
     />
     <div className="enrolled-students-container">
       {enrolledStudents
         .filter(student =>
-          student.email.toLowerCase().includes(searchStudent.toLowerCase())
+          student.email.toLowerCase().includes(searchStudent.toLowerCase()) || 
+          student.id.toLowerCase().includes(searchStudent.toLowerCase()) ||
+          `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchStudent.toLowerCase()) 
         )
         .map((student) => (
           <div key={student.id} className="student-item">
-            <p>{student.email}</p>
+            <p>
+            {student.firstName} {student.lastName} - {student.email} - (ID: {student.id})
+            </p>
           </div>
         ))
       }
       {enrolledStudents.filter(student =>
-        student.email.toLowerCase().includes(searchStudent.toLowerCase())
+        student.email.toLowerCase().includes(searchStudent.toLowerCase()) ||
+        student.id.toLowerCase().includes(searchStudent.toLowerCase()) ||
+        `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchStudent.toLowerCase())
       ).length === 0 && <p>No students found.</p>}
     </div>
- 
-    <button className="enrolled-student-buttons" onClick={() => { setShowEnrolledStudents(false);}}>Cancel</button>
-   
+    <button className="enrolled-student-buttons" onClick={() => { setShowEnrolledStudents(false); }}>Cancel</button>
   </div>
 )}
-        </div>
+        
       </div>
     </div>
   );
