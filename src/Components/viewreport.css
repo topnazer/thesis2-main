@@ -75,8 +75,8 @@
   font-weight: bold;
 }
 
-/* Button styling */
-button {
+
+.view-evaluation-page button {
   padding: 10px 20px;
   background-color: #4CAF50; /* Green button background */
   color: white;
@@ -85,11 +85,11 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+.view-evaluation-page button:hover {
   background-color: #45a049; /* Darker green on hover */
 }
 
-button:focus {
+.view-evaluation-page button:focus {
   background-color: blue; /* Blue on focus */
 }
 
