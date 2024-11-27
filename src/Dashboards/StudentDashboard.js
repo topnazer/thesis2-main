@@ -130,8 +130,8 @@ const StudentDashboard = () => {
           <img src="/spc.png" alt="Logo" className="dashboardlogo" />
         </div>
         <h1>Student Dashboard</h1>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span>{userName}</span>
+        <div style={{ display: "flex", alignItems: "center" , gap: "20px"}}>
+          <p style={{fontSize: "30px"}}><strong>{userName}</strong></p>
           <button className="notification-icon" onClick={() => setShowNotifications(!showNotifications)}>
             Notifications {notifications.length > 0 && `(${notifications.length})`}
           </button>

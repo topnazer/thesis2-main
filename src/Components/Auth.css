@@ -4,7 +4,7 @@
   justify-content: center;
   align-items: center;
   height: 100vh;  
-  background-color: #ffffff;
+  background-color: #5a001F;
   font-family: 'Arial', sans-serif;
 }
 
@@ -110,7 +110,7 @@
   justify-content: center;
   align-items: center;
   height: 100vh;    
-  background-color: white;
+  background-color: #5a001F;
   font-family: 'Arial', sans-serif;
   
 }
@@ -163,7 +163,6 @@
 }
 
 .signup-box .login-button {
-  background-color: transparent;
   color: rgb(69 10 10);
   font-size: 1rem;
   cursor: pointer;

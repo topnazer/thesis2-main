@@ -25,15 +25,18 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
-  margin: 10px 10px;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+  max-height: 80%;
+  border-radius: 10px;
   
 }
 
 .user-item {
-  padding: 16px 20px;
+  padding: 10px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  margin: 0 6px;
 }
 
 .user-info {
@@ -55,40 +58,41 @@
   color: #666;
 }
 .user-button {
-  margin-top: 40px;
+  display: flex;
+  flex-direction: row;
+  padding:  20px 0 ;
+  gap: 20px;
+  justify-content: center;
+ 
 }
 
 .user-button button {
-  margin: 40px auto;
-  background: transparent;
-  border-radius: 6px;
-  box-shadow: 1px 1px 1px black;
-  color: black;
+  background-color: rgb(69 10 10);
+  padding: 10px 20px; 
+  color: white;
+  border-radius: 5px;
   cursor: pointer;
-  display: inline-block;
-  font-size: 16px;
-  padding: 9px 10px;
-  text-align: center;
-  text-decoration: none;
-  margin: 4px;
+  border:none;
 }
 
 
 .user-button button:hover, .user-button button:focus {
-  background-color:#800020;
-  color: #F5F5DC;
+  border: 2px solid black;
+  color: white;
+  
+
 }
 
 .user-list {
   width: 100%;
-  margin: 10px;
   display: flex;
   flex-direction: column;
   gap: 25px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  height: 100%;
-  max-height: 100%;
+  max-height: 98%;
   border-radius: 10px;
+  overflow: hidden;
+  padding: 10px;
 }
 
 .subjects-content {
@@ -104,10 +108,14 @@
 
 .user-search {
   width: 50%;
-  padding: 0.7rem;
-  font-size: 1rem;
-  border-radius: 5px;
-  box-shadow: 0 0.4rem #dfd9d9;
+  font-size: 14px;
+  border-radius: 6px;
+ line-height: 1.5;
+padding: 5px 10px;
+border: 2px solid #dee1e2;
+color: rgb(14, 14, 16);
+display: block;
+height: 36px;           
 }
 .user-subject-content {
   height: 100px;

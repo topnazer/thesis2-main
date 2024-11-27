@@ -61,15 +61,16 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  width:100%;
+  padding: 10px;
   gap: 10px;
 }
 .editsubj-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Two columns */
-  gap: 15px; /* Space between inputs */
-  width: 100%; /* Stretch the grid to match the container */
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 15px; 
+  width: 100%; 
   box-sizing: border-box;
+  padding: 10px;
 }
 
 .subject-card {
@@ -99,16 +100,6 @@
   gap: 10px;
 }
 
-.viewed-subject-details {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 90%;
-  padding: 10px;
-  border-radius: 10px;
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
 
 .viewed-subject-details h1 {
   margin-bottom: 10px;
@@ -118,10 +109,13 @@
 
 .details-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adjust column size dynamically */
-  gap: 20px; /* Add space between grid items */
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 20px;
   width: 100%;
   box-sizing: border-box;
+  padding: 10px;
 }
 
 .details-item {
@@ -150,25 +144,18 @@
   display: flex;
   flex-direction: column;
   height:auto;
-  padding:10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   border-radius: 20px;
-  width: 90%;
+  width: 100%;
+  margin-top: 20px;
 }
 
 .edit-subject {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 100%; /* Make it take the full width of its container */
-  padding: 20px; /* Add consistent padding */
-  box-sizing: border-box; /* Ensure padding and border are included in width */
-  border-radius: 10px; /* Match the subject-details container's style */
-  background-color: #ffffff; /* Ensure a clean background */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for clarity */
-  gap: 20px; /* Add space between internal elements */
+  width: 100%;
+  border-radius: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 50%);
 }
 
 
@@ -222,7 +209,6 @@
   justify-content: center; 
   gap: 15px;
   padding: 20px; 
-  width: 100%;
 }
 
 
@@ -231,38 +217,46 @@
 }
 
 .subject-name {
-  padding: 0.7rem;
-  font-size: 1rem;
-  border-radius: 5px;
-  box-shadow: 0 0.4px #dfd9d9;
+border-radius: 6px;
+line-height: 1.5;
+padding: 5px 10px;
+border: 2px solid #dee1e2;
+color: rgb(14, 14, 16);
+height: 36px;
+width: 50%;
+
 }
 .department-filter-buttons {
   display: flex;
-  flex-wrap: wrap; /* Allow wrapping to the next line */
-  gap: 15px; /* Space between buttons */
-  margin: 10px; /* Add margin around the container */
-  justify-content: center; /* Center align buttons */
-  padding: 10px 0; /* Add padding inside the container */
-  overflow-x: auto; /* Enable horizontal scrolling if needed */
+  flex-wrap: wrap; 
+  gap: 15px; 
+  margin: 10px; 
+  justify-content: center; 
+  padding: 10px 0; 
+  overflow-x: auto; 
 }
 
 
 .subj-dept-button {
-  padding: 10px 20px; /* Add proper padding for buttons */
-  color: black;
-  background-color: white;
-  border: 1px solid black;
+  padding: 10px 20px; 
+  color: white;
+  background-color: rgb(69 10 10);
   border-radius: 5px;
   cursor: pointer;
+  border: none;
 }
+.subj-dept-button:hover,.subj-dept-button:focus {
+  border: 2px solid black;
+  color: white;
 
+}
 
 .edit-buttons {
   display: flex;
-  flex-wrap: wrap; /* Allow buttons to wrap if needed */
-  justify-content: center; /* Center-align the buttons */
-  gap: 15px; /* Add space between buttons */
-  padding: 20px; /* Add spacing above the buttons */
+  flex-wrap: wrap; 
+  justify-content: center; 
+  gap: 15px; 
+  padding: 20px; 
   width: 100%;
 }
 
@@ -295,11 +289,11 @@
 
 
 
-.subject-delete-button:hover, .subj-dept-button:hover {
+.subject-delete-button:hover {
   background-color:#800100;
   color: #F5F5DC;
 }
-.subject-delete-button:focus, .subj-dept-button:focus {
+.subject-delete-button:focus  {
   background-color:#800100;
   color: #F5F5DC;
 }

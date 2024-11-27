@@ -8,55 +8,56 @@ const UsersPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [userSubjects, setUserSubjects] = useState({});
-  const [selectedDepartment, setSelectedDepartment] = useState("CCS");
+  const [selectedDepartment, setSelectedDepartment] = useState("All");
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubjects, setSelectedSubjects] = useState([]);
-  const [newPassword, setNewPassword] = useState(''); // For storing the new password
+  const [newPassword, setNewPassword] = useState('');
   const db = getFirestore();
 
   const fetchUsersByDepartment = useCallback(async (department) => {
     try {
       let q;
-  
-      // Modify query logic based on ACAF department
-      if (department === "ACAF") {
+      if (department === "All") {
+        q = query(collection(db, "users"), where("status", "==", "Approved"));
+      } else if (department === "ACAF") {
         q = query(
           collection(db, "users"),
-          where("role", "==", "ACAF"), // Fetch users with role "ACAF"
+          where("role", "==", "ACAF"),
           where("status", "==", "Approved")
         );
       } else {
         q = query(
           collection(db, "users"),
-          where("department", "==", department), // Fetch users based on department for other departments
+          where("department", "==", department),
           where("status", "==", "Approved")
         );
       }
-  
+
       const userSnapshot = await getDocs(q);
       const usersList = [];
       const subjectsList = {};
-  
+
       for (const doc of userSnapshot.docs) {
         const userData = doc.data();
         const userId = doc.id;
-        usersList.push({ id: userId, ...userData });
-  
-        subjectsList[userId] = await fetchUserSubjects(userData.role, userId);
+
+        if (userData.role !== "Admin") {
+          usersList.push({ id: userId, ...userData });
+          subjectsList[userId] = await fetchUserSubjects(userData.role, userId);
+        }
       }
-  
+
       setUsers(usersList);
       setUserSubjects(subjectsList);
     } catch (error) {
       console.error("Error fetching users by department:", error);
     }
   }, [db]);
-  
 
   const fetchUserSubjects = useCallback(async (role, userId) => {
     try {
-      const collectionPath = role === "Student" 
-        ? `students/${userId}/subjects` 
+      const collectionPath = role === "Student"
+        ? `students/${userId}/subjects`
         : `${role.toLowerCase()}/${userId}/subjects`;
       const subjectsRef = collection(db, collectionPath);
       const subjectSnapshot = await getDocs(subjectsRef);
@@ -72,7 +73,7 @@ const UsersPage = () => {
     try {
       const studentId = selectedUser.id;
       const studentSubjectsPath = `students/${studentId}/subjects`;
-  
+
       const unenrollPromises = selectedSubjects.map(async (subjectId) => {
         await deleteDoc(doc(db, studentSubjectsPath, subjectId));
         const enrolledStudentsPath = `subjects/${subjectId}/enrolledStudents`;
@@ -90,8 +91,8 @@ const UsersPage = () => {
   };
 
   const toggleSubjectSelection = (subjectId) => {
-    setSelectedSubjects(prevSelected => 
-      prevSelected.includes(subjectId) 
+    setSelectedSubjects(prevSelected =>
+      prevSelected.includes(subjectId)
         ? prevSelected.filter(id => id !== subjectId)
         : [...prevSelected, subjectId]
     );
@@ -118,7 +119,7 @@ const UsersPage = () => {
     fetchUsersByDepartment(selectedDepartment);
   }, [fetchUsersByDepartment, selectedDepartment]);
 
-  const departments = ["CCS", "COC", "CED", "CASS", "COE", "CBA", "ACAF"];
+  const departments = ["All", "CCS", "COC", "CED", "CASS", "COE", "CBA", "ACAF"];
 
   const showOverlay = (user) => {
     setSelectedUser(user);
@@ -128,7 +129,7 @@ const UsersPage = () => {
   const hideOverlay = () => {
     setUserDetail(false);
     setSelectedUser(null);
-    setSubjectsOverlayVisible(false);  
+    setSubjectsOverlayVisible(false);
   };
 
   const showSubjectsOverlay = () => {
@@ -146,44 +147,60 @@ const UsersPage = () => {
     return fullName.includes(search) || role.includes(search);
   });
 
+  const getDepartmentColor = (department) => {
+    const colors = {
+      CCS: "green",
+      COC: "red",
+      COE: "purple",
+      CASS: "orange",
+      CBA: "yellow",
+      CED: "blue",
+    };
+    return colors[department] || "white";
+  };
+
   return (
     <div className='user-page-container'>
       <div className='user-page-left'>
-        <div className="user-list"> 
+        <div className="user-list">
           <div className='user-button'>
             {departments.map((dept) => (
-              <button 
+              <button
                 key={dept}
                 onClick={() => setSelectedDepartment(dept)}
                 className={selectedDepartment === dept ? "active-department" : ""}
+                style={{ backgroundColor: getDepartmentColor(dept), color: getDepartmentColor(dept).color } }
               >
                 {dept}
               </button>
             ))}
           </div>
           <div className='search-user-bar'>
-          <input 
-            type="text" 
-            placeholder="Search users..." 
-            value={searchTerm} 
-            onChange={(e) => setSearchTerm(e.target.value)} 
-            className='user-search'
-          />
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className='user-search'
+            />
           </div>
           {filteredUsers.length === 0 ? (
             <p>No users found in {selectedDepartment} department.</p>
           ) : (
             <div className="user-card">
               {filteredUsers.map((user) => (
-                <div key={user.id} className="user-item">
+                <div
+                  key={user.id}
+                  className="user-item"
+                >
                   <div className="user-info">
                     <strong>{user.firstName} {user.lastName}</strong>
                     <strong><p>({user.role})</p></strong>
                     <p>
-  {user.role === "ACAF" 
-    ? `Role: ${user.role}` 
-    : `Department: ${user.department}`}
-</p>
+                      {user.role === "ACAF"
+                        ? `Role: ${user.role}`
+                        : `Department: ${user.department}`}
+                    </p>
                   </div>
                   <button className="user-view" onClick={() => showOverlay(user)}>View</button>
                 </div>

@@ -1,7 +1,4 @@
-html, body {
-  height: 100%;
-  margin: 0;
-}
+
 /* Navigation Bar */
 .student-dashboard nav {
   background-color: rgb(69, 10, 10); 
@@ -21,15 +18,15 @@ html, body {
 }
 
 .student-dashboard nav button {
-  margin-left: 10px; /* Space between the buttons */
+  gap: 10px;
   background-color: #dc3545;
   color: white;
   padding: 0.5rem 1rem;
   border: none;
+  border-radius: 10px;
   cursor: pointer;
 }
 
-/* Section styling */
 .student-dashboard section {
   margin: 2rem;
 }
@@ -39,8 +36,10 @@ html, body {
   width: 100%;
   font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
+  border-radius: 20px;
   margin-top: 1rem;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3); /* Adds a subtle shadow effect */ /* Adds a subtle shadow effect */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3); 
+
 }
 
 .student-dashboard table th, 
@@ -48,9 +47,9 @@ html, body {
   padding: 1rem;
   border: 1px solid #dee2e6;
   text-align: left;
- 
   border-radius: 2px;
   font-size: 17px;
+  background-color: white;
 }
 
 .student-dashboard table th {
@@ -73,10 +72,11 @@ html, body {
   padding: 0.5rem 1rem;
   border: none;
   cursor: pointer;
+  border-radius:  0 20px 0 20px;
 }
 
 .student-dashboard .table-evaluate-btn:hover {
-  background-color:rgb(85, 31, 31); 
+  background-color:rgb(253, 253, 253); 
 }
 
 

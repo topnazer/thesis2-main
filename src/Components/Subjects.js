@@ -177,7 +177,21 @@ const Subjects = () => {
           console.error("Error deleting subject and associated data:", error);
       }
   };
-
+  const getDepartmentColor = (department) => {
+    const colors = {
+      CCS: "green",
+      COC: "red",
+      COE: "purple",
+      CASS: "orange",
+      CBA: "yellow",
+      CED: "blue",
+    };
+    return colors[department] || "white";
+  };
+  const textColors = {
+    CBA: "black", 
+    default: "white",
+  };
 
 
   const handleAddSubject = async () => {
@@ -302,7 +316,7 @@ const Subjects = () => {
         <div className="department-filter-buttons">
           <button className="subj-dept-button" onClick={() => setFilterDepartment("")}>ALL</button>
           {departments.map((department) => (
-            <button className="subj-dept-button" key={department} onClick={() => setFilterDepartment(department)}>
+            <button style={{backgroundColor: getDepartmentColor(department), color: getDepartmentColor(department).color }}className="subj-dept-button" key={department} onClick={() => setFilterDepartment(department)}>
               {department}
             </button>
           ))}
@@ -416,58 +430,14 @@ const Subjects = () => {
     </form>
   </div>
   
-          {viewedSubject && (
-            <div className="viewed-subject-details">
-              <h1>Subject Details</h1>
-              <div className="details-grid">
-                <div className="details-item">
-                  <strong>Name:</strong><span>{viewedSubject.name}</span>
-                </div>
-                <div className="details-item">
-                  <strong>ID:</strong> <span>{viewedSubject.id}</span>
-                </div>
-                <div className="details-item">
-                  <strong>School Year:</strong> <span>{viewedSubject.schoolYear}</span>
-                </div>
-                <div className="details-item">
-                  <strong>Faculty:</strong> <span>{facultyList.find((f) => f.id === viewedSubject.facultyId)?.email || "No faculty assigned"}</span>
-                </div>
-                <div className="details-item">
-                  <strong>Semester:</strong> <span>{viewedSubject.semester}</span>
-                </div>
-                <div className="details-item">
-                  <strong>Department:</strong> <span>{viewedSubject.department || "No department assigned"}</span>
-                </div>
-                <div className="details-item">
-                  <strong>Description: </strong>{viewedSubject.description}
-                </div>
-              </div>
-              <div className="edit-buttons"> 
-              <button onClick={() => {
-  setEditSubjectName(viewedSubject.name);
-  setSubjectIdToEdit(viewedSubject.id);
-  setSelectedEditFaculty(viewedSubject.facultyId);
-  setSelectedEditSemester(viewedSubject.semester);
-  setSelectedEditDepartment(viewedSubject.department);
-  setEditSubjectDescription(viewedSubject.description); 
-  CancelView();
-}}>
-  Edit
-</button>              
-                <button disabled={!!subjectIdToEdit} className="subject-delete-button" onClick={() => handleDeleteSubject(viewedSubject.id)}>Delete</button>
-                <button onClick={() => { setEnroll(viewedSubject); CancelView(); }}>Enroll Student</button>
-                <button onClick={() => { fetchEnrolledStudents(viewedSubject.id); CancelView(); CancelEnroll(); }}>Enrolled Students</button>         
-                <button onClick={() => { CancelView();}}>Cancel</button>       
-              </div> 
-            </div>      
-          )}
-          {subjectIdToEdit && (
+  <div className="edit-subject">
+  {subjectIdToEdit && (
     <div className="editsubj-tool">
       <div className="addsubj-h1">
         <h1>EDIT SUBJECT</h1>
       </div>
       <div className="editsubj-grid">
-      <select
+        <select
           value={selectedEditSemester}
           onChange={(e) => setSelectedEditSemester(e.target.value)}
         >
@@ -475,15 +445,15 @@ const Subjects = () => {
           <option value="First">First Semester</option>
           <option value="Second">Second Semester</option>
         </select>
-      <select
-  value={selectedEditSchoolYear}
-  onChange={(e) => setSelectedEditSchoolYear(e.target.value)}
->
-  <option value="">Select School Year</option>
-  {schoolYears.map((year) => (
-    <option key={year} value={year}>{year}</option>
-  ))}
-</select>
+        <select
+          value={selectedEditSchoolYear}
+          onChange={(e) => setSelectedEditSchoolYear(e.target.value)}
+        >
+          <option value="">Select School Year</option>
+          {schoolYears.map((year) => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
         <input
           type="text"
           value={editSubjectName}
@@ -524,88 +494,137 @@ const Subjects = () => {
       </div>
     </div>
   )}
-          
-          {Enroll && (
-  <div className="enroll-student">
-    <div className="enroll-tool">
-      <h1>Enroll Students in {Enroll.name}</h1>
-      <div className="student-checkboxes">
-        {filteredStudents.map((student) => (
-          <div key={student.id} className="student-checkbox">
-            <input
-              type="checkbox"
-              id={`student-${student.id}`}
-              value={student.id}
-              checked={selectedStudents.includes(student.id)}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setSelectedStudents((prev) => [...prev, student.id]); 
-                } else {
-                  setSelectedStudents((prev) => prev.filter(id => id !== student.id)); 
-                }
-              }}
-            />
-            <label htmlFor={`student-${student.id}`}>
-              {student.firstName} {student.lastName} - {student.email} - (ID: {student.id})
-            </label>
-          </div>
-        ))}
+
+  {viewedSubject && (
+    <div className="viewed-subject-details">
+      <h1>Subject Details</h1>
+      <div className="details-grid">
+        <div className="details-item">
+          <strong>Name:</strong><span>{viewedSubject.name}</span>
+        </div>
+        <div className="details-item">
+          <strong>ID:</strong><span>{viewedSubject.id}</span>
+        </div>
+        <div className="details-item">
+          <strong>School Year:</strong><span>{viewedSubject.schoolYear}</span>
+        </div>
+        <div className="details-item">
+          <strong>Faculty:</strong>
+          <span>{facultyList.find((f) => f.id === viewedSubject.facultyId)?.email || "No faculty assigned"}</span>
+        </div>
+        <div className="details-item">
+          <strong>Semester:</strong><span>{viewedSubject.semester}</span>
+        </div>
+        <div className="details-item">
+          <strong>Department:</strong><span>{viewedSubject.department || "No department assigned"}</span>
+        </div>
+        <div className="details-item">
+          <strong>Description:</strong>{viewedSubject.description}
+        </div>
       </div>
-      <div className="enroll-buttons">
-        <input
-          type="text"
-          value={searchStudent}
-          onChange={(e) => setSearchStudent(e.target.value)}
-          placeholder="Search by email, ID, or name"
-          className="enroll-search-bar" 
-        />
+      <div className="edit-buttons">
         <button onClick={() => {
-          selectedStudents.forEach(studentId => handleEnrollStudent(Enroll.id, studentId));
-          setSelectedStudents([]); 
+          setEditSubjectName(viewedSubject.name);
+          setSubjectIdToEdit(viewedSubject.id);
+          setSelectedEditFaculty(viewedSubject.facultyId);
+          setSelectedEditSemester(viewedSubject.semester);
+          setSelectedEditDepartment(viewedSubject.department);
+          setEditSubjectDescription(viewedSubject.description);
+          CancelView();
         }}>
-          Enroll Students
+          Edit
         </button>
-        <button onClick={() => { setEnroll(null); }}>Cancel</button>
+        <button disabled={!!subjectIdToEdit} className="subject-delete-button" onClick={() => handleDeleteSubject(viewedSubject.id)}>
+          Delete
+        </button>
+        <button onClick={() => { setEnroll(viewedSubject); CancelView(); }}>
+          Enroll Student
+        </button>
+        <button onClick={() => { fetchEnrolledStudents(viewedSubject.id); CancelView(); CancelEnroll(); }}>
+          Enrolled Students
+        </button>
+        <button onClick={CancelView}>Cancel</button>
       </div>
     </div>
-  </div>
-)}
-  
-  {showEnrolledStudents && (
-  <div className="enrolled-students-list">
-    <h1>Enrolled Students</h1>
-    <input
-      type="text"
-      value={searchStudent}
-      onChange={(e) => setSearchStudent(e.target.value)}
-      placeholder="Search by email or name"
-      className="enroll-search-bar"
-    />
-    <div className="enrolled-students-container">
-      {enrolledStudents
-        .filter(student =>
-          student.email.toLowerCase().includes(searchStudent.toLowerCase()) || 
-          student.id.toLowerCase().includes(searchStudent.toLowerCase()) ||
-          `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchStudent.toLowerCase()) 
-        )
-        .map((student) => (
-          <div key={student.id} className="student-item">
-            <p>
-            {student.firstName} {student.lastName} - {student.email} - (ID: {student.id})
-            </p>
-          </div>
-        ))
-      }
-      {enrolledStudents.filter(student =>
-        student.email.toLowerCase().includes(searchStudent.toLowerCase()) ||
-        student.id.toLowerCase().includes(searchStudent.toLowerCase()) ||
-        `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchStudent.toLowerCase())
-      ).length === 0 && <p>No students found.</p>}
+  )}
+
+  {Enroll && (
+    <div className="enroll-student">
+      <div className="enroll-tool">
+        <h1>Enroll Students in {Enroll.name}</h1>
+        <div className="student-checkboxes">
+          {filteredStudents.map((student) => (
+            <div key={student.id} className="student-checkbox">
+              <input
+                type="checkbox"
+                id={`student-${student.id}`}
+                value={student.id}
+                checked={selectedStudents.includes(student.id)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedStudents((prev) => [...prev, student.id]);
+                  } else {
+                    setSelectedStudents((prev) => prev.filter((id) => id !== student.id));
+                  }
+                }}
+              />
+              <label htmlFor={`student-${student.id}`}>
+                {student.firstName} {student.lastName} - {student.email}
+              </label>
+            </div>
+          ))}
+        </div>
+        <div className="enroll-buttons">
+          <input
+            type="text"
+            value={searchStudent}
+            onChange={(e) => setSearchStudent(e.target.value)}
+            placeholder="Search by email"
+            className="enroll-search-bar"
+          />
+          <button onClick={() => {
+            selectedStudents.forEach((studentId) => handleEnrollStudent(Enroll.id, studentId));
+            setSelectedStudents([]);
+          }}>
+            Enroll Students
+          </button>
+          <button onClick={() => setEnroll(null)}>Cancel</button>
+        </div>
+      </div>
     </div>
-    <button className="enrolled-student-buttons" onClick={() => { setShowEnrolledStudents(false); }}>Cancel</button>
-  </div>
-)}
-        
+  )}
+
+  {showEnrolledStudents && (
+    <div className="enrolled-students-list">
+      <h1>Enrolled Students</h1>
+      <input
+        type="text"
+        value={searchStudent}
+        onChange={(e) => setSearchStudent(e.target.value)}
+        placeholder="Search by email"
+        className="enroll-search-bar"
+      />
+      <div className="enrolled-students-container">
+        {enrolledStudents
+          .filter((student) =>
+            student.email.toLowerCase().includes(searchStudent.toLowerCase())
+          )
+          .map((student) => (
+            <div key={student.id} className="student-item">
+              <p>{student.email}</p>
+            </div>
+          ))}
+        {enrolledStudents.filter((student) =>
+          student.email.toLowerCase().includes(searchStudent.toLowerCase())
+        ).length === 0 && <p>No students found.</p>}
+      </div>
+      <button className="enrolled-student-buttons" onClick={() => setShowEnrolledStudents(false)}>
+        Cancel
+      </button>
+    </div>
+  )}
+</div>
+   
       </div>
     </div>
   );
