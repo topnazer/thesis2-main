@@ -1,16 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { auth } from "../firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import './Auth.css';
-
 
 const LoginForm = ({ toggleSignUp }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const db = getFirestore();
+
+  useEffect(() => {
+    // Check if a user is already logged in and redirect to the appropriate page
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          // Redirect based on user role
+          switch (userData.role) {
+            case "Admin":
+              navigate("/admin-dashboard");
+              break;
+            case "Faculty":
+              navigate("/faculty-dashboard");
+              break;
+            case "Dean":
+              navigate("/dean-dashboard");
+              break;
+            case "Student":
+              navigate("/student-dashboard");
+              break;
+            case "ACAF":
+              navigate("/acaf-dashboard");
+              break;
+            default:
+              alert("Access denied: Unknown role.");
+              break;
+          }
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate, db]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -21,8 +55,6 @@ const LoginForm = ({ toggleSignUp }) => {
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        console.log("User role:", userData.role);
-
         if (userData.status !== "Approved") {
           alert("Your account is not approved yet.");
           return;
@@ -41,7 +73,7 @@ const LoginForm = ({ toggleSignUp }) => {
           case "Student":
             navigate("/student-dashboard");
             break;
-          case "ACAF": 
+          case "ACAF":
             navigate("/acaf-dashboard");
             break;
           default:
@@ -86,16 +118,19 @@ const LoginForm = ({ toggleSignUp }) => {
             </div>
             <button type="submit" className="login-button">Login</button>
           </form>
-          <span>Dont have account? </span><span onClick={toggleSignUp} className="signup-button">Sign up</span>
+          <div className="auth-span">
+            <span>Dont have account? </span><span onClick={toggleSignUp} className="signup-button">Sign up</span>
+          </div> 
           <div className="social-links">
-              <div><img src="spc.png"/></div>
-              <div><img src="spc.png"/></div>
-              <div><img src="spc.png"/></div>
+            <img src="spc.png" alt="social-link"/>
+            <img src="spc.png" alt="social-link"/>
+            <img src="spc.png" alt="social-link"/>
           </div>
         </div>
         <div className="auth-right">
           <div className="auth-logo">  
-            <img src="spc.png"/>
+            <img src="spc.png" alt="SPC logo"/>
+            <h1>Evaluating for Excellence.</h1>
           </div>
         </div>
       </div>
