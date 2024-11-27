@@ -26,8 +26,11 @@
 }
 
 .auth-left {
+  display: flex;
+  flex-direction: column;
   width: 50%;
-  padding: 40px;
+  padding: 30px;
+  gap: 10px;
   
 }
 
@@ -80,30 +83,26 @@
 }
 
 .social-links {
-  height: 70px;
-  width: 400px;
+  width: 100%;
   display: flex;
   flex-direction: row;
-  margin-top: 20px;
+  justify-content: space-evenly;
+  
+}
+
+.social-links img {
+  width: 10%;
 }
 
 
-.social-links div {
-  width: 50px;
-  height: 50px;
-  margin: 0 auto;
-  cursor: pointer;
-}
-.social-links div img {
-  margin-top: 20px;
-  width: 50px;
-  height: 50px;
-}
 
 .auth-right {
+  display: flex;
+  justify-content: center;
+  text-align: center;
   width: 50%;
   box-shadow: 0px 2px 4px rgb(69 10 10); 
-   
+  gap: 10px;
 }
 
 .signup-container {
@@ -117,7 +116,7 @@
 }
 
 .signup-box {
-  width: 400px;
+  width: 50%;
   padding: 40px;
   background-color: white;
   border-radius: 10px;
@@ -133,24 +132,24 @@
 }
 
 .signup-box form {
-  display: flex;
+  display: grid;
+  grid-Template-Columns: 1fr 1fr ;
+  grid-Template-Rows: 1fr 1fr  ;
+  gap: 20px  ;
   flex-direction: column;
 }
 
 .signup-box input,
-.signup-box select {
+.signup-box select
+ {
   margin-bottom: 15px;
   padding: 10px;
   font-size: 1rem;
   border: 1px solid black;
   border-radius: 5px;
-  width: 95%;
 }
 
-.signup-box select {
-  margin-left: auto;
-  margin-right: auto;
-}
+
 
 .signup-box .signup-button {
   background-color: #800020;
@@ -160,7 +159,7 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  margin-top: 10px;
+  width: 30%;
 }
 
 .signup-box .login-button {
@@ -177,15 +176,35 @@
 }
 
 .auth-logo {
-  margin: 50px auto;
-  width: 250px;
-  height: 250px;
-  border-radius: 100%;
+  width: 60%;
+  height: 50%;
+ 
 }
 
 .auth-logo img {
-  height: 250px;
-  width: 250px;
-  margin: auto;
+  height: 100%;
+  width: 100%;
+  margin-top: 20px;
   border-radius: 100%;
+}
+
+.sign-up-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  align-items: center;
+  
+  
+}
+
+.span-item {
+  grid-column: 1 / -1; 
+  justify-self: center; 
+  align-items: center;
+  padding: 15px;
+  border-radius: 10px;
+  width: 100%;
+    
 }
