@@ -1,7 +1,12 @@
 html, body {
-  height: 100%;
   margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden; /* Prevents horizontal overflow */
 }
+
 
 /* Navigation Bar */
 .faculty-dashboard nav {
@@ -18,7 +23,7 @@ html, body {
 
 .faculty-dashboard nav h1 {
   font-size: 1.5rem;
-  margin: 0;
+  margin-left: 100px;
 }
 
 .faculty-dashboard nav button {
@@ -133,7 +138,7 @@ html, body {
   font-size: 1rem;
 }
 
-.evaluation-report-modal {
+.facevaluation-report-modal {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -155,14 +160,14 @@ html, body {
   color: black;
 }
 
-.evaluation-report-modal h2 {
+.facevaluation-report-modal h2 {
   margin-top: 0px;
   margin-bottom: 10px;
   
 }
 
 /* Container for the side-by-side boxes */
-.evaluation-box-container {
+.facevaluation-box-container {
   display: flex;
   gap: 20px; /* Space between the two boxes */
   width: 100%;
@@ -171,7 +176,7 @@ html, body {
 }
 
 /* Individual box styling */
-.evaluation-box {
+.facevaluation-box {
   flex: 1;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -180,14 +185,14 @@ html, body {
   max-width: 250px;
 }
 
-.subject-scores-vertical {
+.facsubject-scores-vertical {
   display: flex;
   flex-direction: column;
   gap: 10px;
   align-items: center;
 }
 
-.subject-score-box {
+.facsubject-score-box {
   width: 100%;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -198,7 +203,7 @@ html, body {
   text-align: center;
 }
 
-.evaluation-report-modal button {
+.facevaluation-report-modal button {
   background-color: rgb(15, 2, 2);
   color: white;
   padding: 0.5rem 1rem;
@@ -209,8 +214,193 @@ html, body {
   margin-top: 20px;
 }
 
-.evaluation-report-modal button:hover {
+.facevaluation-report-modal button:hover {
   background-color: rgb(85, 31, 31);
 }
 
 
+/* Subjects section styling */
+.facsubject-list {
+  display: flex;
+  flex-direction: row; /* Align items in a row */
+  gap: 10px; /* Space between each card */
+  padding: 1rem;
+  max-width: 100%; /* Full width container */
+  flex-wrap: wrap; /* Wrap to next line if needed */
+}
+
+.facsubject-card {
+  flex: 1 1 250px; /* Each card takes a minimum width of 250px */
+  display: flex;
+  flex-direction: column;
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  font-family: Arial, sans-serif;
+  color: #333;
+  margin: 0; /* Remove any extra margins to ensure consistent gap */
+}
+
+
+.facsubject-list h2 {
+  width: 100%; /* Makes the heading take full width */
+  text-align: center; /* Centers the heading text */
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem; /* Adds space between heading and cards */
+}
+
+.facsubject-card h3 {
+  margin: 0;
+  font-size: 1.1rem; /* Slightly smaller font for title */
+  font-weight: bold;
+}
+
+.facsubject-card p {
+  margin: 0.3rem 0; /* Reduced space around paragraph text */
+  font-size: 0.95rem; /* Slightly smaller text for compactness */
+  color: #555;
+}
+
+.facsubject-card button {
+  align-self: flex-start;
+  background-color: rgb(69, 10, 10); /* Dark red color to match theme */
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.facsubject-card button:hover {
+  background-color: rgb(85, 31, 31); /* Slightly lighter shade on hover */
+}
+
+.Facviewed-subject-details {
+  background-color: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 8px; /* Keep a slight border radius for consistency */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 100%; /* Full width of the container */
+  margin: 20px auto; /* Center and add space above */
+  width: 100%; /* Optional: adjust width to keep it consistent */
+  box-sizing: border-box; /* Ensures padding is included in width */
+  margin-right: 20px;
+}
+
+.Facviewed-subject-details h2 {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.Facviewed-subject-details ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Columns will fill the row */
+  grid-auto-rows: min-content; /* Adjust row height to content */
+  gap: 15px; /* Space between each student */
+  max-width: 600px;
+ 
+}
+
+.Facviewed-subject-details ul li {
+  background-color: #f2f2f2;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #333;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+  white-space: nowrap;
+}
+
+/* Additional rule to limit each column to 6 items */
+.Facviewed-subject-details ul {
+  grid-auto-flow: column; /* Fill columns before adding rows */
+  grid-template-rows: repeat(10, auto); /* Limit each column to 6 rows */
+}
+
+
+.Facviewed-subject-details ul li:hover {
+  background-color: #e0e0e0;
+}
+
+.close-subdetails {
+  display: block;
+  margin-top: 1rem; /* Space above the button */
+  padding: 0.5rem 1rem;
+  background-color: rgb(69, 10, 10);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: left; /* Align text to the left */
+}
+
+.close-subdetails button:hover {
+  background-color: rgb(85, 31, 31);
+}
+
+.facpagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.facpagination-controls button {
+  padding: 0.5rem 1rem;
+  background-color: rgb(69, 10, 10); /* Dark red color to match theme */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.facpagination-controls button:disabled {
+  background-color: #ccc; /* Gray for disabled state */
+  cursor: not-allowed;
+}
+
+.facpagination-controls span {
+  font-size: 1rem;
+  font-weight: bold;
+}
+.go-back-btn {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #f9f9f9;
+  color: black;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.dashboardlogo-container {
+  position:absolute;
+    top: 0; /* Aligns the logo to the top of the header */
+  left: 0; /* Aligns the logo to the right of the header */
+   z-index: 10;
+}
+
+.dashboardlogo {
+  width: 80px;
+  height: auto;
+  border-radius: 50%;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
