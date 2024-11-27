@@ -6,17 +6,17 @@ import {FileCog} from 'lucide-react';
 const Evaluation = () => (
     <div className='evaluation-container'>
         <div className="evaluation-buttons">
-            <Link to="/admin-dashboard/subject-evaluation" className='subject-evaluation-button'>
+            <Link to="/admin-dashboard/subject-evaluation" className='evaluation-tool-button'>
                 <FileCog style={{ width: '50px', height: '50px', color: 'black' }} /> 
                 <p>Student Tools</p>    
             </Link>
 
-            <Link to="/admin-dashboard/faculty-evaluation" className='faculty-evaluation-button'>
+            <Link to="/admin-dashboard/faculty-evaluation" className='evaluation-tool-button'>
                 <FileCog style={{ width: '50px', height: '50px', color: 'black' }} />
                 <p>Peer-to-peer Tools</p>
             </Link>
 
-            <Link to="/admin-dashboard/dean-evaluation" className='dean-evaluation-button'>
+            <Link to="/admin-dashboard/dean-evaluation" className='evaluation-tool-button'>
                 <FileCog style={{ width: '50px', height: '50px', color: 'black' }} />
                 <p>Dean/Acaf Tools</p>
             </Link>
@@ -24,5 +24,4 @@ const Evaluation = () => (
         
     </div>
 );
-
 export default Evaluation;
