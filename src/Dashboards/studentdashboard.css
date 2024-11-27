@@ -17,6 +17,7 @@ html, body {
 
 .student-dashboard nav h1 {
   font-size: 1.5rem;
+  margin-left: 100px;
 }
 
 .student-dashboard nav button {
@@ -125,4 +126,53 @@ html, body {
 
 .notifications-dropdown ul li {
   color: #333;
+}
+
+.dashboardlogo-container {
+  top: 0; /* Aligns the logo to the top of the header */
+  left: 0; /* Aligns the logo to the right of the header */
+  margin-left: 15px;
+  margin-top: 15px;
+}
+
+.dashboardlogo {
+  width: 80px;
+  height: auto;
+  border-radius: 50%;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.pagination button {
+  background-color: rgb(69, 10, 10); /* Match theme color */
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  margin: 0 5px;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  font-size: 1rem;
+}
+
+.pagination button:hover {
+  background-color: rgb(85, 31, 31); /* Darker shade for hover */
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pagination span {
+  font-size: 1rem;
+  color: #333;
+  margin: 0 10px;
 }
