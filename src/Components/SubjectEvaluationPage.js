@@ -1,232 +1,270 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getFirestore, doc, setDoc, collection, getDocs, getDoc, deleteDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import './subjectevaluationpage.css';
 
 const SubjectEvaluationPage = () => {
-    const [evaluationForms, setEvaluationForms] = useState([]);  // Use a single form state instead of by subject
+    const [evaluationQuestions, setEvaluationQuestions] = useState([]);
     const [newQuestion, setNewQuestion] = useState("");
     const [newWeight, setNewWeight] = useState("");
     const [editingIndex, setEditingIndex] = useState(null);
     const [categories, setCategories] = useState([]);
     const [newCategory, setNewCategory] = useState("");
+    const [categoryType, setCategoryType] = useState("Multiple Choice");
+    const [categoryOptions, setCategoryOptions] = useState([]); 
+    const [newOption, setNewOption] = useState(""); 
     const [selectedCategory, setSelectedCategory] = useState("");
-    const [expirationDate, setExpirationDate] = useState(""); // New expiration date state
+    const [editingCategoryIndex, setEditingCategoryIndex] = useState(null);
+    const [expirationDate, setExpirationDate] = useState("");
 
     const db = getFirestore();
 
-    const addCategory = () => {
-        if (!newCategory.trim()) return;
-        setCategories((prevCategories) => {
-            if (prevCategories.includes(newCategory)) {
-                alert("Category already exists!");
-                return prevCategories;
+    const fetchEvaluationData = useCallback(async () => {
+        try {
+            const formRef = doc(db, "evaluationForms", "subject");
+            const formSnap = await getDoc(formRef);
+            if (formSnap.exists()) {
+                setEvaluationQuestions(formSnap.data().questions || []);
+                setCategories(formSnap.data().categories || []);
+                setExpirationDate(formSnap.data().expirationDate?.toDate() || "");
             }
-            return [...prevCategories, newCategory];
+        } catch (error) {
+            console.error("Error fetching form data:", error);
+        }
+    }, [db]);
+
+    useEffect(() => {
+        fetchEvaluationData();
+    }, [fetchEvaluationData]);
+
+    const addOrEditCategory = () => {
+        if (!newCategory.trim()) return;
+
+        setCategories((prevCategories) => {
+            const updatedCategories = [...prevCategories];
+            if (editingCategoryIndex !== null) {
+                // Update category and type
+                updatedCategories[editingCategoryIndex] = {
+                    name: newCategory,
+                    type: categoryType,
+                    options: categoryOptions, // Save options for this category
+                };
+                setEvaluationQuestions((prevQuestions) =>
+                    prevQuestions.map((question) =>
+                        question.category === prevCategories[editingCategoryIndex].name
+                            ? { ...question, category: newCategory }
+                            : question
+                    )
+                );
+            } else {
+                updatedCategories.push({ name: newCategory, type: categoryType, options: categoryOptions });
+            }
+            return updatedCategories;
         });
-        setNewCategory("");
+
+        resetCategoryState();
     };
 
-    const addQuestion = () => {
-        if (!newQuestion.trim() || !selectedCategory) {
-            alert("Please enter a question and select a category.");
-            return;
-        }
+    const resetCategoryState = () => {
+        setNewCategory("");
+        setCategoryType("Multiple Choice");
+        setCategoryOptions([]);
+        setNewOption("");
+        setEditingCategoryIndex(null);
+    };
 
-        const questionWithWeight = {
-            text: newQuestion,
-            weight: parseFloat(newWeight) || 1,
-            category: selectedCategory,
-        };
+    const deleteCategory = (category) => {
+        setCategories((prevCategories) => prevCategories.filter((cat) => cat.name !== category.name));
+        setEvaluationQuestions((prevQuestions) =>
+            prevQuestions.filter((question) => question.category !== category.name)
+        );
+    };
 
-        setEvaluationForms((prevForms) => {
-            const updatedQuestions = editingIndex !== null
-                ? prevForms.map((question, index) =>
-                    index === editingIndex ? questionWithWeight : question
+    const handleEditCategory = (index, category) => {
+        setNewCategory(category.name);
+        setCategoryType(category.type); 
+        setCategoryOptions(category.options || []); 
+        setEditingCategoryIndex(index);
+    };
+
+    const handleCategoryOptionsChange = (e) => {
+        setNewOption(e.target.value); 
+    };
+
+    const addOption = () => {
+        if (newOption.trim() && selectedCategory) {
+            setCategories((prevCategories) =>
+                prevCategories.map((category) =>
+                    category.name === selectedCategory
+                        ? {
+                              ...category,
+                              options: [...(category.options || []), newOption.trim()],
+                          }
+                        : category
                 )
-                : [...prevForms, questionWithWeight];
+            );
+            setNewOption(""); 
+        }
+    };
+    const deleteOption = (index) => {
+        if (selectedCategory) {
+            setCategories((prevCategories) =>
+                prevCategories.map((category) =>
+                    category.name === selectedCategory
+                        ? {
+                              ...category,
+                              options: category.options.filter((_, i) => i !== index),
+                          }
+                        : category
+                )
+            );
+        }
+    };
+    const addOrEditQuestion = () => {
+        if (!newQuestion.trim() || !selectedCategory) return;
+        const question = { text: newQuestion, weight: parseFloat(newWeight) || 1, category: selectedCategory };
 
-            return updatedQuestions;
-        });
+        setEvaluationQuestions((prev) =>
+            editingIndex !== null
+                ? prev.map((q, i) => (i === editingIndex ? question : q))
+                : [...prev, question]
+        );
 
+        resetQuestionState();
+    };
+
+    const resetQuestionState = () => {
         setNewQuestion("");
         setNewWeight("");
         setEditingIndex(null);
     };
 
-    const deleteQuestion = (absoluteIndex) => {
-        setEvaluationForms((prevForms) => prevForms.filter((_, i) => i !== absoluteIndex));
+    const handleEditQuestion = (index) => {
+        const question = evaluationQuestions[index];
+        setNewQuestion(question.text);
+        setNewWeight(question.weight);
+        setSelectedCategory(question.category);
+        setEditingIndex(index);
     };
 
-    const handleEditQuestion = (absoluteIndex) => {
-        setNewQuestion(evaluationForms[absoluteIndex].text);
-        setNewWeight(evaluationForms[absoluteIndex].weight);
-        setSelectedCategory(evaluationForms[absoluteIndex].category);
-        setEditingIndex(absoluteIndex);
+    const deleteQuestion = (index) => {
+        setEvaluationQuestions(evaluationQuestions.filter((_, i) => i !== index));
     };
 
     const handleSaveForm = async () => {
         try {
-            const formRef = doc(db, "evaluationForms", "commonEvaluationForm"); // Use a common ID for single form
-            await setDoc(formRef, {
-                questions: evaluationForms || [],
-                categories,
-                expirationDate: expirationDate || null, // Save expiration date
-            });
-            alert("Subject evaluation form saved successfully!");
+            const formRef = doc(db, "evaluationForms", "subject");
+            await setDoc(formRef, { questions: evaluationQuestions, categories, expirationDate: expirationDate || null });
+            alert("Form saved successfully!");
         } catch (error) {
             console.error("Error saving form:", error);
         }
     };
 
-    const deleteCategory = (categoryToDelete) => {
-        setCategories((prevCategories) => 
-            prevCategories.filter((category) => category !== categoryToDelete)
-        );
-        setEvaluationForms((prevForms) => prevForms.filter(
-            (question) => question.category !== categoryToDelete
-        ));
-    };
-
-    const checkExpiration = useCallback(async () => {
-        try {
-            const now = new Date();
-            const formRef = doc(db, "evaluationForms", "commonEvaluationForm");
-            const formDoc = await getDoc(formRef);
-
-            if (formDoc.exists() && formDoc.data().expirationDate) {
-                const expiration = new Date(formDoc.data().expirationDate.seconds * 1000);
-                if (expiration < now) {
-                    await deleteDoc(formRef);
-                    setEvaluationForms([]);
-                    alert(`The common evaluation form has expired and was deleted.`);
-                }
-            }
-        } catch (error) {
-            console.error("Error checking for expired forms:", error);
-        }
-    }, [db]);
-
-    const handleExtendExpiration = async (newDate) => {
-        try {
-            const formRef = doc(db, "evaluationForms", "commonEvaluationForm");
-            await setDoc(formRef, { expirationDate: new Date(newDate) }, { merge: true });
-            setExpirationDate(newDate);
-            alert("Expiration date extended successfully!");
-        } catch (error) {
-            console.error("Error extending expiration date:", error);
-        }
-    };
-
-    useEffect(() => {
-        const fetchForm = async () => {
-            try {
-                const formRef = doc(db, "evaluationForms", "commonEvaluationForm");
-                const formSnap = await getDoc(formRef);
-                if (formSnap.exists()) {
-                    setEvaluationForms(formSnap.data().questions || []);
-                    setCategories(formSnap.data().categories || []);
-                    setExpirationDate(formSnap.data().expirationDate?.toDate() || ""); // Load expiration date
-                }
-            } catch (error) {
-                console.error("Error fetching evaluation form:", error);
-            }
-        };
-
-        fetchForm();
-        const intervalId = setInterval(checkExpiration, 3600000); // Check every hour
-        return () => clearInterval(intervalId); // Cleanup interval on unmount
-    }, [checkExpiration]);
-
     return (
-        <div className="subject-evaluation-page">
-            <div className="subject-evaluation-card">
-                <h2 className="subject-evaluation-header">Create or Edit Evaluation Form</h2>
+        <div className="subject-evaluation-container">
+            <div className="subject-form">
+                <h2>Subject Evaluation Form</h2>
 
-                <div className="subject-category-section">
-                    <label>Select Category:</label>
-                    <select
-                        className="subject-evaluation-select"
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                    >
-                        <option value="" disabled>Select a category</option>
-                        {categories.map((category, index) => (
-                            <option key={index} value={category}>{category}</option>
-                        ))}
-                    </select>
+                <div className="category-input-section">
+                    <h3>{editingCategoryIndex !== null ? "Edit Category" : "Add Category"}</h3>
                     <input
                         type="text"
                         value={newCategory}
                         onChange={(e) => setNewCategory(e.target.value)}
-                        placeholder="Add new category"
+                        placeholder={editingCategoryIndex !== null ? "Edit category name" : "Add category"}
                     />
-                    <button onClick={addCategory} style={{ marginLeft: '10px', backgroundColor: '#8b0000' }}>Add Category</button>
+                    <select
+                        value={categoryType}
+                        onChange={(e) => setCategoryType(e.target.value)}
+                    >
+                        <option value="Multiple Choice">Multiple Choice</option>
+                        <option value="Checkbox">Checkbox</option>
+                        <option value="Rating">Rating</option>
+                    </select>
+                    <button onClick={addOrEditCategory}>
+                        {editingCategoryIndex !== null ? "Update Category" : "Add Category"}
+                    </button>
                 </div>
 
-                <div className="expiration-date">
+                <div className="question-input-section">
+    <h1>Select Category to Edit</h1>
+    <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+        <option value="" disabled>Select a category</option>
+        {categories.map((category, index) => (
+            <option key={index} value={category.name}>{category.name}</option>
+        ))}
+    </select>
+    <textarea
+        value={newQuestion}
+        onChange={(e) => setNewQuestion(e.target.value)}
+        placeholder="Add Question"
+    />
+
+    {categories.find((cat) => cat.name === selectedCategory)?.type === "Multiple Choice" ||
+    categories.find((cat) => cat.name === selectedCategory)?.type === "Checkbox" ? (
+        <>
+            <input
+                type="text"
+                value={newOption}
+                onChange={handleCategoryOptionsChange}
+                placeholder="Enter new option"
+            />
+            <button onClick={addOption}>Add Option</button>
+            <ul>
+                {categoryOptions.map((option, index) => (
+                    <li key={index}>
+                        {option}
+                        <button onClick={() => deleteOption(index)}>Delete</button>
+                    </li>
+                ))}
+            </ul>
+        </>
+    ) : null}
+
+    <button onClick={addOrEditQuestion}>
+        {editingIndex !== null ? "Update Question" : "Add Question"}
+    </button>
+</div>
+
+                <div className="expiration-date-section">
                     <label>Expiration Date:</label>
-                    <input
-                        type="date"
-                        value={expirationDate}
-                        onChange={(e) => setExpirationDate(e.target.value)}
-                    />
-                    <button onClick={() => handleExtendExpiration(expirationDate)}>Extend Expiration</button>
+                    <input type="date" value={expirationDate} onChange={(e) => setExpirationDate(e.target.value)} />
+                    <button onClick={handleSaveForm}>Save Form</button>
                 </div>
+            </div>
 
-                <div className="subject-questions-container">
-                    {categories.map((category, categoryIndex) => (
-                        <div key={categoryIndex} className="subject-category-block">
-                            <h3>{category}
-                                <button 
-                                    className="delete-category-button"
-                                    onClick={() => deleteCategory(category)}
-                                >
-                                    Delete
-                                </button>
-                            </h3>
-                            <ul className="subject-questions-list">
-                                {(evaluationForms || []).map((question, absoluteIndex) => {
-                                    if (question.category === category) {
-                                        return (
-                                            <li key={absoluteIndex}>
-                                                {question.text} ({question.weight})
-                                                <div className="subject-operation-buttons">
-                                                    <button className="subject-edit-button" onClick={() => handleEditQuestion(absoluteIndex)}>Edit</button>
-                                                    <button className="subject-delete-button" onClick={() => deleteQuestion(absoluteIndex)}>Delete</button>
-                                                </div>
-                                            </li>
-                                        );
-                                    }
-                                    return null;
-                                })}
-                            </ul>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="subject-question-form">
-                    <textarea
-                        className="subject-question-input"
-                        value={newQuestion}
-                        onChange={(e) => setNewQuestion(e.target.value)}
-                        placeholder={editingIndex !== null ? "Edit the question" : "Add a new question"}
-                    />
-                    <input
-                        type="number"
-                        className="subject-weight-input"
-                        value={newWeight}
-                        onChange={(e) => setNewWeight(e.target.value)}
-                        placeholder="Set question weight"
-                    />
-                    <div className="subject-buttons-container">
-                        <button className="subject-save-button" onClick={addQuestion}>
-                            {editingIndex !== null ? "Update Question" : "Add Question"}
-                        </button>
-                        <button className="subject-cancel-button" onClick={() => setNewQuestion("")}>Cancel</button>
+            <div className="subject-preview">
+                {categories.map((category, index) => (
+                    <div key={index} className="category-preview-section">
+                        <h3>
+                            {category.name} ({category.type})
+                            <div className='edit-category-button'>
+                            <button onClick={() => deleteCategory(category)} className="delete-category-btn">
+                                Delete Category
+                            </button>
+                            <button onClick={() => handleEditCategory(index, category)} className="edit-category-btn">
+                                Edit Category
+                            </button>
+                            </div>
+                        </h3>
+                        <ul>
+                            {evaluationQuestions
+                                .filter((q) => q.category === category.name)
+                                .map((q, i) => (
+                                    <li key={i} className="question-item">
+                                        <div className="question-content">
+                                            <p>{q.text}</p>
+                                            <span className="question-weight">Weight: {q.weight}</span>
+                                        </div>
+                                        <div className="question-actions">
+                                            <button onClick={() => handleEditQuestion(i)}>Edit</button>
+                                            <button onClick={() => deleteQuestion(i)}>Delete</button>
+                                        </div>
+                                    </li>
+                                ))}
+                        </ul>
                     </div>
-                    <button className="subject-save-button" onClick={handleSaveForm}>Save Form</button>
-                    
-                </div>
+                ))}
             </div>
         </div>
     );
