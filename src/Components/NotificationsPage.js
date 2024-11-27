@@ -1,5 +1,5 @@
   import React, { useState, useEffect, useCallback } from 'react';
-  import { getFirestore, collection, getDocs, updateDoc, doc } from "firebase/firestore";
+  import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc } from "firebase/firestore";
   import './Notificationpage.css';
 
   const NotificationsPage = () => {
@@ -37,13 +37,19 @@
     const handleRejectUser = async (userId) => {
       try {
         await updateDoc(doc(db, "users", userId), { status: "Rejected" });
+        
+        await deleteDoc(doc(db, "users", userId));
+        
         setPendingUsers((prev) => prev.filter((user) => user.id !== userId));
-        alert("User rejected.");
-        fetchPendingUsers(); // Update the list again after rejection
+        
+        alert("User rejected and data deleted successfully.");
+        
+        fetchPendingUsers();
       } catch (error) {
-        console.error("Error rejecting user:", error);
+        console.error("Error rejecting and deleting user:", error);
       }
     };
+    
 
     useEffect(() => {
       fetchPendingUsers();
@@ -51,6 +57,7 @@
 
     return (
       <div className='notification-container'>
+      <div className='notification-left'>
       <h2>Pending User Registrations</h2>
       {pendingUsers.length === 0 ? (
         <p>No pending users to approve.</p>
@@ -72,6 +79,10 @@
           ))}
         </div>
       )}
+      </div>
+      <div className='notification-right'>
+        
+      </div>
     </div>
   );
 };
