@@ -161,14 +161,13 @@
 }
 
 
-
 /* Subject Evaluation  */
 .logo-container {
   position: absolute;
   top: 0; /* Aligns the logo to the top of the header */
   right: 0; /* Aligns the logo to the right of the header */
   margin-right: 15px;
-  margin-top: 2px;
+  margin-top: 8px;
 }
 
 .logo {
@@ -192,7 +191,6 @@
 /* Header Container */
 .header-container {
   margin-left: 5px;
-  padding-top: 20px;
   margin-right: 5px;
   display: flex;
   align-items: center;
@@ -205,7 +203,6 @@
   0px 4px 28px rgba(43, 12, 12, 0.05),
   0px 4px 38px rgba(46, 8, 8, 0.02);
   background: linear-gradient(45deg, rgba(29, 17, 17, 0.15), rgba(30, 12, 12, 0.1), rgba(30, 12, 12, 0));
-
   border: 2px solid #ddd; /* Border to give box-like appearance */
   border-radius: 8px;
   
@@ -226,14 +223,12 @@ margin-left: 20px;
 .form-header h2 {
   font-size: 18px;
   color: #0b0a0a;
-  margin: 5px 0;
   font-family: Arial, Helvetica, sans-serif;
 }
 
 .form-header p {
   font-size: 14px;
   color: #333;
-  margin: 5px 0;
 }
 
 
