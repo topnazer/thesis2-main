@@ -1,144 +1,161 @@
-/* Updated CSS for Subject Evaluation Page */
-
-.subject-evaluation-page {
-    padding: 10px; /* Reduced padding */
+::-webkit-scrollbar {
+    width: 0px;
 }
 
-.subject-evaluation-card {
-    margin-bottom: 10px; /* Reduced margin */
-    padding: 15px;
-    background-color: #F5F5DC;
-    border-radius: 5px;
-    border: 1px solid #8B4513;
-}
-
-.subject-evaluation-header {
-    font-size: 24px;
-    margin-bottom: 10px; /* Reduced margin */
-    color: #800020;
-    text-align: center;
-}
-
-.subject-category-section,
-.subject-question-form {
-    margin-bottom: 15px; /* Reduced margin */
-}
-
-.subject-category-block {
-    margin-top: 20px; /* Adjust the value as needed */
-}
-
-
-.subject-evaluation-select {
-    margin: 0px 6px;
-    padding: 8px; /* Reduced padding */
-    border: 1px solid #8B4513; 
-    border-radius: 5px;
-    background-color: #F5F5DC; 
-    color: #800020; 
-    font-size: 16px;
-}
-
-.subject-questions-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0; /* Removed margins */
-}
-
-.subject-questions-list li {
+.subject-evaluation-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #FFFFFF;
-    padding: 8px; /* Reduced padding */
-    margin-bottom: 5px; /* Reduced margin */
-    border-radius: 5px;
-    border: 1px solid #8B4513;
+    gap: 20px;
+    height: 100%;
+    width: 100%;
 }
 
-.subject-operation-buttons {
-    display: flex;
-    gap: 5px; /* Reduced gap */
+.subject-evaluation-container h1, h2, h3 {
+    color: rgb(133, 5, 5);
+}
+.subject-evaluation-container h1, h2, h3, p {
+    margin: 0;
 }
 
-.subject-operation-buttons button {
-    background-color: #8b0000;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    padding: 5px;
-    border-radius: 5px;
-}
-
-.subject-edit-button {
-    background-color: #A52A2A;
-    color: white;
-}
-
-.subject-edit-button:hover {
-    background-color: #A52A2A;
-}
-
-.subject-delete-button {
-    background-color: #8B4513;
-    color: white;
-}
-
-.subject-delete-button:hover {
-    background-color: #CD853F;
-}
-
-.subject-question-input {
-    width: 80%;
+.category-preview-section h3 {
     padding: 10px;
-    margin: 10px auto;
-    font-size: 16px;
-    border: 1px solid #ccc;
+  }
+.subject-form {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    width: 50%;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+}
+
+.category-input-section,
+.question-input-section,
+.expiration-date-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.category-input-section input,
+.question-input-section input,
+.question-input-section textarea,
+.question-input-section select,
+.expiration-date-section input {
+    text-align: center;
+    border: 0.5px solid rgb(0, 0, 0);
+    padding: 0.7rem 0;
+    font-size: 1rem;
     border-radius: 5px;
+    box-shadow: 0 0.4rem #dfd9d9;
+    width: 100%;
+}
+
+
+
+.question-input-section textarea {
+    width: 100%;
     resize: none;
 }
 
-.subject-buttons-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.subject-buttons-container button {
-    padding: 8px 16px; /* Adjusted padding */
+.subject-evaluation-container button {
+    padding: 8px 12px;
     font-size: 16px;
+    border: none;
     border-radius: 5px;
-    border: none;
     cursor: pointer;
 }
 
-.subject-save-button {
-    background-color: #800020;
+.subject-form button {
+    background-color: #4CAF50;
     color: white;
 }
 
-.subject-save-button:hover {
-    background-color: #A52A2A; 
-}
-
-.subject-cancel-button {
-    background-color: #8B4513;
+.subject-preview button {
+    background-color: #008CBA;
     color: white;
 }
 
-.subject-cancel-button:hover {
-    background-color: #CD853F; 
+.subject-evaluation-container .expiration-date-section button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.subject-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 50%;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    overflow-y: auto;
+}
+
+.category-preview-section {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+    padding: 5px;
 }
 
 
-.delete-category-button {
-    background-color: #8b0000;
+.category-preview-section ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.question-item {
+    background-color: #f9f9f9;
+    padding: 20px;
+    margin: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.question-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.question-actions button {
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+.question-actions .edit-btn {
+    background-color: #008CBA;
     color: white;
-    padding: 6px; /* Reduced padding */
-    font-size: 12px; /* Smaller font size */
-    border: none;
-    border-radius: 5px; /* Adjusted border-radius for smaller size */
-    cursor: pointer;
-    margin-left: 20px;
-    margin-bottom: 20px;
+}
+
+.question-actions .delete-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.expiration-date-section input {
+    width: 100%;
+}
+
+.expiration-date-section label {
+    font-size: 1rem;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #888;
+}
+
+.edit-category-button {
+    display: flex;
+    flex-direction:  row;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+}
+
+.edit-category-button button {
+    padding: 5px 5px; 
+    gap: 5px;
 }
