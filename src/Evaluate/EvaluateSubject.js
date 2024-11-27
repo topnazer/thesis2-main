@@ -20,6 +20,7 @@ const EvaluateSubject = () => {
   const [averageScore, setAverageScore] = useState(null);
   const db = getFirestore();
 
+  // Fetch subject information
   const fetchSubject = useCallback(async () => {
     try {
       const subjectDoc = await getDoc(doc(db, "subjects", subjectId));
@@ -52,13 +53,22 @@ const EvaluateSubject = () => {
     }
   }, [db, subjectId]);
 
+  // Fetch evaluation form and categories
   const fetchEvaluationForm = useCallback(async () => {
     try {
-      const evaluationDoc = await getDoc(doc(db, "evaluationForms", "commonEvaluationForm"));
+      const evaluationDoc = await getDoc(doc(db, "evaluationForms", "subject"));
       if (evaluationDoc.exists()) {
         const data = evaluationDoc.data();
-        setEvaluationForm(data.questions || []);
-        setCategories(data.categories || []);
+
+        if (!data.questions || !Array.isArray(data.questions)) {
+          throw new Error("Invalid questions structure in Firestore.");
+        }
+        if (!data.categories || !Array.isArray(data.categories)) {
+          throw new Error("Invalid categories structure in Firestore.");
+        }
+
+        setEvaluationForm(data.questions);
+        setCategories(data.categories.map((category) => category.name)); // Extract category names
       } else {
         setError("No evaluation form found for this subject.");
       }
@@ -67,6 +77,7 @@ const EvaluateSubject = () => {
     }
   }, [db]);
 
+  // Initial data fetch
   useEffect(() => {
     fetchSubject();
     fetchEvaluationForm();
@@ -75,24 +86,22 @@ const EvaluateSubject = () => {
   const handleResponseChange = (categoryIndex, questionIndex, value) => {
     const updatedResponses = { ...responses };
     const uniqueKey = `${categoryIndex}-${questionIndex}`;
-    updatedResponses[uniqueKey] = String(value); // Store as string for consistency
+    updatedResponses[uniqueKey] = String(value);
     setResponses(updatedResponses);
   };
 
   // Check if all questions in the current category are answered
   const isCurrentCategoryComplete = () => {
+    if (!categories[currentCategoryIndex]) {
+      return false;
+    }
     const category = categories[currentCategoryIndex];
     const categoryQuestions = evaluationForm.filter(
       (question) => question.category === category
     );
-
-    // Debug: Log each question and its response status
-    console.log("Checking completeness for category:", category);
     return categoryQuestions.every((_, questionIndex) => {
       const uniqueKey = `${currentCategoryIndex}-${questionIndex}`;
-      const isAnswered = responses[uniqueKey] !== undefined;
-      console.log(`Question ${questionIndex} (Key: ${uniqueKey}):`, isAnswered ? "Answered" : "Not Answered");
-      return isAnswered;
+      return responses[uniqueKey] !== undefined;
     });
   };
 
@@ -200,22 +209,31 @@ const EvaluateSubject = () => {
     }
   };
 
+
   const renderQuestionsForCurrentCategory = () => {
-    const category = categories[currentCategoryIndex];
+    const currentCategory = categories[currentCategoryIndex];
+    if (!currentCategory) {
+      return <tr><td>No questions available for this category.</td></tr>;
+    }
+
     const categoryQuestions = evaluationForm.filter(
-      (question) => question.category === category
+      (question) => question.category === currentCategory
     );
+
+    if (categoryQuestions.length === 0) {
+      return <tr><td>No questions available for this category.</td></tr>;
+    }
 
     return (
       <React.Fragment>
         <tr>
-          <td colSpan="6" className="category-header"><strong>{category}</strong></td>
+          <td colSpan="6" className="category-header"><strong>{currentCategory}</strong></td>
         </tr>
         {categoryQuestions.map((question, questionIndex) => {
           const uniqueKey = `${currentCategoryIndex}-${questionIndex}`;
           return (
             <tr key={uniqueKey}>
-              <td>{question.text}</td>
+              <td>{question.text || "Invalid question text"}</td>
               {["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"].map((label, value) => (
                 <td key={value}>
                   <input
@@ -296,7 +314,6 @@ const EvaluateSubject = () => {
         />
       </div>
     </div>
- 
   );
 };
 
