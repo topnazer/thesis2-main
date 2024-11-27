@@ -111,7 +111,10 @@ const AcafDashboard = () => {
 
   return (
     <div className="acaf-dashboard">
-      <nav style={{ display: "flex", justifyContent: "space-between" }}>
+      <nav>
+      <div className="dashboardlogo-container">
+            <img src="/spc.png" alt="Logo" className="dashboardlogo" />
+          </div>
         <h1>ACAF Dashboard</h1>
         <div>
           <span>{userName}</span>
