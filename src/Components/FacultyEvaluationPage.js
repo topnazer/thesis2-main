@@ -66,7 +66,7 @@ const FacultyEvaluationPage = () => {
 
     const handleEditCategory = (index, category) => {
         setNewFacultyCategory(category);
-        setEditingCategoryIndex(index);
+        setEditingCategoryIndex(index);  // Set editing index to track which category is being edited
     };
 
     const addOrEditQuestionForFaculty = () => {
@@ -123,9 +123,13 @@ const FacultyEvaluationPage = () => {
     const renderQuestionsByCategory = () => {
         return facultyCategories.map((category, categoryIndex) => (
             <div key={categoryIndex}>
-                <h3>{category}
+                <h3>
+                    {category}
                     <button onClick={() => deleteCategory(category)} className="delete-category-btn">
                         Delete Category
+                    </button>
+                    <button onClick={() => handleEditCategory(categoryIndex, category)} className="edit-category-btn">
+                        Edit Category
                     </button>
                 </h3>
                 <ul className="questions-list">
@@ -151,15 +155,15 @@ const FacultyEvaluationPage = () => {
     return (
         <div className="faculty-evaluation-container">
             <div className="faculty-evaluation-form">
-                <h2>Create or Edit Evaluation Form for Faculty</h2>
+                <h2>Create Evaluation Form for Faculty</h2>
                 
                 <div className="category-section">
-                    <h3>Add Category</h3>
+                    <h3>{editingCategoryIndex !== null ? "Edit Category" : "Add Category"}</h3>
                     <input
                         type="text"
                         value={newFacultyCategory}
                         onChange={(e) => setNewFacultyCategory(e.target.value)}
-                        placeholder="Add or Edit category"
+                        placeholder={editingCategoryIndex !== null ? "Edit category name" : "Add category"}
                         className="input-category"
                     />
                     <button onClick={addOrEditCategoryForFaculty}>
@@ -168,13 +172,7 @@ const FacultyEvaluationPage = () => {
                 </div>
 
                 <div className="question-section">
-                    <h3>Create Question</h3>
-                    <textarea
-                        value={newQuestion}
-                        onChange={(e) => setNewQuestion(e.target.value)}
-                        placeholder={editingIndex !== null ? "Edit the question" : "Add a new question"}
-                        className="input-question"
-                    />
+                    <h1>Select Category to Edit</h1>
                     <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
@@ -185,6 +183,12 @@ const FacultyEvaluationPage = () => {
                             <option key={index} value={category}>{category}</option>
                         ))}
                     </select>
+                    <textarea
+                        value={newQuestion}
+                        onChange={(e) => setNewQuestion(e.target.value)}
+                        placeholder={editingIndex !== null ? "Edit the question" : "Add a new question"}
+                        className="input-question"
+                    />
                     <button onClick={addOrEditQuestionForFaculty}>
                         {editingIndex !== null ? "Update Question" : "Add Question"}
                     </button>
