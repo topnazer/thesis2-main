@@ -1,18 +1,20 @@
-html {
+html, body {
     margin: 0;
     padding: 0;
     font-family: 'Roboto', sans-serif;
+        box-sizing: border-box;    
 }
 
 .whole-container {
-    display: flex;
-    flex-direction: column;
+    
+    height: 100vh;
+    
 }
 
 .content-container {
     display: flex;
     flex-direction: row;
-    height: 98vh;
+    height: 100vh;
     background-color:rgb(69 10 10); 
 }
 
@@ -21,14 +23,24 @@ html {
     height: 40px;
     background-color:rgb(69 10 10); 
     color: #ffffff; 
-    text-align: center;
-
 }
+
+.Admin-header button{
+    border: none;
+    color: #fdfdfd; 
+    background-color: transparent; 
+    cursor: pointer;
+    font-size: 16px;
+    padding:0;
+    text-align: right;
+  
+}
+
 
 .Admin-navbar {
     background-color:rgb(69 10 10); 
     width: 280px;
-    height: 98vh;
+    height: 100vh;
     align-items: center;
     display: flex;
     flex-direction: column;
@@ -67,6 +79,7 @@ html {
 
 .Admin-links a {
     background-color: transparent; 
+    margin: 0 5px;
     color: #fdfdfd; 
     cursor: pointer;
     font-size: 16px;
@@ -88,7 +101,6 @@ html {
     padding: 12px 10px;
     width: 100%;
     text-align: center;
-    position: absolute;
     bottom: -30%;
 }
 
@@ -98,8 +110,8 @@ html {
 }
 
 .Admin-links a:focus {
-    background-color: rgb(102, 1, 26); 
-    color: #fdfdfd;
+    background-color: white; 
+    color: #000000;
 }
 
 .Admin-navbar h1 {
@@ -119,10 +131,9 @@ html {
     background-color: rgb(255, 255, 255); 
     align-items: center;
     width: 100%;
-    height: 95vh;
+    height: 100vh;
     max-height:100vh;
     border-radius: 20px 0 0 20px;
-    overflow-y: auto;
 }
 
 .notification-link {
