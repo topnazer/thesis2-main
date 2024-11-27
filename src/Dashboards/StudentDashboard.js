@@ -6,22 +6,22 @@ import { onAuthStateChanged } from "firebase/auth";
 import './studentdashboard.css';
 
 const StudentDashboard = () => {
-  const [evaluationForm, setEvaluationForm] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [userName, setUserName] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const [currentPage, setCurrentPage] = useState(1); // Pagination state
+  const pageSize = 5; // Limit to 5 subjects per page
+
   const navigate = useNavigate();
   const db = getFirestore();
 
-  // Initialize data only after authentication
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         fetchUserInfo(user);
-        fetchEvaluationForm();
         fetchNotifications(user);
         fetchSubjects(user);
       } else {
@@ -40,17 +40,6 @@ const StudentDashboard = () => {
       }
     } catch (error) {
       console.error("Error fetching user info:", error);
-    }
-  };
-
-  const fetchEvaluationForm = async () => {
-    try {
-      const evaluationDoc = await getDoc(firestoreDoc(db, "evaluations", "student"));
-      if (evaluationDoc.exists()) {
-        setEvaluationForm(evaluationDoc.data().questions || []);
-      }
-    } catch (error) {
-      console.error("Error fetching evaluation form:", error);
     }
   };
 
@@ -122,9 +111,24 @@ const StudentDashboard = () => {
     }
   };
 
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => (prevPage > 1 ? prevPage - 1 : 1));
+  };
+
+  // Calculate paginated subjects based on the current page
+  const paginatedSubjects = subjects.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const hasNextPage = currentPage * pageSize < subjects.length;
+
   return (
     <div className="student-dashboard">
-      <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <nav>
+        <div className="dashboardlogo-container">
+          <img src="/spc.png" alt="Logo" className="dashboardlogo" />
+        </div>
         <h1>Student Dashboard</h1>
         <div style={{ display: "flex", alignItems: "center" }}>
           <span>{userName}</span>
@@ -153,7 +157,7 @@ const StudentDashboard = () => {
         <h2>Subjects</h2>
         {loading ? (
           <p>Loading subjects...</p>
-        ) : subjects.length > 0 ? (
+        ) : paginatedSubjects.length > 0 ? (
           <table>
             <thead>
               <tr>
@@ -164,7 +168,7 @@ const StudentDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {subjects.map((subject) => (
+              {paginatedSubjects.map((subject) => (
                 <tr key={subject.id}>
                   <td>{subject.id}</td>
                   <td>{subject.name}</td>
@@ -185,6 +189,11 @@ const StudentDashboard = () => {
         ) : (
           <p>No subjects available</p>
         )}
+        <div className="pagination">
+          <button onClick={handlePreviousPage} disabled={currentPage === 1}>Previous</button>
+          <span>Catalog {currentPage}</span>
+          <button onClick={handleNextPage} disabled={!hasNextPage}>Next</button>
+        </div>
       </section>
     </div>
   );
