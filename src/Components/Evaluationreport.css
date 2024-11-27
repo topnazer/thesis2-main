@@ -12,24 +12,19 @@
     flex-direction: row;
     gap: 50px;  
 }
-.subject-evaluationreport-button {
-    padding: 75px;
+.evaluationreport-button {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    width: 220px;
+    height:220px;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.7), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     cursor: pointer; 
     text-decoration: none;
     border-radius: 20px;
     color: black;
     text-align: center;
-}
-
-.facultydean-evaluationreport-button {
-    padding: 75px;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.7), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    cursor: pointer; 
-    text-decoration: none;
-    border-radius: 20px;
-    color: black;
-    text-align: center; 
 }
 
 .subject-evaluationreport-button:hover, .facultydean-evaluationreport-button:hover {
