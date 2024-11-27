@@ -3,50 +3,59 @@
 }
 
 
+
 .manage-subject-container {
   display: flex;
   flex-direction: row;
-  width: 98%;
-  height: 95%;
+  width: 100%; 
+  height: 100%;
   gap: 20px;
-  padding: 20px;
 }
+ 
 
 .manage-subject-container h1 {
   color: rgb(133, 5, 5);
 }
 
-.manage-subject-right {
+
+.manage-subject-left
+ {
   display: flex;
   flex-direction: column;
   width: 50%; 
+  max-width: 50%; 
   height: 100%;
-  gap: 20px;
+  gap: 10px;
+  padding: 0 10px;
 }
 
-.manage-subject-left {
+.manage-subject-right
+{
+  display: flex;
+  flex-direction: column;
   width: 50%; 
+  max-width: 50%; 
   height: 100%;
-}
-
-.search-subject h1 {
-  margin: 20px;
+  gap: 30px;
+  padding: 0 10px;
 }
 
 .subject-list {
   width: 100%;
-  height: 72%;
+  max-height: 80%;
   border-radius: 7px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  overflow-y: auto;
-  
+  overflow-y: auto; /* Handle large lists */
+  margin-bottom: 20px; /* Add spacing below */
 }
+
 .subject-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); 
-  grid-template-rows: repeat(2, 1fr); 
-  gap: 10px; 
-  margin: 10px;
+  grid-template-columns: 1fr 1fr; 
+    grid-template-rows: auto auto; 
+  padding: 10px;
+  overflow: hidden;
+  gap: 10px;
 }
 .add-subject-grid {
   display: grid;
@@ -57,14 +66,15 @@
 }
 .editsubj-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  width:100%;
-  gap: 10px;
+  grid-template-columns: repeat(2, 1fr); /* Two columns */
+  gap: 15px; /* Space between inputs */
+  width: 100%; /* Stretch the grid to match the container */
+  box-sizing: border-box;
 }
+
 .subject-card {
   height: 100%; 
-  padding: 20px;
+  padding: 40px;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
   display: flex;
@@ -90,7 +100,14 @@
 }
 
 .viewed-subject-details {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .viewed-subject-details h1 {
@@ -100,19 +117,23 @@
 }
 
 .details-grid {
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
   display: grid;
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adjust column size dynamically */
+  gap: 20px; /* Add space between grid items */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .details-item {
-  padding: 15px 10px;
+  padding: 15px 10px; /* Adjust padding as necessary */
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   display: flex;
-  gap: 30px;
+  flex-wrap: wrap; /* Allow content to wrap if needed */
+  gap: 10px; /* Reduced gap to prevent overflow */
   align-items: center;
+  width: 100%; /* Ensure it stays within the grid */
+  box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .details-item strong {
@@ -129,22 +150,27 @@
   display: flex;
   flex-direction: column;
   height:auto;
-  padding:16px;
+  padding:10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   border-radius: 20px;
-  width: 95%;
+  width: 90%;
 }
 
-
-.edit-subject{
-  display: grid;
-  width: 95%;
-  height: 51%;
-  padding: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  border-radius: 20px;
-
+.edit-subject {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%; /* Make it take the full width of its container */
+  padding: 20px; /* Add consistent padding */
+  box-sizing: border-box; /* Ensure padding and border are included in width */
+  border-radius: 10px; /* Match the subject-details container's style */
+  background-color: #ffffff; /* Ensure a clean background */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for clarity */
+  gap: 20px; /* Add space between internal elements */
 }
+
 
 .subject-grid input,
 .subject-grid select,
@@ -156,6 +182,7 @@
   border-radius: 5px;
   box-shadow: 0 0.4rem #dfd9d9;
   width: 100%;
+  text-align: center;
 }
 
 .add-subject-grid textarea, .editsubj-grid textarea {
@@ -164,6 +191,7 @@
   border: 0.5px solid rgb(0, 0, 0);
   font-size: 1rem;
   border-radius: 5px;
+  text-align: center;
 }
 .enroll-search-bar {
   border: 0.5px solid rgb(0, 0, 0);
@@ -178,6 +206,7 @@
   font-size: 1rem;
   border-radius: 5px;
   box-shadow: 0 0.4rem #dfd9d9;
+  text-align: center;
 }
 
 
@@ -187,58 +216,84 @@
   margin: auto auto;
   
 }
+
 .editsubj-button {
+  display: flex;
+  justify-content: center; 
+  gap: 15px;
+  padding: 20px; 
   width: 100%;
 }
 
-.editsubj-button button {
-  margin: 20px;
-}
-
-.addsubj-button {
-}
 
 .addsubj-h1 {
   margin: 30px;
 }
 
 .subject-name {
-  margin: 10px;
   padding: 0.7rem;
   font-size: 1rem;
   border-radius: 5px;
   box-shadow: 0 0.4px #dfd9d9;
 }
+.department-filter-buttons {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping to the next line */
+  gap: 15px; /* Space between buttons */
+  margin: 10px; /* Add margin around the container */
+  justify-content: center; /* Center align buttons */
+  padding: 10px 0; /* Add padding inside the container */
+  overflow-x: auto; /* Enable horizontal scrolling if needed */
+}
+
 
 .subj-dept-button {
-  background-color: transparent;
-  border-radius: 4px;
-  box-shadow: 1px 1px 1px black;
+  padding: 10px 20px; /* Add proper padding for buttons */
   color: black;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 5px;
   cursor: pointer;
-  display: inline-block;
-  font-size: 16px;
-  padding: 7px 15px;
-  text-align: center;
-  text-decoration: none;
-  margin: 5px;
+}
+
+
+.edit-buttons {
+  display: flex;
+  flex-wrap: wrap; /* Allow buttons to wrap if needed */
+  justify-content: center; /* Center-align the buttons */
+  gap: 15px; /* Add space between buttons */
+  padding: 20px; /* Add spacing above the buttons */
+  width: 100%;
 }
 
 .subject-delete-button {
-
   background-color:#800020;
   color: #F5F5DC;
 }
-.edit-buttons {
-  gap: 5px;
-  display: flex;
-  flex-direction: row;
-  margin: 10px;
-  gap: 25px;
+
+
+.addsubj-button button {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  background-color: #4caf50; 
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
 }
+
 .edit-buttons button {
-  padding:10px 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  background-color: #4caf50; 
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
+
+
 
 .subject-delete-button:hover, .subj-dept-button:hover {
   background-color:#800100;
@@ -252,20 +307,23 @@
  display: flex;
  flex-direction: column;
 }
-.enroll-tool h1, .enroll-buttons button{
-  margin: 10px
+.enroll-tool h1 {
+  margin: 10px;
+
 }
 .enroll-buttons {
-  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
 }
 
 .enroll-tool input {
   margin: 15px;
+  text-align: center;
 }
 
-.enrolled-student-buttons {
-  margin: 10px;
-}
 .student-item-container {
   height: 200px;
   width: 100%;
@@ -275,7 +333,7 @@
 }
 
 .student-checkboxes {
-  height: 90%;
+  height: 250px;
   max-height: 250px;
   overflow-y: auto;
 }
@@ -288,6 +346,7 @@
 
 .student-checkbox input {
   margin-right: 10px;
+  text-align: center;
 }
 
 .enrolled-students-container {
@@ -308,4 +367,47 @@
 
 .student-item p {
   margin: 0;
+}
+
+.subject-card button {
+  padding: 10px 20px;
+  background-color: #4CAF50; 
+  margin: 5px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.enroll-buttons button {
+  padding: 10px 20px;
+  background-color: #4CAF50; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+
+.enrolled-student-buttons {
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #4CAF50; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.editsubj-button button {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  background-color: #4caf50; /* Green button */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  flex: 1 1 auto; /* Flexible button sizing */
+  max-width: 150px; /* Optional: Set a max width for each button */
 }
