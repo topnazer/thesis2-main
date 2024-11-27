@@ -8,7 +8,6 @@ import SubjectEvaluationPage from "./SubjectEvaluationPage";
 import NotificationsPage from "./NotificationsPage";
 import Subjects from "./Subjects";
 import EvaluateSubject from '../Evaluate/EvaluateSubject';
-import EvaluationReportPage from "./EvaluationReportPage";
 import FacultyEvaluationPage from './FacultyEvaluationPage';
 import SubjectEvaluationReport from "./SubjectEvaluationReport";
 import Evaluation from "./Evaluation";
@@ -77,14 +76,15 @@ const AdminDashboard = () => {
         {pendingUsersCount > 0 && (
       <span className="badge">{pendingUsersCount}</span>
     )}
+       
   </Link>
           <Link to="users" > <CircleUserRound />   Users</Link>
           <Link to="subjects"><BookCopy/>   Subjects</Link>
           <Link to="Evaluation"><Hammer/>   Evaluation Tools</Link> 
           <Link to="evaluation-report"> <FileCheck /> Evaluation Report</Link>
           <Link to="/admin/evaluation-report">Evaluation Report Scoring</Link>
-          <div className="line"></div>  
           <button onClick={handleLogout}>Log Out</button>
+          <div className="line"></div>  
         </div>
       </div>
       <div className="route-container">
@@ -98,7 +98,6 @@ const AdminDashboard = () => {
         <Route path="subject-evaluation-report" element={<SubjectEvaluationReport />} />
         <Route path="evaluation-report" element={<Evaluationreport />} />
         <Route path="Evaluation" element={<Evaluation />} />
-        <Route path="evaluation-reports" element={<EvaluationReportPage />} />
         <Route path="dean-evaluation" element={<DeanEvaluationPage />} />
         <Route path="/admin/evaluation-report" element={<EvaluationReportScoringPage />} />
        </Routes>
