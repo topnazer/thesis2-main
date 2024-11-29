@@ -239,15 +239,15 @@ width: 50%;
 
 .subj-dept-button {
   padding: 10px 20px; 
-  color: white;
-  background-color: rgb(69 10 10);
+  color: black;
+  background-color: rgb(201, 185, 185);
   border-radius: 5px;
   cursor: pointer;
   border: none;
+  font-weight: bold;
 }
 .subj-dept-button:hover,.subj-dept-button:focus {
-  border: 2px solid black;
-  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 1);
 
 }
 

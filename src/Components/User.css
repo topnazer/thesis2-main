@@ -67,20 +67,18 @@
 }
 
 .user-button button {
-  background-color: rgb(69 10 10);
+  background-color: rgb(201, 185, 185) ;
   padding: 10px 20px; 
-  color: white;
+  color: black;
   border-radius: 5px;
   cursor: pointer;
   border:none;
+  font-weight: bold;
 }
 
 
 .user-button button:hover, .user-button button:focus {
-  border: 2px solid black;
-  color: white;
-  
-
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 1);
 }
 
 .user-list {

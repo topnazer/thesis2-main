@@ -23,7 +23,6 @@ const SubjectEvaluationPage = () => {
             const formRef = doc(db, "evaluationForms", "subject");
             const formSnap = await getDoc(formRef);
             if (formSnap.exists()) {
-                setEvaluationQuestions(formSnap.data().questions || []);
                 setCategories(formSnap.data().categories || []);
                 setExpirationDate(formSnap.data().expirationDate?.toDate() || "");
             }
@@ -45,18 +44,17 @@ const SubjectEvaluationPage = () => {
                 // Update category and type
                 updatedCategories[editingCategoryIndex] = {
                     name: newCategory,
+                    questions: updatedCategories[editingCategoryIndex].questions || [],
                     type: categoryType,
                     options: categoryOptions, // Save options for this category
                 };
-                setEvaluationQuestions((prevQuestions) =>
-                    prevQuestions.map((question) =>
-                        question.category === prevCategories[editingCategoryIndex].name
-                            ? { ...question, category: newCategory }
-                            : question
-                    )
-                );
             } else {
-                updatedCategories.push({ name: newCategory, type: categoryType, options: categoryOptions });
+                updatedCategories.push({
+                    name: newCategory,
+                    questions: [],
+                    type: categoryType,
+                    options: categoryOptions,
+                });
             }
             return updatedCategories;
         });
@@ -74,9 +72,6 @@ const SubjectEvaluationPage = () => {
 
     const deleteCategory = (category) => {
         setCategories((prevCategories) => prevCategories.filter((cat) => cat.name !== category.name));
-        setEvaluationQuestions((prevQuestions) =>
-            prevQuestions.filter((question) => question.category !== category.name)
-        );
     };
 
     const handleEditCategory = (index, category) => {
@@ -105,6 +100,7 @@ const SubjectEvaluationPage = () => {
             setNewOption(""); 
         }
     };
+
     const deleteOption = (index) => {
         if (selectedCategory) {
             setCategories((prevCategories) =>
@@ -119,14 +115,27 @@ const SubjectEvaluationPage = () => {
             );
         }
     };
+
     const addOrEditQuestion = () => {
         if (!newQuestion.trim() || !selectedCategory) return;
-        const question = { text: newQuestion, weight: parseFloat(newWeight) || 1, category: selectedCategory };
 
-        setEvaluationQuestions((prev) =>
-            editingIndex !== null
-                ? prev.map((q, i) => (i === editingIndex ? question : q))
-                : [...prev, question]
+        const question = { 
+            text: newQuestion, 
+            weight: parseFloat(newWeight) || 1, 
+            options: categoryOptions, 
+        };
+
+        setCategories((prevCategories) =>
+            prevCategories.map((category) =>
+                category.name === selectedCategory
+                    ? {
+                          ...category,
+                          questions: editingIndex !== null
+                              ? category.questions.map((q, i) => (i === editingIndex ? question : q))
+                              : [...category.questions, question],
+                      }
+                    : category
+            )
         );
 
         resetQuestionState();
@@ -139,27 +148,46 @@ const SubjectEvaluationPage = () => {
     };
 
     const handleEditQuestion = (index) => {
-        const question = evaluationQuestions[index];
-        setNewQuestion(question.text);
-        setNewWeight(question.weight);
-        setSelectedCategory(question.category);
-        setEditingIndex(index);
+        const question = categories
+            .find((cat) => cat.name === selectedCategory)
+            ?.questions[index];
+        if (question) {
+            setNewQuestion(question.text);
+            setNewWeight(question.weight);
+            setEditingIndex(index);
+        }
     };
 
     const deleteQuestion = (index) => {
-        setEvaluationQuestions(evaluationQuestions.filter((_, i) => i !== index));
+        setCategories((prevCategories) =>
+            prevCategories.map((category) =>
+                category.name === selectedCategory
+                    ? {
+                          ...category,
+                          questions: category.questions.filter((_, i) => i !== index),
+                      }
+                    : category
+            )
+        );
     };
 
     const handleSaveForm = async () => {
         try {
             const formRef = doc(db, "evaluationForms", "subject");
-            await setDoc(formRef, { questions: evaluationQuestions, categories, expirationDate: expirationDate || null });
+            await setDoc(formRef, {
+                categories: categories.map((category) => ({
+                    name: category.name,
+                    type: category.type,
+                    options: category.options || [],  // Ensure options are included for Multiple Choice or Checkbox categories
+                    questions: category.questions || [],  // Ensure questions are included under each category
+                })),
+                expirationDate: expirationDate || null, 
+            });
             alert("Form saved successfully!");
         } catch (error) {
             console.error("Error saving form:", error);
         }
     };
-
     return (
         <div className="subject-evaluation-container">
             <div className="subject-form">
@@ -187,44 +215,44 @@ const SubjectEvaluationPage = () => {
                 </div>
 
                 <div className="question-input-section">
-    <h1>Select Category to Edit</h1>
-    <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-        <option value="" disabled>Select a category</option>
-        {categories.map((category, index) => (
-            <option key={index} value={category.name}>{category.name}</option>
-        ))}
-    </select>
-    <textarea
-        value={newQuestion}
-        onChange={(e) => setNewQuestion(e.target.value)}
-        placeholder="Add Question"
-    />
+                    <h1>Select Category to Edit</h1>
+                    <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+                        <option value="" disabled>Select a category</option>
+                        {categories.map((category, index) => (
+                            <option key={index} value={category.name}>{category.name}</option>
+                        ))}
+                    </select>
+                    <textarea
+                        value={newQuestion}
+                        onChange={(e) => setNewQuestion(e.target.value)}
+                        placeholder="Add Question"
+                    />
 
-    {categories.find((cat) => cat.name === selectedCategory)?.type === "Multiple Choice" ||
-    categories.find((cat) => cat.name === selectedCategory)?.type === "Checkbox" ? (
-        <>
-            <input
-                type="text"
-                value={newOption}
-                onChange={handleCategoryOptionsChange}
-                placeholder="Enter new option"
-            />
-            <button onClick={addOption}>Add Option</button>
-            <ul>
-                {categoryOptions.map((option, index) => (
-                    <li key={index}>
-                        {option}
-                        <button onClick={() => deleteOption(index)}>Delete</button>
-                    </li>
-                ))}
-            </ul>
-        </>
-    ) : null}
+                    {categories.find((cat) => cat.name === selectedCategory)?.type === "Multiple Choice" ||
+                    categories.find((cat) => cat.name === selectedCategory)?.type === "Checkbox" ? (
+                        <>
+                            <input
+                                type="text"
+                                value={newOption}
+                                onChange={handleCategoryOptionsChange}
+                                placeholder="Enter new option"
+                            />
+                            <button onClick={addOption}>Add Option</button>
+                            <ul>
+                                {categoryOptions.map((option, index) => (
+                                    <li key={index}>
+                                        {option}
+                                        <button onClick={() => deleteOption(index)}>Delete</button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </>
+                    ) : null}
 
-    <button onClick={addOrEditQuestion}>
-        {editingIndex !== null ? "Update Question" : "Add Question"}
-    </button>
-</div>
+                    <button onClick={addOrEditQuestion}>
+                        {editingIndex !== null ? "Update Question" : "Add Question"}
+                    </button>
+                </div>
 
                 <div className="expiration-date-section">
                     <label>Expiration Date:</label>
@@ -238,30 +266,38 @@ const SubjectEvaluationPage = () => {
                     <div key={index} className="category-preview-section">
                         <h3>
                             {category.name} ({category.type})
-                            <div className='edit-category-button'>
-                            <button onClick={() => deleteCategory(category)} className="delete-category-btn">
-                                Delete Category
-                            </button>
-                            <button onClick={() => handleEditCategory(index, category)} className="edit-category-btn">
-                                Edit Category
-                            </button>
+                            <div className="edit-category-button">
+                                <button onClick={() => deleteCategory(category)} className="delete-category-btn">
+                                    Delete Category
+                                </button>
+                                <button onClick={() => handleEditCategory(index, category)} className="edit-category-btn">
+                                    Edit Category
+                                </button>
                             </div>
                         </h3>
-                        <ul>
-                            {evaluationQuestions
-                                .filter((q) => q.category === category.name)
-                                .map((q, i) => (
-                                    <li key={i} className="question-item">
-                                        <div className="question-content">
-                                            <p>{q.text}</p>
-                                            <span className="question-weight">Weight: {q.weight}</span>
-                                        </div>
-                                        <div className="question-actions">
-                                            <button onClick={() => handleEditQuestion(i)}>Edit</button>
-                                            <button onClick={() => deleteQuestion(i)}>Delete</button>
-                                        </div>
-                                    </li>
+
+                        {/* Show options for categories like "Multiple Choice" and "Checkbox" */}
+                        {category.type === "Multiple Choice" || category.type === "Checkbox" ? (
+                            <ul>
+                                {category.options.map((option, i) => (
+                                    <li key={i}>{option}</li>
                                 ))}
+                            </ul>
+                        ) : null}
+
+                        <ul>
+                            {category.questions.map((q, i) => (
+                                <li key={i} className="question-item">
+                                    <div className="question-content">
+                                        <p>{q.text}</p>
+                                        <span className="question-weight">Weight: {q.weight}</span>
+                                    </div>
+                                    <div className="question-actions">
+                                        <button onClick={() => handleEditQuestion(i)}>Edit</button>
+                                        <button onClick={() => deleteQuestion(i)}>Delete</button>
+                                    </div>
+                                </li>
+                            ))}
                         </ul>
                     </div>
                 ))}

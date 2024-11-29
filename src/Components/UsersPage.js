@@ -156,7 +156,7 @@ const UsersPage = () => {
       CBA: "yellow",
       CED: "blue",
     };
-    return colors[department] || "white";
+    return colors[department] || "";
   };
 
   return (
