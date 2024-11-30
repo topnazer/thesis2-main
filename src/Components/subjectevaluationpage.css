@@ -12,13 +12,15 @@
 .subject-evaluation-container h1, h2, h3 {
     color: rgb(133, 5, 5);
 }
+
 .subject-evaluation-container h1, h2, h3, p {
     margin: 0;
 }
 
 .category-preview-section h3 {
     padding: 10px;
-  }
+}
+
 .subject-form {
     display: flex;
     flex-direction: column;
@@ -50,8 +52,6 @@
     box-shadow: 0 0.4rem #dfd9d9;
     width: 100%;
 }
-
-
 
 .question-input-section textarea {
     width: 100%;
@@ -90,6 +90,64 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     border-radius: 10px;
     overflow-y: auto;
+    background-color: #f9f9f9;
+}
+
+.category-preview {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+.category-preview h3 {
+    color: #333;
+    
+
+}
+
+.category-preview .edit-category-button {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.edit-category-btn, .delete-category-btn {
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+}
+
+.edit-category-btn {
+    background-color: #008CBA;
+}
+
+.delete-category-btn {
+    background-color: #f44336;
+}
+
+.category-preview ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.category-preview ul li {
+    font-size: 14px;
+    list-style: decimal;    
+    
+}
+
+.category-preview ul li strong {
+    color: #333;
+}
+
+.category-preview h2 {
+    color: #444;
+    margin: 0;
+    font-size: 24px;
 }
 
 .category-preview-section {
@@ -97,7 +155,6 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
     padding: 5px;
 }
-
 
 .category-preview-section ul {
     list-style-type: none;
@@ -149,13 +206,20 @@ textarea::placeholder {
 
 .edit-category-button {
     display: flex;
-    flex-direction:  row;
+    flex-direction: row;
     justify-content: center;
     gap: 10px;
     padding: 10px;
 }
 
 .edit-category-button button {
-    padding: 5px 5px; 
+    padding: 5px 5px;
     gap: 5px;
+}
+
+.questions-preview, .options-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
 }

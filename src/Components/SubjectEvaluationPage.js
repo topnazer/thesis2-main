@@ -37,16 +37,22 @@ const SubjectEvaluationPage = () => {
 
     const addOrEditCategory = () => {
         if (!newCategory.trim()) return;
-
+    
+        const isCategoryExists = categories.some(category => category.name === newCategory);
+        if (isCategoryExists) {
+            alert("Category with this name already exists! Please choose a different name.");
+            return;
+        }
+    
         setCategories((prevCategories) => {
             const updatedCategories = [...prevCategories];
             if (editingCategoryIndex !== null) {
-                // Update category and type
+               
                 updatedCategories[editingCategoryIndex] = {
                     name: newCategory,
                     questions: updatedCategories[editingCategoryIndex].questions || [],
                     type: categoryType,
-                    options: categoryOptions, // Save options for this category
+                    options: categoryOptions, 
                 };
             } else {
                 updatedCategories.push({
@@ -58,7 +64,7 @@ const SubjectEvaluationPage = () => {
             }
             return updatedCategories;
         });
-
+    
         resetCategoryState();
     };
 
@@ -178,8 +184,8 @@ const SubjectEvaluationPage = () => {
                 categories: categories.map((category) => ({
                     name: category.name,
                     type: category.type,
-                    options: category.options || [],  // Ensure options are included for Multiple Choice or Checkbox categories
-                    questions: category.questions || [],  // Ensure questions are included under each category
+                    options: category.options || [],  
+                    questions: category.questions || [],  
                 })),
                 expirationDate: expirationDate || null, 
             });
@@ -191,10 +197,10 @@ const SubjectEvaluationPage = () => {
     return (
         <div className="subject-evaluation-container">
             <div className="subject-form">
-                <h2>Subject Evaluation Form</h2>
+                <h1>Subject Evaluation Form</h1>
 
                 <div className="category-input-section">
-                    <h3>{editingCategoryIndex !== null ? "Edit Category" : "Add Category"}</h3>
+                    <h2>{editingCategoryIndex !== null ? "Edit Category" : "Add Category"}</h2>
                     <input
                         type="text"
                         value={newCategory}
@@ -215,7 +221,7 @@ const SubjectEvaluationPage = () => {
                 </div>
 
                 <div className="question-input-section">
-                    <h1>Select Category to Edit</h1>
+                    <h2>Select Category to Edit</h2>
                     <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
                         <option value="" disabled>Select a category</option>
                         {categories.map((category, index) => (
@@ -227,6 +233,9 @@ const SubjectEvaluationPage = () => {
                         onChange={(e) => setNewQuestion(e.target.value)}
                         placeholder="Add Question"
                     />
+                    <button onClick={addOrEditQuestion}>
+                        {editingIndex !== null ? "Update Question" : "Add Question"}
+                    </button>
 
                     {categories.find((cat) => cat.name === selectedCategory)?.type === "Multiple Choice" ||
                     categories.find((cat) => cat.name === selectedCategory)?.type === "Checkbox" ? (
@@ -249,58 +258,58 @@ const SubjectEvaluationPage = () => {
                         </>
                     ) : null}
 
-                    <button onClick={addOrEditQuestion}>
-                        {editingIndex !== null ? "Update Question" : "Add Question"}
-                    </button>
                 </div>
 
                 <div className="expiration-date-section">
-                    <label>Expiration Date:</label>
+                    <h2>Expiration Date:</h2>
                     <input type="date" value={expirationDate} onChange={(e) => setExpirationDate(e.target.value)} />
                     <button onClick={handleSaveForm}>Save Form</button>
                 </div>
             </div>
 
-            <div className="subject-preview">
-                {categories.map((category, index) => (
-                    <div key={index} className="category-preview-section">
-                        <h3>
-                            {category.name} ({category.type})
-                            <div className="edit-category-button">
-                                <button onClick={() => deleteCategory(category)} className="delete-category-btn">
-                                    Delete Category
-                                </button>
-                                <button onClick={() => handleEditCategory(index, category)} className="edit-category-btn">
-                                    Edit Category
-                                </button>
-                            </div>
-                        </h3>
+           {/* Right Container: Structured Preview */}
+<div className="subject-preview">
+    <h1>Subject Evaluation Form Preview</h1>
+    <div>
+        <h3>Expiration Date:</h3>
+        <p>{expirationDate || "Not Set"}</p>
+    </div>
+    {categories.map((category, index) => (
+        <div key={index} className="category-preview">
+            <h2>
+                Category: {category.name} ({category.type})
+            </h2>
+            <div className="edit-category-button">
+                <button onClick={() => handleEditCategory(index, category)} className="edit-category-btn">Edit Category</button>
+                <button onClick={() => deleteCategory(category)} className="delete-category-btn">Delete Category</button>
+            </div>
+            {category.questions.length > 0 && (
+                <div className='questions-preview'>
+                    <ul>
+                        
+                        {category.questions.map((question, i) => (
+                            <li key={i}>
+                                <h2>Question: {question.text}</h2>
+                                {/*<strong>Weight:</strong> {question.weight}*/}
+                            </li>       
+                        ))}
+                    </ul>
+                </div>
+            )}
+            {category.options.length > 0 && (
+                <div className="options-preview">
+                    
+                    <ul>
+                        <h2>Options:</h2>
+                        {category.options.map((option, i) => (
+                            <li key={i}>{option}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    ))}
 
-                        {/* Show options for categories like "Multiple Choice" and "Checkbox" */}
-                        {category.type === "Multiple Choice" || category.type === "Checkbox" ? (
-                            <ul>
-                                {category.options.map((option, i) => (
-                                    <li key={i}>{option}</li>
-                                ))}
-                            </ul>
-                        ) : null}
-
-                        <ul>
-                            {category.questions.map((q, i) => (
-                                <li key={i} className="question-item">
-                                    <div className="question-content">
-                                        <p>{q.text}</p>
-                                        <span className="question-weight">Weight: {q.weight}</span>
-                                    </div>
-                                    <div className="question-actions">
-                                        <button onClick={() => handleEditQuestion(i)}>Edit</button>
-                                        <button onClick={() => deleteQuestion(i)}>Delete</button>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                ))}
             </div>
         </div>
     );

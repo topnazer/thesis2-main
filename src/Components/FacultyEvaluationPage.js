@@ -155,13 +155,13 @@ const FacultyEvaluationPage = () => {
         try {
             const formRef = doc(db, "evaluationForms", "faculty");
             await setDoc(formRef, {
-                questions: facultyQuestions,
                 categories: categories.map((category) => ({
                     name: category.name,
                     type: category.type,
-                    options: category.options || [],
+                    options: category.options || [],  
+                    questions: facultyQuestions.filter((q) => q.category === category.name),
                 })),
-                expirationDate: expirationDate || null,
+                expirationDate: expirationDate || null, 
             });
             alert("Faculty form saved successfully!");
         } catch (error) {
@@ -173,11 +173,11 @@ const FacultyEvaluationPage = () => {
         <div className="faculty-evaluation-container">
         {/* Left Container: Faculty Form */}
         <div className="faculty-evaluation-form">
-            <h2>Faculty Evaluation Form</h2>
+            <h1>Faculty Evaluation Form</h1>
     
             {/* Add/Edit Category */}
             <div className="category-input-section">
-                <h3>{editingCategoryIndex !== null ? "Edit Category" : "Add Category"}</h3>
+                <h2>{editingCategoryIndex !== null ? "Edit Category" : "Add Category"}</h2>
                 <input
                     className="input-category"
                     type="text"
@@ -201,7 +201,7 @@ const FacultyEvaluationPage = () => {
     
             {/* Add/Edit Question */}
             <div className="question-input-section">
-                <h3>Select Category to Edit</h3>
+                <h2>Select Category to Edit</h2>
                 <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedFacultyCategory(e.target.value)}
@@ -245,7 +245,7 @@ const FacultyEvaluationPage = () => {
     
             {/* Expiration Date */}
             <div className="expiration-date-section">
-                <label>Expiration Date:</label>
+                <h2>Expiration Date:</h2>
                 <input
                     type="date"
                     value={expirationDate}

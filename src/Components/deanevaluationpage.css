@@ -32,17 +32,19 @@
 .dean-category-input,
 .dean-evaluation-select,
 .dean-question-input,
-.dean-weight-input {
+.dean-weight-input,
+.dean-expiration-input {
     border: 0.5px solid rgb(0, 0, 0);
     padding: 0.7rem 0rem;
     font-size: 1rem;
     border-radius: 5px;
     box-shadow: 0 0.4rem #dfd9d9;
+    text-align: center;
 }
 
 .dean-category-input,
 .dean-evaluation-select {
-    width: 50%;
+    width: 100%;
 }
 
 .dean-question-input {
@@ -52,11 +54,11 @@
 
 .dean-evaluation-page button {
     padding: 8px 12px;
-    margin: 10px;
     font-size: 16px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    width: 100%;
 }
 
 .dean-save-button {
@@ -88,9 +90,9 @@
 }
 
 .dean-category-section {
-    border-radius: 5px;
-    border: 0.5px solid rgb(0, 0, 0);
-    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .dean-question-form {
