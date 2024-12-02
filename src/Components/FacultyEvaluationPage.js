@@ -42,6 +42,7 @@ const FacultyEvaluationPage = () => {
             const updatedCategories = [...prevCategories];
             if (editingCategoryIndex !== null) {
                 updatedCategories[editingCategoryIndex] = {
+                    id: updatedCategories[editingCategoryIndex].id || Date.now(), 
                     name: newCategory,
                     type: categoryType,
                     options: categoryOptions,
@@ -54,7 +55,12 @@ const FacultyEvaluationPage = () => {
                     )
                 );
             } else {
-                updatedCategories.push({ name: newCategory, type: categoryType, options: categoryOptions });
+                updatedCategories.push({
+                    id: Date.now(),
+                    name: newCategory,
+                    type: categoryType,
+                    options: categoryOptions,
+                });
             }
             return updatedCategories;
         });
@@ -71,17 +77,10 @@ const FacultyEvaluationPage = () => {
     };
 
     const deleteCategory = (category) => {
-        setFacultyCategories((prevCategories) => prevCategories.filter((cat) => cat.name !== category.name));
+        setFacultyCategories((prevCategories) => prevCategories.filter((cat) => cat.id !== category.id)); 
         setFacultyQuestions((prevQuestions) =>
             prevQuestions.filter((question) => question.category !== category.name)
         );
-    };
-
-    const handleEditCategory = (index, category) => {
-        setNewFacultyCategory(category.name);
-        setFacultyCategoryType(category.type);
-        setFacultyCategoryOptions(category.options || []);
-        setEditingFacultyCategoryIndex(index);
     };
 
     const handleCategoryOptionsChange = (e) => {
@@ -154,15 +153,22 @@ const FacultyEvaluationPage = () => {
     const handleSaveForm = async () => {
         try {
             const formRef = doc(db, "evaluationForms", "faculty");
+
+            // Save data in the required structure
             await setDoc(formRef, {
                 categories: categories.map((category) => ({
+                    id: category.id || Date.now(), // Ensure each category has a unique ID
                     name: category.name,
                     type: category.type,
-                    options: category.options || [],  
-                    questions: facultyQuestions.filter((q) => q.category === category.name),
+                    options: category.options || [],
+                    questions: facultyQuestions.filter((q) => q.category === category.name).map(q => ({
+                        text: q.text,
+                        weight: q.weight,
+                    })),
                 })),
-                expirationDate: expirationDate || null, 
+                expirationDate: expirationDate || null,
             });
+
             alert("Faculty form saved successfully!");
         } catch (error) {
             console.error("Error saving form:", error);
@@ -171,123 +177,172 @@ const FacultyEvaluationPage = () => {
 
     return (
         <div className="faculty-evaluation-container">
-        {/* Left Container: Faculty Form */}
-        <div className="faculty-evaluation-form">
-            <h1>Faculty Evaluation Form</h1>
-    
-            {/* Add/Edit Category */}
-            <div className="category-input-section">
-                <h2>{editingCategoryIndex !== null ? "Edit Category" : "Add Category"}</h2>
-                <input
-                    className="input-category"
-                    type="text"
-                    value={newCategory}
-                    onChange={(e) => setNewFacultyCategory(e.target.value)}
-                    placeholder="Add category"
-                />
-                <select
-                    className="select-category"
-                    value={categoryType}
-                    onChange={(e) => setFacultyCategoryType(e.target.value)}
-                >
-                    <option value="Multiple Choice">Multiple Choice</option>
-                    <option value="Checkbox">Checkbox</option>
-                    <option value="Rating">Rating</option>
-                </select>
-                <button onClick={addOrEditCategory}>
-                    {editingCategoryIndex !== null ? "Update Category" : "Add Category"}
-                </button>
-            </div>
-    
-            {/* Add/Edit Question */}
-            <div className="question-input-section">
-                <h2>Select Category to Edit</h2>
-                <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedFacultyCategory(e.target.value)}
-                >
-                    <option value="" disabled>Select a category</option>
-                    {categories.map((category, index) => (
-                        <option key={index} value={category.name}>{category.name}</option>
-                    ))}
-                </select>
-                <textarea
-                    className="input-question"
-                    value={newQuestion}
-                    onChange={(e) => setNewQuestion(e.target.value)}
-                    placeholder="Add Question"
-                />
-                {categories.find((cat) => cat.name === selectedCategory)?.type === "Multiple Choice" ||
-                categories.find((cat) => cat.name === selectedCategory)?.type === "Checkbox" ? (
-                    <>
-                        <input
-                            className="input-category"
-                            type="text"
-                            value={newOption}
-                            onChange={handleCategoryOptionsChange}
-                            placeholder="Enter new option"
-                        />
-                        <button onClick={addOption}>Add Option</button>
-                        <ul>
-                            {categoryOptions.map((option, index) => (
-                                <li key={index}>
-                                    {option}
-                                    <button onClick={() => deleteOption(index)}>Delete</button>
-                                </li>
-                            ))}
-                        </ul>
-                    </>
-                ) : null}
-                <button onClick={addOrEditQuestion}>
-                    {editingIndex !== null ? "Update Question" : "Add Question"}
-                </button>
-            </div>
-    
-            {/* Expiration Date */}
-            <div className="expiration-date-section">
-                <h2>Expiration Date:</h2>
-                <input
-                    type="date"
-                    value={expirationDate}
-                    onChange={(e) => setExpirationDate(e.target.value)}
-                />
-                <button onClick={handleSaveForm}>Save Form</button>
-            </div>
-        </div>
-    
-        {/* Right Container: Faculty Preview */}
-        <div className="faculty-evaluation-preview">
-            {categories.map((category, index) => (
-                <div key={index} className="category-preview-section">
-                    <h3>
-                        {category.name} ({category.type})
-                        <button className="delete-category-btn" onClick={() => deleteCategory(category)}>
-                            Delete Category
-                        </button>
-                        <button className="operation-buttons" onClick={() => handleEditCategory(index, category)}>
-                            Edit Category
-                        </button>
-                    </h3>
-                    <ul>
-                        {facultyQuestions
-                            .filter((q) => q.category === category.name)
-                            .map((q, i) => (
-                                <li key={i} className="question-item">
-                                    <div className="question-content">
-                                        <p>{q.text}</p>
-                                        <span className="question-weight">Weight: {q.weight}</span>
-                                    </div>
-                                    <div className="question-actions">
-                                        <button onClick={() => handleEditQuestion(i)}>Edit</button>
-                                        <button onClick={() => deleteQuestion(i)}>Delete</button>
-                                    </div>
-                                </li>
-                            ))}
-                    </ul>
+            {/* Left Container: Faculty Form */}
+            <div className="faculty-evaluation-form">
+                <h1>Faculty Evaluation Form</h1>
+
+                {/* Add/Edit Category */}
+                <div className="category-input-section">
+                    <h2>{editingCategoryIndex !== null ? "Edit Category" : "Add Category"}</h2>
+                    <input
+                        className="input-category"
+                        type="text"
+                        value={newCategory}
+                        onChange={(e) => setNewFacultyCategory(e.target.value)}
+                        placeholder="Add category"
+                    />
+                    <select
+                        className="select-category"
+                        value={categoryType}
+                        onChange={(e) => setFacultyCategoryType(e.target.value)}
+                    >
+                        <option value="Multiple Choice">Multiple Choice</option>
+                        <option value="Checkbox">Checkbox</option>
+                        <option value="Rating">Rating</option>
+                    </select>
+                    <button onClick={addOrEditCategory}>
+                        {editingCategoryIndex !== null ? "Update Category" : "Add Category"}
+                    </button>
                 </div>
-            ))}
+
+                {/* Add/Edit Question */}
+                <div className="question-input-section">
+                    <h2>Select Category to Edit</h2>
+                    <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedFacultyCategory(e.target.value)}
+                    >
+                        <option value="" disabled>Select a category</option>
+                        {categories.map((category, index) => (
+                            <option key={index} value={category.name}>{category.name}</option>
+                        ))}
+                    </select>
+                    <textarea
+                        className="input-question"
+                        value={newQuestion}
+                        onChange={(e) => setNewQuestion(e.target.value)}
+                        placeholder="Add Question"
+                    />
+                    <button onClick={addOrEditQuestion}>
+                        {editingIndex !== null ? "Update Question" : "Add Question"}
+                    </button>
+                    {categories.find((cat) => cat.name === selectedCategory)?.type === "Multiple Choice" ||
+                    categories.find((cat) => cat.name === selectedCategory)?.type === "Checkbox" ? (
+                        <>
+                            <input
+                                className="input-category"
+                                type="text"
+                                value={newOption}
+                                onChange={handleCategoryOptionsChange}
+                                placeholder="Enter new option"
+                            />
+                            <button onClick={addOption}>Add Option</button>
+                            <ul>
+                                {(categoryOptions || []).map((option, index) => (
+                                    <li key={index}>
+                                        {option}
+                                        <button onClick={() => deleteOption(index)}>Delete</button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </>
+                    ) : null}
+                </div>
+
+                {/* Expiration Date */}
+                <div className="expiration-date-section">
+                    <h2>Expiration Date:</h2>
+                    <input
+                        type="date"
+                        value={expirationDate}
+                        onChange={(e) => setExpirationDate(e.target.value)}
+                    />
+                    <button onClick={handleSaveForm}>Save Form</button>
+                </div>
+            </div>
+
+            <div className="subject-preview">
+                <h1>Subject Evaluation Form Preview</h1>
+
+                <div>
+                    <h3>Expiration Date:</h3>
+                    <p>{expirationDate || "Not Set"}</p>
+                </div>
+
+                {categories.map((category) => (
+    <div key={category.id} className="category-preview">  
+        <h2>
+            Category: {category.name} ({category.type})
+        </h2>
+
+        <div className="edit-category-button">
+            <button
+                onClick={() => {
+                    setSelectedFacultyCategory(category.name);
+                    setEditingFacultyCategoryIndex(categories.findIndex(c => c.id === category.id));  
+                }}
+                className="edit-category-btn"
+            >
+                Edit Category
+            </button>
+            <button
+                onClick={() => deleteCategory(category)} 
+                className="delete-category-btn"
+            >
+                Delete Category
+            </button>
         </div>
-    </div>
+
+                        {/* Display Questions */}
+                        {category.questions && category.questions.length > 0 && (
+                            <div className="questions-preview">
+                                <h3>Questions:</h3>
+                                <ul>
+                                    {category.questions.map((question, i) => (
+                                        <li key={i}>
+                                            <span>Question: {question.text}</span>
+                                            <div className="question-actions">
+                                                <button onClick={() => handleEditQuestion(i)}>
+                                                    Edit
+                                                </button>
+                                                <button onClick={() => deleteQuestion(i)}>
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {category.options && category.options.length > 0 && (
+                            <div className="options-preview">
+                                <h3>Options:</h3>
+                                <ul>
+                                    {category.options.map((option, i) => (
+                                        <li key={i}>
+                                            <span>{option}</span>
+                                            <div className="option-actions">
+                                                <button
+                                                    onClick={() => {
+                                                        setNewOption(option);
+                                                        setEditingOptionIndex(i);
+                                                        setSelectedFacultyCategory(category.name);
+                                                    }}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button onClick={() => deleteOption(i)}>Delete</button>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 };
 
