@@ -10,14 +10,12 @@ const EvaluateSubject = () => {
   const location = useLocation();
   const [subject, setSubject] = useState(null);
   const [faculty, setFaculty] = useState(null);
-  const [evaluationForm, setEvaluationForm] = useState([]);
   const [categories, setCategories] = useState([]);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [responses, setResponses] = useState({});
   const [comment, setComment] = useState("");
-  const [averageScore, setAverageScore] = useState(null);
   const db = getFirestore();
 
   // Fetch subject information
@@ -34,14 +32,6 @@ const EvaluateSubject = () => {
           } else {
             setError("Faculty not found for the subject.");
           }
-        }
-
-        const subjectEvaluationRef = doc(db, 'subjectEvaluations', subjectId);
-        const subjectEvaluationDoc = await getDoc(subjectEvaluationRef);
-        if (subjectEvaluationDoc.exists()) {
-          setAverageScore(subjectEvaluationDoc.data().averageScore || null);
-        } else {
-          setAverageScore(null);
         }
       } else {
         setError("Subject not found");
@@ -60,15 +50,11 @@ const EvaluateSubject = () => {
       if (evaluationDoc.exists()) {
         const data = evaluationDoc.data();
 
-        if (!data.questions || !Array.isArray(data.questions)) {
-          throw new Error("Invalid questions structure in Firestore.");
-        }
         if (!data.categories || !Array.isArray(data.categories)) {
           throw new Error("Invalid categories structure in Firestore.");
         }
 
-        setEvaluationForm(data.questions);
-        setCategories(data.categories.map((category) => category.name)); // Extract category names
+        setCategories(data.categories);
       } else {
         setError("No evaluation form found for this subject.");
       }
@@ -83,25 +69,32 @@ const EvaluateSubject = () => {
     fetchEvaluationForm();
   }, [fetchSubject, fetchEvaluationForm]);
 
-  const handleResponseChange = (categoryIndex, questionIndex, value) => {
+  const handleResponseChange = (categoryIndex, questionIndex, value, isCheckbox = false) => {
     const updatedResponses = { ...responses };
     const uniqueKey = `${categoryIndex}-${questionIndex}`;
-    updatedResponses[uniqueKey] = String(value);
+    if (isCheckbox) {
+      updatedResponses[uniqueKey] = updatedResponses[uniqueKey] || [];
+      if (updatedResponses[uniqueKey].includes(value)) {
+        updatedResponses[uniqueKey] = updatedResponses[uniqueKey].filter((val) => val !== value);
+      } else {
+        updatedResponses[uniqueKey].push(value);
+      }
+    } else {
+      updatedResponses[uniqueKey] = String(value);
+    }
     setResponses(updatedResponses);
   };
 
-  // Check if all questions in the current category are answered
   const isCurrentCategoryComplete = () => {
     if (!categories[currentCategoryIndex]) {
       return false;
     }
-    const category = categories[currentCategoryIndex];
-    const categoryQuestions = evaluationForm.filter(
-      (question) => question.category === category
-    );
-    return categoryQuestions.every((_, questionIndex) => {
+    const { questions, type } = categories[currentCategoryIndex];
+    return questions.every((_, questionIndex) => {
       const uniqueKey = `${currentCategoryIndex}-${questionIndex}`;
-      return responses[uniqueKey] !== undefined;
+      return type === "Checkbox"
+        ? responses[uniqueKey] && responses[uniqueKey].length > 0
+        : responses[uniqueKey] !== undefined;
     });
   };
 
@@ -121,134 +114,251 @@ const EvaluateSubject = () => {
     }
   };
 
+  const calculateRatingScore = () => {
+    let totalScore = 0;
+    let maxScore = 0;
+
+    categories.forEach((category, categoryIndex) => {
+      if (category.type === "Rating") {
+        const { questions } = category;
+
+        questions.forEach((_, questionIndex) => {
+          const uniqueKey = `${categoryIndex}-${questionIndex}`;
+          const response = responses[uniqueKey];
+
+          totalScore += parseInt(response || 0, 10); // Add the rating value
+          maxScore += 5; // Assuming 5 is the max rating for each question
+        });
+      }
+    });
+
+    const percentageScore = (totalScore / maxScore) * 100;
+    return { totalScore, maxScore, percentageScore };
+  };
+
+  const calculateOptionFrequencies = () => {
+    const frequencies = {};
+
+    categories.forEach((category, categoryIndex) => {
+      const { questions, type, options } = category;
+
+      if (type === "Multiple Choice" || type === "Checkbox") {
+        questions.forEach((question, questionIndex) => {
+          const uniqueKey = `${categoryIndex}-${questionIndex}`;
+          const response = responses[uniqueKey];
+
+          // Initialize the frequency object for this question
+          if (!frequencies[uniqueKey]) {
+            frequencies[uniqueKey] = options.reduce((acc, option) => {
+              acc[option] = 0;
+              return acc;
+            }, {});
+          }
+
+          // Count responses
+          if (type === "Multiple Choice" && response) {
+            frequencies[uniqueKey][response] += 1;
+          } else if (type === "Checkbox" && Array.isArray(response)) {
+            response.forEach((selectedOption) => {
+              if (frequencies[uniqueKey][selectedOption] !== undefined) {
+                frequencies[uniqueKey][selectedOption] += 1;
+              }
+            });
+          }
+        });
+      }
+    });
+
+    return frequencies;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+  
     if (!isCurrentCategoryComplete()) {
       alert("Please answer all questions in this category before submitting.");
       return;
     }
-
-    const totalScore = Object.values(responses).reduce((sum, score) => sum + parseInt(score), 0);
-    const maxScore = evaluationForm.length * 5;
-    const percentageScore = (totalScore / maxScore) * 100;
-
+  
     const user = auth.currentUser;
     if (!user) {
-      alert('User not authenticated.');
+      alert("User not authenticated.");
       return;
     }
-
+  
+    // Use calculateRatingScore for score calculation
+    const { totalScore, maxScore, percentageScore } = calculateRatingScore();
+  
+    // Use calculateOptionFrequencies for option frequency computation
+    const optionFrequencies = calculateOptionFrequencies();
+  
     try {
+      // Save individual evaluation
       const evaluationRef = doc(
         db,
         `students/${user.uid}/subjects/${subjectId}/sections/${sectionId}/completed_evaluations`,
         user.uid
       );
-
+  
       await setDoc(evaluationRef, {
         userId: user.uid,
         sectionId,
         subjectId,
-        facultyId: subject?.facultyId || null,
+        facultyId: subject?.facultyId || null, // Include facultyId
         scores: responses,
+        ratingScore: { totalScore, maxScore, percentageScore },
+        optionFrequencies,
         comment,
-        percentageScore,
         createdAt: new Date(),
       });
-
-      const subjectEvaluationRef = doc(db, 'subjectEvaluations', subjectId);
+  
+      // Update or create subject evaluation score with facultyId
+      const subjectEvaluationRef = doc(db, "subjectEvaluations", subjectId);
       const subjectEvaluationDoc = await getDoc(subjectEvaluationRef);
+  
       let newAverageScore;
-
+      let completedEvaluations;
+  
       if (subjectEvaluationDoc.exists()) {
         const existingAverageScore = subjectEvaluationDoc.data().averageScore || 0;
-        const completedEvaluations = (subjectEvaluationDoc.data().completedEvaluations || 0) + 1;
+        completedEvaluations = (subjectEvaluationDoc.data().completedEvaluations || 0) + 1;
         newAverageScore = ((existingAverageScore * (completedEvaluations - 1)) + percentageScore) / completedEvaluations;
-
+  
+        await setDoc(
+          subjectEvaluationRef,
+          {
+            averageScore: newAverageScore,
+            completedEvaluations,
+            facultyId: subject?.facultyId || null, // Include facultyId in the subject evaluation document
+          },
+          { merge: true } // Use merge to prevent overwriting other fields
+        );
+      } else {
+        newAverageScore = percentageScore;
+        completedEvaluations = 1;
+  
         await setDoc(subjectEvaluationRef, {
           averageScore: newAverageScore,
           completedEvaluations,
-        }, { merge: true });
-      } else {
-        newAverageScore = percentageScore;
-        await setDoc(subjectEvaluationRef, {
-          averageScore: newAverageScore,
-          completedEvaluations: 1,
+          facultyId: subject?.facultyId || null, // Include facultyId in the new document
         });
       }
-
+  
+      // Update faculty evaluation score if facultyId exists
       if (subject?.facultyId) {
-        const facultyEvaluationRef = doc(db, 'facultyEvaluations', subject.facultyId, 'subjects', subjectId);
+        const facultyEvaluationRef = doc(db, "facultyEvaluations", subject.facultyId, "subjects", subjectId);
         const facultyEvaluationDoc = await getDoc(facultyEvaluationRef);
+  
         let facultyNewAverageScore;
-
+  
         if (facultyEvaluationDoc.exists()) {
           const existingFacultyAverageScore = facultyEvaluationDoc.data().averageScore || 0;
           const facultyCompletedEvaluations = (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
           facultyNewAverageScore = ((existingFacultyAverageScore * (facultyCompletedEvaluations - 1)) + percentageScore) / facultyCompletedEvaluations;
-
-          await setDoc(facultyEvaluationRef, {
-            averageScore: facultyNewAverageScore,
-            completedEvaluations: facultyCompletedEvaluations,
-          }, { merge: true });
+  
+          await setDoc(
+            facultyEvaluationRef,
+            {
+              averageScore: facultyNewAverageScore,
+              completedEvaluations: facultyCompletedEvaluations,
+            },
+            { merge: true }
+          );
         } else {
           facultyNewAverageScore = percentageScore;
+  
           await setDoc(facultyEvaluationRef, {
             averageScore: facultyNewAverageScore,
             completedEvaluations: 1,
           });
         }
       }
-
-      alert('Evaluation submitted successfully!');
+  
+      alert(`Evaluation submitted successfully! Your score: ${totalScore} / ${maxScore} (${percentageScore.toFixed(2)}%)`);
       navigate(location.state?.redirectTo || "/student-dashboard");
     } catch (error) {
-      alert('Failed to submit evaluation. Please try again.');
+      alert("Failed to submit evaluation. Please try again.");
       console.error("Error submitting evaluation:", error.message);
     }
   };
-
-
+  
+  
   const renderQuestionsForCurrentCategory = () => {
     const currentCategory = categories[currentCategoryIndex];
     if (!currentCategory) {
       return <tr><td>No questions available for this category.</td></tr>;
     }
 
-    const categoryQuestions = evaluationForm.filter(
-      (question) => question.category === currentCategory
-    );
+    const { type, questions, options } = currentCategory;
 
-    if (categoryQuestions.length === 0) {
+    if (!questions || questions.length === 0) {
       return <tr><td>No questions available for this category.</td></tr>;
     }
 
     return (
-      <React.Fragment>
+      <>
         <tr>
-          <td colSpan="6" className="category-header"><strong>{currentCategory}</strong></td>
+          <th>Question</th>
+          {type === "Rating" && (
+            <>
+              <th>Strongly disagree</th>
+              <th>Disagree</th>
+              <th>Neutral</th>
+              <th>Agree</th>
+              <th>Strongly agree</th>
+            </>
+          )}
+          {(type === "Multiple Choice" || type === "Checkbox") && options.map((option, index) => (
+            <th key={index}>{option}</th>
+          ))}
         </tr>
-        {categoryQuestions.map((question, questionIndex) => {
+
+        {questions.map((question, questionIndex) => {
           const uniqueKey = `${currentCategoryIndex}-${questionIndex}`;
           return (
             <tr key={uniqueKey}>
-              <td>{question.text || "Invalid question text"}</td>
-              {["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"].map((label, value) => (
-                <td key={value}>
-                  <input
-                    type="radio"
-                    name={`question-${uniqueKey}`}
-                    value={value + 1}
-                    checked={responses[uniqueKey] === String(value + 1)}
-                    onChange={(e) => handleResponseChange(currentCategoryIndex, questionIndex, e.target.value)}
-                  />
-                </td>
-              ))}
+              <td style={{ fontWeight: 'bold' }}>{question.text || "Invalid question text"}</td>
+              {type === "Rating" &&
+                [1, 2, 3, 4, 5].map((value) => (
+                  <td key={value}>
+                    <input
+                      type="radio"
+                      name={`question-${uniqueKey}`}
+                      value={value}
+                      checked={responses[uniqueKey] === String(value)}
+                      onChange={(e) =>
+                        handleResponseChange(currentCategoryIndex, questionIndex, e.target.value)
+                      }
+                    />
+                  </td>
+                ))}
+              {(type === "Multiple Choice" || type === "Checkbox") &&
+                options.map((option, optionIndex) => (
+                  <td key={optionIndex}>
+                    <input
+                      type={type === "Multiple Choice" ? "radio" : "checkbox"}
+                      name={`question-${uniqueKey}`}
+                      value={option}
+                      checked={
+                        type === "Multiple Choice"
+                          ? responses[uniqueKey] === option
+                          : responses[uniqueKey]?.includes(option)
+                      }
+                      onChange={(e) =>
+                        handleResponseChange(
+                          currentCategoryIndex,
+                          questionIndex,
+                          e.target.value,
+                          type === "Checkbox"
+                        )
+                      }
+                    />
+                  </td>
+                ))}
             </tr>
           );
         })}
-      </React.Fragment>
+      </>
     );
   };
 
@@ -276,19 +386,8 @@ const EvaluateSubject = () => {
         <form onSubmit={handleSubmit}>
           <div className="form-table-section">
             <table>
-              <thead>
-                <tr>
-                  <th>Rating Legend</th>
-                  <th>Strongly disagree</th>
-                  <th>Disagree</th>
-                  <th>Neutral</th>
-                  <th>Agree</th>
-                  <th>Strongly agree</th>
-                </tr>
-              </thead>
-              <tbody>
-                {renderQuestionsForCurrentCategory()}
-              </tbody>
+              <thead>{renderQuestionsForCurrentCategory()}</thead>
+              <tbody></tbody>
             </table>
           </div>
 

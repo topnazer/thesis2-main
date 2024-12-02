@@ -242,7 +242,7 @@ margin-left: 20px;
 
 .evaluate-subject-page table {
   width: 100%;
-  border-collapse: separate;
+  border-collapse: collapse; /* Ensure no gaps between borders */
   border-spacing: 0;
   background-color: #f0f2f5; /* Consistent background color */
   border-radius: 8px;
@@ -256,7 +256,8 @@ margin-left: 20px;
   padding: 12px;
   text-align: center;
   font-size: 15px;
-  font-family:Arial, Helvetica, sans-serif
+  font-family: Arial, Helvetica, sans-serif;
+  border: 1px solid #e0e0e0; /* Add border to all cells */
 }
 
 .evaluate-subject-page table thead th {
@@ -267,24 +268,23 @@ margin-left: 20px;
   padding: 18px;
   text-align: center;
   font-family: Arial, Helvetica, sans-serif;
-
 }
-
-
 
 .evaluate-subject-page table th {
   font-size: 14px;
   font-weight: bold;
   background-color: #d9d9d9; /* Light gray color for headers */
   color: #000000;
-
 }
 
 /* First column styling for questions */
-.evaluate-subject-page table th:first-child,
+.evaluate-subject-page table th:first-child {
+  font-weight: bold; /* Keep bold for header */
+}
+
 .evaluate-subject-page table td:first-child {
-  width: 40%; /* Allocate more space for the Question column */
-  text-align: left;
+  font-weight: normal; /* Remove bold for question text */
+  text-align: left; /* Ensure question text is left-aligned */
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -301,7 +301,7 @@ margin-left: 20px;
 }
 
 .evaluate-subject-page table tbody tr td {
-  border-bottom: 1px solid #e0e0e0;
+  border: 1px solid #e0e0e0; /* Add borders between rows and columns */
 }
 
 /* Styling for the category header row */

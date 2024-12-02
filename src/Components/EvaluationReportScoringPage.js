@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
+import { getFirestore, doc, getDocs, setDoc, collection, query, where, onSnapshot, getDoc } from 'firebase/firestore';
 import './evaluationreportscoringpage.css';
 
 const EvaluationReportScoringPage = () => {
@@ -50,7 +50,7 @@ const EvaluationReportScoringPage = () => {
 
   const fetchFaculties = useCallback(() => {
     const facultyQuery = query(collection(db, 'users'), where('role', '==', 'Faculty'));
-
+  
     const unsubscribe = onSnapshot(
       facultyQuery,
       async (snapshot) => {
@@ -58,15 +58,34 @@ const EvaluationReportScoringPage = () => {
           snapshot.docs.map(async (facultyDoc) => {
             const facultyData = facultyDoc.data();
             const facultyId = facultyDoc.id;
-
+  
+            // Fetch subject evaluations for this faculty
+            const subjectEvaluationsQuery = query(
+              collection(db, 'subjectEvaluations'),
+              where('facultyId', '==', facultyId)
+            );
+            const subjectEvaluationsSnapshot = await getDocs(subjectEvaluationsQuery);
+  
+            // Calculate subject scores
+            let totalSubjectScore = 0;
+            let subjectCount = 0;
+  
+            if (!subjectEvaluationsSnapshot.empty) {
+              subjectEvaluationsSnapshot.forEach((doc) => {
+                const evaluationData = doc.data();
+                totalSubjectScore += evaluationData.averageScore || 0;
+                subjectCount += 1;
+              });
+            }
+  
+            const subjectScore = subjectCount > 0 ? (totalSubjectScore / subjectCount).toFixed(2) : 'Not scored yet';
+  
+            // Fetch faculty evaluation score
             const facultyEvaluationDoc = await getDoc(doc(db, 'facultyEvaluations', facultyId));
             const facultyEvaluationData = facultyEvaluationDoc.exists() ? facultyEvaluationDoc.data() : null;
             const facultyScore = facultyEvaluationData ? facultyEvaluationData.averageScore : 'Not scored yet';
-
-            const subjectEvaluationDoc = await getDoc(doc(db, 'facultyEvaluations', facultyId, 'subjects', '123'));
-            const subjectEvaluationData = subjectEvaluationDoc.exists() ? subjectEvaluationDoc.data() : null;
-            const subjectScore = subjectEvaluationData ? subjectEvaluationData.averageScore : 'Not scored yet';
-
+  
+            // Calculate the final weighted score
             let finalScore = 'Not scored yet';
             if (facultyScore !== 'Not scored yet' && subjectScore !== 'Not scored yet') {
               finalScore = (
@@ -74,7 +93,7 @@ const EvaluationReportScoringPage = () => {
                 facultyScore * (facultyWeight / 100)
               ).toFixed(2);
             }
-
+  
             return {
               id: facultyId,
               ...facultyData,
@@ -84,7 +103,7 @@ const EvaluationReportScoringPage = () => {
             };
           })
         );
-
+  
         setFaculties(facultyList);
         setLoading(false);
       },
@@ -93,9 +112,11 @@ const EvaluationReportScoringPage = () => {
         setLoading(false);
       }
     );
-
+  
     return unsubscribe;
   }, [db, subjectWeight, facultyWeight]);
+  
+  
 
   useEffect(() => {
     fetchFaculties();
@@ -183,24 +204,28 @@ const EvaluationReportScoringPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {displayedFaculties.map((faculty) => (
-                    <tr key={faculty.id}>
-                      <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
-                      <td>{faculty.department}</td>
-                      <td>
-                        {faculty.facultyScore !== 'Not scored yet'
-                          ? faculty.facultyScore.toFixed(2)
-                          : 'Not scored yet'}
-                      </td>
-                      <td>
-                        {faculty.subjectScore !== 'Not scored yet'
-                          ? faculty.subjectScore.toFixed(2)
-                          : 'Not scored yet'}
-                      </td>
-                      <td>{faculty.finalScore}</td>
-                    </tr>
-                  ))}
-                </tbody>
+  {displayedFaculties.map((faculty) => (
+    <tr key={faculty.id}>
+      <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
+      <td>{faculty.department}</td>
+      <td>
+        {typeof faculty.facultyScore === 'number'
+          ? faculty.facultyScore.toFixed(2)
+          : faculty.facultyScore}
+      </td>
+      <td>
+        {typeof faculty.subjectScore === 'number'
+          ? faculty.subjectScore.toFixed(2)
+          : faculty.subjectScore}
+      </td>
+      <td>
+        {typeof faculty.finalScore === 'number'
+          ? faculty.finalScore
+          : faculty.finalScore}
+      </td>
+    </tr>
+  ))}
+</tbody>
               </table>
               <div className="pagination">
                 <button onClick={handlePreviousPage} disabled={currentPage === 1}>

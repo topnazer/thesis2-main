@@ -9,7 +9,6 @@ const EvaluateFaculty = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [faculty, setFaculty] = useState(null);
-  const [evaluationForm, setEvaluationForm] = useState([]);
   const [categories, setCategories] = useState([]);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -38,8 +37,12 @@ const EvaluateFaculty = () => {
       const evaluationDoc = await getDoc(doc(db, "evaluationForms", "faculty"));
       if (evaluationDoc.exists()) {
         const data = evaluationDoc.data();
-        setEvaluationForm(data.questions || []);
-        setCategories(data.categories || []);
+
+        if (!data.categories || !Array.isArray(data.categories)) {
+          throw new Error("Invalid categories structure in Firestore.");
+        }
+
+        setCategories(data.categories);
       } else {
         setError("No evaluation form found for faculty.");
       }
@@ -69,23 +72,91 @@ const EvaluateFaculty = () => {
     checkIfAlreadyEvaluated();
   }, [fetchFaculty, fetchEvaluationForm, checkIfAlreadyEvaluated]);
 
-  const handleResponseChange = (categoryIndex, questionIndex, value) => {
+  const handleResponseChange = (categoryIndex, questionIndex, value, isCheckbox = false) => {
     const updatedResponses = { ...responses };
     const uniqueKey = `${categoryIndex}-${questionIndex}`;
-    updatedResponses[uniqueKey] = String(value);
+    if (isCheckbox) {
+      updatedResponses[uniqueKey] = updatedResponses[uniqueKey] || [];
+      if (updatedResponses[uniqueKey].includes(value)) {
+        updatedResponses[uniqueKey] = updatedResponses[uniqueKey].filter((val) => val !== value);
+      } else {
+        updatedResponses[uniqueKey].push(value);
+      }
+    } else {
+      updatedResponses[uniqueKey] = String(value);
+    }
     setResponses(updatedResponses);
   };
 
   const isCurrentCategoryComplete = () => {
-    const category = categories[currentCategoryIndex];
-    const categoryQuestions = evaluationForm.filter(
-      (question) => question.category === category
-    );
-
-    return categoryQuestions.every((_, questionIndex) => {
+    if (!categories[currentCategoryIndex]) {
+      return false;
+    }
+    const { questions, type } = categories[currentCategoryIndex];
+    return questions.every((_, questionIndex) => {
       const uniqueKey = `${currentCategoryIndex}-${questionIndex}`;
-      return responses[uniqueKey] !== undefined;
+      return type === "Checkbox"
+        ? responses[uniqueKey] && responses[uniqueKey].length > 0
+        : responses[uniqueKey] !== undefined;
     });
+  };
+
+  const calculateRatingScore = () => {
+    let totalScore = 0;
+    let maxScore = 0;
+
+    categories.forEach((category, categoryIndex) => {
+      if (category.type === "Rating") {
+        const { questions } = category;
+
+        questions.forEach((_, questionIndex) => {
+          const uniqueKey = `${categoryIndex}-${questionIndex}`;
+          const response = responses[uniqueKey];
+
+          totalScore += parseInt(response || 0, 10); // Add the rating value
+          maxScore += 5; // Assuming 5 is the max rating for each question
+        });
+      }
+    });
+
+    const percentageScore = (totalScore / maxScore) * 100;
+    return { totalScore, maxScore, percentageScore };
+  };
+
+  const calculateOptionFrequencies = () => {
+    const frequencies = {};
+
+    categories.forEach((category, categoryIndex) => {
+      const { questions, type, options } = category;
+
+      if (type === "Multiple Choice" || type === "Checkbox") {
+        questions.forEach((question, questionIndex) => {
+          const uniqueKey = `${categoryIndex}-${questionIndex}`;
+          const response = responses[uniqueKey];
+
+          // Initialize the frequency object for this question
+          if (!frequencies[uniqueKey]) {
+            frequencies[uniqueKey] = options.reduce((acc, option) => {
+              acc[option] = 0;
+              return acc;
+            }, {});
+          }
+
+          // Count responses
+          if (type === "Multiple Choice" && response) {
+            frequencies[uniqueKey][response] += 1;
+          } else if (type === "Checkbox" && Array.isArray(response)) {
+            response.forEach((selectedOption) => {
+              if (frequencies[uniqueKey][selectedOption] !== undefined) {
+                frequencies[uniqueKey][selectedOption] += 1;
+              }
+            });
+          }
+        });
+      }
+    });
+
+    return frequencies;
   };
 
   const handleNext = () => {
@@ -106,94 +177,154 @@ const EvaluateFaculty = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+  
     if (!isCurrentCategoryComplete()) {
       alert("Please answer all questions in this category before submitting.");
       return;
     }
-
-    const totalScore = Object.values(responses).reduce((sum, score) => sum + parseInt(score), 0);
-    const maxScore = evaluationForm.length * 5;
-    const percentageScore = (totalScore / maxScore) * 100;
-
+  
     const user = auth.currentUser;
     if (!user) {
       alert("User not authenticated.");
       return;
     }
-
+  
+    // Use calculateRatingScore for score calculation
+    const { totalScore, maxScore, percentageScore } = calculateRatingScore();
+  
+    // Use calculateOptionFrequencies for option frequency computation
+    const optionFrequencies = calculateOptionFrequencies();
+  
     try {
+      // Save individual evaluation
       const evaluationRef = doc(collection(db, "facultyEvaluations", facultyId, "completed_evaluations"), user.uid);
-
+  
       await setDoc(evaluationRef, {
         userId: user.uid,
-        facultyId: facultyId,
+        facultyId,
         scores: responses,
+        ratingScore: { totalScore, maxScore, percentageScore },
+        optionFrequencies,
         comment,
         percentageScore,
         createdAt: new Date(),
       });
-
+  
+      // Update or create the overall faculty evaluation
       const facultyEvaluationRef = doc(db, "facultyEvaluations", facultyId);
       const facultyEvaluationDoc = await getDoc(facultyEvaluationRef);
+  
       let newAverageScore;
-
+      let completedEvaluations;
+  
       if (facultyEvaluationDoc.exists()) {
         const existingAverageScore = facultyEvaluationDoc.data().averageScore || 0;
-        const completedEvaluations = (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
+        completedEvaluations = (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
         newAverageScore = ((existingAverageScore * (completedEvaluations - 1)) + percentageScore) / completedEvaluations;
-
+  
+        await setDoc(
+          facultyEvaluationRef,
+          {
+            averageScore: newAverageScore,
+            completedEvaluations,
+          },
+          { merge: true }
+        );
+      } else {
+        newAverageScore = percentageScore;
+        completedEvaluations = 1;
+  
         await setDoc(facultyEvaluationRef, {
           averageScore: newAverageScore,
           completedEvaluations,
-        }, { merge: true });
-      } else {
-        newAverageScore = percentageScore;
-        await setDoc(facultyEvaluationRef, {
-          averageScore: newAverageScore,
-          completedEvaluations: 1,
         });
       }
-
-      alert("Evaluation submitted successfully!");
+  
+      alert(`Evaluation submitted successfully! Your score: ${totalScore} / ${maxScore} (${percentageScore.toFixed(2)}%)`);
       navigate(location.state?.redirectTo || "/faculty-dashboard");
     } catch (error) {
       alert("Failed to submit evaluation. Please try again.");
       console.error("Error submitting evaluation:", error.message);
     }
   };
+  
 
   const renderQuestionsForCurrentCategory = () => {
-    const category = categories[currentCategoryIndex];
-    const categoryQuestions = evaluationForm.filter(
-      (question) => question.category === category
-    );
+    const currentCategory = categories[currentCategoryIndex];
+    if (!currentCategory) {
+      return <tr><td>No questions available for this category.</td></tr>;
+    }
+
+    const { type, questions, options } = currentCategory;
+
+    if (!questions || questions.length === 0) {
+      return <tr><td>No questions available for this category.</td></tr>;
+    }
 
     return (
-      <React.Fragment>
+      <>
         <tr>
-          <td colSpan="6" className="category-header"><strong>{category}</strong></td>
+          <th>Question</th>
+          {type === "Rating" && (
+            <>
+              <th>Strongly disagree</th>
+              <th>Disagree</th>
+              <th>Neutral</th>
+              <th>Agree</th>
+              <th>Strongly agree</th>
+            </>
+          )}
+          {(type === "Multiple Choice" || type === "Checkbox") && options.map((option, index) => (
+            <th key={index}>{option}</th>
+          ))}
         </tr>
-        {categoryQuestions.map((question, questionIndex) => {
+
+        {questions.map((question, questionIndex) => {
           const uniqueKey = `${currentCategoryIndex}-${questionIndex}`;
           return (
             <tr key={uniqueKey}>
-              <td>{question.text}</td>
-              {["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"].map((label, value) => (
-                <td key={value}>
-                  <input
-                    type="radio"
-                    name={`question-${uniqueKey}`}
-                    value={value + 1}
-                    checked={responses[uniqueKey] === String(value + 1)}
-                    onChange={(e) => handleResponseChange(currentCategoryIndex, questionIndex, e.target.value)}
-                  />
-                </td>
-              ))}
+              <td style={{ fontWeight: 'bold' }}>{question.text || "Invalid question text"}</td>
+              {type === "Rating" &&
+                [1, 2, 3, 4, 5].map((value) => (
+                  <td key={value}>
+                    <input
+                      type="radio"
+                      name={`question-${uniqueKey}`}
+                      value={value}
+                      checked={responses[uniqueKey] === String(value)}
+                      onChange={(e) =>
+                        handleResponseChange(currentCategoryIndex, questionIndex, e.target.value)
+                      }
+                    />
+                  </td>
+                ))}
+              {(type === "Multiple Choice" || type === "Checkbox") &&
+                options.map((option, optionIndex) => (
+                  <td key={optionIndex}>
+                    <input
+                      type={type === "Multiple Choice" ? "radio" : "checkbox"}
+                      name={`question-${uniqueKey}`}
+                      value={option}
+                      checked={
+                        type === "Multiple Choice"
+                          ? responses[uniqueKey] === option
+                          : responses[uniqueKey]?.includes(option)
+                      }
+                      onChange={(e) =>
+                        handleResponseChange(
+                          currentCategoryIndex,
+                          questionIndex,
+                          e.target.value,
+                          type === "Checkbox"
+                        )
+                      }
+                    />
+                  </td>
+                ))}
             </tr>
           );
         })}
-      </React.Fragment>
+      </>
     );
   };
 
@@ -221,19 +352,8 @@ const EvaluateFaculty = () => {
         <form onSubmit={handleSubmit}>
           <div className="form-table-section">
             <table>
-              <thead>
-                <tr>
-                  <th>Rating Legend</th>
-                  <th>Strongly disagree</th>
-                  <th>Disagree</th>
-                  <th>Neutral</th>
-                  <th>Agree</th>
-                  <th>Strongly agree</th>
-                </tr>
-              </thead>
-              <tbody>
-                {renderQuestionsForCurrentCategory()}
-              </tbody>
+              <thead>{renderQuestionsForCurrentCategory()}</thead>
+              <tbody></tbody>
             </table>
           </div>
 
