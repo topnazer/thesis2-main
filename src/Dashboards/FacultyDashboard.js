@@ -155,24 +155,49 @@ const FacultyDashboard = () => {
 
   const fetchFacultyInDepartment = async (user) => {
     try {
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const department = userDoc.data().department;
+        // Fetch current user's department
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+            const department = userDoc.data().department;
 
-        const facultyQuery = query(
-          collection(db, "users"),
-          where("department", "==", department),
-          where("role", "==", "Faculty")
-        );
+            // Fetch all faculty in the department
+            const facultyQuery = query(
+                collection(db, "users"),
+                where("department", "==", department),
+                where("role", "==", "Faculty")
+            );
 
-        onSnapshot(facultyQuery, (snapshot) => {
-          setFacultyList(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-        });
-      }
+            // Fetch the expiration date from Firestore
+            const evaluationFormRef = doc(db, "evaluationForms", "faculty");
+            const evaluationFormSnap = await getDoc(evaluationFormRef);
+
+            let expirationDate = null;
+            if (evaluationFormSnap.exists()) {
+                const data = evaluationFormSnap.data();
+                expirationDate = data.expirationDate ? new Date(data.expirationDate) : null;
+            }
+
+            const today = new Date();
+
+            // Check if the evaluation period has expired
+            const expired = expirationDate ? today > expirationDate : false;
+
+            // Fetch faculty list and include expiration status
+            onSnapshot(facultyQuery, (snapshot) => {
+                setFacultyList(
+                    snapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        expired, // Add the expiration status to each faculty
+                    }))
+                );
+            });
+        }
     } catch (error) {
-      console.error("Error fetching faculty in department:", error);
+        console.error("Error fetching faculty in department:", error);
     }
-  };
+};
+
 
   const fetchDeansInDepartment = async (user) => {
     try {
@@ -363,7 +388,7 @@ const FacultyDashboard = () => {
           </div>
             <h1>Faculty Dashboard</h1>
             <div style={{ display: "flex", alignItems: "center" }}>
-              <span>{userName}</span>
+            <p style={{fontSize: "25px"}}><strong>{userName}</strong></p>
               <button className="facnotification-icon" onClick={() => setShowNotifications(!showNotifications)}>
                 Notifications {notifications.length > 0 && `(${notifications.length})`}
               </button>
@@ -474,17 +499,19 @@ const FacultyDashboard = () => {
             {faculty.firstName} {faculty.lastName}
           </td>
           <td>
-            {evaluationsDone?.facultyEvaluations?.[faculty.id] ? (
-              <span className="evaluation-done">Evaluation Done</span>
-            ) : (
-              <button
-                className="table-evaluate-btn"
-                onClick={() => handleEvaluateFaculty(faculty.id)}
-              >
-                Evaluate
-              </button>
-            )}
-          </td>
+    {faculty.expired ? (
+        <span className="evaluation-expired">Evaluation Expired</span>
+    ) : evaluationsDone?.facultyEvaluations?.[faculty.id] ? (
+        <span className="evaluation-done">Evaluation Done</span>
+    ) : (
+        <button
+            className="table-evaluate-btn"
+            onClick={() => handleEvaluateFaculty(faculty.id)}
+        >
+            Evaluate
+        </button>
+    )}
+</td>
         </tr>
       ))}
     </tbody>

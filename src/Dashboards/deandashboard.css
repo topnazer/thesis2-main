@@ -27,6 +27,7 @@ html, body {
   padding: 0.5rem 1rem;
   border: none;
   cursor: pointer;
+  border-radius: 5px;
 }
 
 /* Section styling */
@@ -65,17 +66,19 @@ html, body {
   background-color: #e9ecef;
 }
 
-.dean-dashboard button {
+.dean-dashboard .table-evaluate-btn {
   background-color: rgb(15, 2, 2); 
   color: white;
   padding: 0.5rem 1rem;
   border: none;
   cursor: pointer;
+  border-radius:  0 20px 0 20px;
 }
 
-.dean-dashboard button:hover {
-  background-color:rgb(85, 31, 31); 
+.dean-dashboard .table-evaluate-btn:hover {
+  background-color:rgb(184, 181, 181); 
 }
+
 .dean-dashboard .evaluation-done {
   color: rgb(173, 55, 55);  /* Green color for completed evaluations */
   font-weight: bold;
@@ -84,32 +87,14 @@ html, body {
   font-size: 1rem;
 }
 
-.deanevaluation-report-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: white;
-  border: 2px solid #ccc;
-  border-radius: 5px;
-  padding: 20px;
-  width: 80%;
-  max-width: 600px;
-  box-shadow: 0 4px 8px rgba(6, 4, 4, 0.2);
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  font-family: 'Times New Roman', Times, serif;
+.dean-dashboard .evaluation-expired {
+  color:rgb(83, 26, 26);
   font-weight: bold;
-  color: black;
+  padding: 0.5rem 1rem;
+  display: inline-block;
+  font-size: 1rem;
 }
 
-.deanevaluation-report-modal h2 {
-  margin-top: 0px;
-  margin-bottom: 10px;
-}
 
 .dashboardlogo-container {
   top: 0; /* Aligns the logo to the top of the header */
@@ -123,4 +108,63 @@ html, body {
   height: auto;
   border-radius: 50%;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Table container specific to evaluation report */
+.deanevaluation-report-container {
+  margin: 2rem auto; /* Center and add spacing */
+  padding: 1rem; /* Inner padding */
+  border: 1px solid rgba(0, 0, 0, 0.3); /* Border styling */
+  border-radius: 2px; /* Rounded corners */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  background-color: #fff; /* White background */
+  width: 100%; /* Limit the width */
+  max-width: 1300px; /* Maximum width */
+}
+
+
+/* Table styling inside the container */
+.deanevaluation-report-container table {
+  margin-top: 1rem; /* Space above the table */
+  width: 100%; /* Full width inside the container */
+  border-collapse: collapse; /* Remove double borders */
+}
+
+.deanevaluation-report-container th,
+.deanevaluation-report-container td {
+  padding: 0.8rem; /* Inner padding */
+  text-align: left; /* Left-align content */
+  border: 1px solid #dee2e6; /* Add borders */
+  font-family: Arial, Helvetica, sans-serif; /* Consistent font */
+}
+
+.deanevaluation-report-container th {
+  background-color: rgb(69, 10, 10); /* Same dark red */
+  color: white; /* White text for contrast */
+}
+
+.deanevaluation-report-container tr {
+  background-color: #f9f9f9; /* Light gray background for rows */
+}
+
+.deanevaluation-report-container tr:hover {
+  background-color: #f1f1f1; /* Slightly darker hover effect */
+}
+.backing {
+  background-color: rgb(15, 2, 2); 
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  border-radius:  20px 20px 20px 2px;
+}
+.backing:hover {
+  background-color: #b22a3a; /* Darker red on hover */
+}
+.hika {
+  text-align: center; /* Centers the text horizontally */
+  margin: 0 auto; /* Ensures the element centers horizontally if it's a block element */
+  font-size: 2rem; /* Adjust the font size as needed */
+  color: white; /* Optional: Customize the text color */
+  padding: 1rem 0; /* Add some padding for spacing */
 }

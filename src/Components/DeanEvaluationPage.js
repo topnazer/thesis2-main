@@ -3,7 +3,6 @@ import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import './deanevaluationpage.css';
 
 const DeanEvaluationPage = () => {
-    const [deanQuestions, setDeanQuestions] = useState([]);
     const [newQuestion, setNewQuestion] = useState("");
     const [newWeight, setNewWeight] = useState("");
     const [editingIndex, setEditingIndex] = useState(null);
@@ -14,50 +13,63 @@ const DeanEvaluationPage = () => {
     const [newOption, setNewDeanOption] = useState("");
     const [selectedCategory, setSelectedDeanCategory] = useState("");
     const [editingCategoryIndex, setEditingDeanCategoryIndex] = useState(null);
-    const [expirationDate, setExpirationDate] = useState('');
+    const [expirationDate, setExpirationDate] = useState("");
+    const [editingOptionIndex, setEditingOptionIndex] = useState(null);
 
     const db = getFirestore();
 
-    useEffect(() => {
-        const fetchForms = async () => {
-            try {
-                const deanDoc = await getDoc(doc(db, "evaluationForms", "dean"));
-                if (deanDoc.exists()) {
-                    const data = deanDoc.data();
-                    setDeanQuestions(data.questions || []);
-                    setDeanCategories(data.categories || []);
-                }
-            } catch (error) {
-                console.error("Error fetching evaluation forms:", error);
+    const fetchEvaluationData = useCallback(async () => {
+        try {
+            const formRef = doc(db, "evaluationForms", "dean");
+            const formSnap = await getDoc(formRef);
+            if (formSnap.exists()) {
+                const data = formSnap.data();
+                setDeanCategories(data.categories || []);
+                setExpirationDate(data.expirationDate || "");
             }
-        };
-        fetchForms();
+        } catch (error) {
+            console.error("Error fetching form data:", error);
+        }
     }, [db]);
 
-    const addOrEditCategory = () => {
+    useEffect(() => {
+        fetchEvaluationData();
+    }, [fetchEvaluationData]);
+
+    const addOrEditCategory = async () => {
         if (!newCategory.trim()) return;
 
-        setDeanCategories((prevCategories) => {
-            const updatedCategories = [...prevCategories];
+        try {
+            const updatedCategories = [...categories];
             if (editingCategoryIndex !== null) {
                 updatedCategories[editingCategoryIndex] = {
+                    ...updatedCategories[editingCategoryIndex],
                     name: newCategory,
-                    questions: updatedCategories[editingCategoryIndex].questions || [],
                     type: categoryType,
                     options: categoryOptions,
                 };
             } else {
-                updatedCategories.push({
+                const newCategoryData = {
+                    id: Date.now(),
                     name: newCategory,
-                    questions: [],
                     type: categoryType,
                     options: categoryOptions,
-                });
+                    questions: [],
+                };
+                updatedCategories.push(newCategoryData);
             }
-            return updatedCategories;
-        });
 
-        resetCategoryState();
+            const formRef = doc(db, "evaluationForms", "dean");
+            await setDoc(formRef, {
+                categories: updatedCategories,
+                expirationDate: expirationDate || null,
+            });
+
+            setDeanCategories(updatedCategories);
+            resetCategoryState();
+        } catch (error) {
+            console.error('Error saving category:', error);
+        }
     };
 
     const resetCategoryState = () => {
@@ -68,8 +80,18 @@ const DeanEvaluationPage = () => {
         setEditingDeanCategoryIndex(null);
     };
 
-    const deleteCategory = (category) => {
-        setDeanCategories((prevCategories) => prevCategories.filter((cat) => cat.name !== category.name));
+    const deleteCategory = async (category) => {
+        try {
+            const updatedCategories = categories.filter((cat) => cat.name !== category.name);
+            const formRef = doc(db, "evaluationForms", "dean");
+            await setDoc(formRef, {
+                categories: updatedCategories,
+                expirationDate: expirationDate || null,
+            });
+            setDeanCategories(updatedCategories);
+        } catch (error) {
+            console.error('Error deleting category:', error);
+        }
     };
 
     const handleEditCategory = (index, category) => {
@@ -84,19 +106,29 @@ const DeanEvaluationPage = () => {
     };
 
     const addOption = () => {
-        if (newOption.trim() && selectedCategory) {
-            setDeanCategories((prevCategories) =>
-                prevCategories.map((category) =>
-                    category.name === selectedCategory
-                        ? {
-                              ...category,
-                              options: [...(category.options || []), newOption.trim()],
-                          }
-                        : category
-                )
-            );
-            setNewDeanOption("");
-        }
+        if (!newOption.trim() || !selectedCategory) return;
+
+        const updatedCategories = categories.map((category) =>
+            category.name === selectedCategory
+                ? {
+                      ...category,
+                      options:
+                          editingOptionIndex !== null
+                              ? category.options.map((option, index) =>
+                                    index === editingOptionIndex ? newOption.trim() : option
+                                )
+                              : [...(category.options || []), newOption.trim()],
+                  }
+                : category
+        );
+
+        setDeanCategories(updatedCategories);
+        resetOptionState();
+    };
+
+    const resetOptionState = () => {
+        setNewDeanOption("");
+        setEditingOptionIndex(null);
     };
 
     const deleteOption = (index) => {
@@ -117,24 +149,26 @@ const DeanEvaluationPage = () => {
     const addOrEditQuestion = () => {
         if (!newQuestion.trim() || !selectedCategory) return;
 
-        const question = {
-            text: newQuestion,
-            weight: parseFloat(newWeight) || 1,
-        };
-
-        setDeanCategories((prevCategories) =>
-            prevCategories.map((category) =>
-                category.name === selectedCategory
-                    ? {
-                          ...category,
-                          questions: editingIndex !== null
-                              ? category.questions.map((q, i) => (i === editingIndex ? question : q))
-                              : [...category.questions, question],
-                      }
-                    : category
-            )
+        const updatedCategories = categories.map((category) =>
+            category.name === selectedCategory
+                ? {
+                      ...category,
+                      questions:
+                          editingIndex !== null
+                              ? category.questions.map((q, i) =>
+                                    i === editingIndex
+                                        ? { text: newQuestion, weight: parseFloat(newWeight) || 1 }
+                                        : q
+                                )
+                              : [
+                                    ...category.questions,
+                                    { text: newQuestion, weight: parseFloat(newWeight) || 1 },
+                                ],
+                  }
+                : category
         );
 
+        setDeanCategories(updatedCategories);
         resetQuestionState();
     };
 
@@ -173,13 +207,15 @@ const DeanEvaluationPage = () => {
             const formRef = doc(db, "evaluationForms", "dean");
             await setDoc(formRef, {
                 categories: categories.map((category) => ({
+                    id: category.id || Date.now(),
                     name: category.name,
                     type: category.type,
                     options: category.options || [],
                     questions: category.questions || [],
                 })),
+                expirationDate: expirationDate || null,
             });
-            alert("Dean form saved successfully!");
+            alert("Form saved successfully!");
         } catch (error) {
             console.error("Error saving form:", error);
         }
@@ -187,13 +223,12 @@ const DeanEvaluationPage = () => {
 
     return (
         <div className="dean-evaluation-page">
-            {/* Left Container: Dean Evaluation Form */}
             <div className="dean-evaluation-card">
                 <h1 className="dean-evaluation-header">Dean Evaluation Form</h1>
-    
-                {/* Add/Edit Category */}
+
+                {/* Add Category Section */}
                 <div className="dean-category-section">
-                    <h2>{editingCategoryIndex !== null ? "Edit Category" : "Add Category"}</h2>
+                    <h2 className="section-title">{editingCategoryIndex !== null ? "Edit Category" : "Add Category"}</h2>
                     <input
                         className="dean-category-input"
                         type="text"
@@ -210,19 +245,14 @@ const DeanEvaluationPage = () => {
                         <option value="Checkbox">Checkbox</option>
                         <option value="Rating">Rating</option>
                     </select>
-                    <div className="dean-buttons-container">
-                        <button
-                            className={editingCategoryIndex !== null ? "dean-edit-button" : "dean-save-button"}
-                            onClick={addOrEditCategory}
-                        >
-                            {editingCategoryIndex !== null ? "Update Category" : "Add Category"}
-                        </button>
-                    </div>
+                    <button className="dean-save-button" onClick={addOrEditCategory}>
+                        {editingCategoryIndex !== null ? "Update Category" : "Add Category"}
+                    </button>
                 </div>
-    
-                {/* Add/Edit Question */}
+
+                {/* Add Question Section */}
                 <div className="dean-question-form">
-                    <h2>Select Category to Edit</h2>
+                    <h2 className="section-title">Select Category to Edit</h2>
                     <select
                         className="dean-evaluation-select"
                         value={selectedCategory}
@@ -243,47 +273,31 @@ const DeanEvaluationPage = () => {
                         onChange={(e) => setNewQuestion(e.target.value)}
                         placeholder="Add Question"
                     />
-                    {(categories.find((cat) => cat.name === selectedCategory)?.type === "Multiple Choice" ||
-                        categories.find((cat) => cat.name === selectedCategory)?.type === "Checkbox") && (
+                    <button className="dean-save-button" onClick={addOrEditQuestion}>
+                        {editingIndex !== null ? "Update Question" : "Add Question"}
+                    </button>
+                    {(categories.find(cat => cat.name === selectedCategory)?.type === "Multiple Choice" ||
+  categories.find(cat => cat.name === selectedCategory)?.type === "Checkbox") && (
                         <>
                             <input
-                                className="dean-category-input"
+                                className="dean-option-input"
                                 type="text"
                                 value={newOption}
                                 onChange={handleCategoryOptionsChange}
-                                placeholder="Enter new option"
+                                placeholder="Add Option"
                             />
                             <button className="dean-save-button" onClick={addOption}>
-                                Add Option
+                                {editingOptionIndex !== null ? "Update Option" : "Add Option"}
                             </button>
-                            <ul>
-                                {categoryOptions.map((option, index) => (
-                                    <li key={index}>
-                                        {option}
-                                        <button
-                                            className="dean-delete-button"
-                                            onClick={() => deleteOption(index)}
-                                        >
-                                            Delete
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
                         </>
                     )}
-                    <button
-                        className={editingIndex !== null ? "dean-edit-button" : "dean-save-button"}
-                        onClick={addOrEditQuestion}
-                    >
-                        {editingIndex !== null ? "Update Question" : "Add Question"}
-                    </button>
                 </div>
-    
-                {/* Expiration Date */}
-                <div className="dean-question-form">
-                    <h2>Expiration Date:</h2>
+
+                {/* Expiration Date Section */}
+                <div className="dean-expiration-section">
+                    <h2 className="section-title">Expiration Date:</h2>
                     <input
-                        className='dean-expiration-input'
+                        className="dean-expiration-input"
                         type="date"
                         value={expirationDate}
                         onChange={(e) => setExpirationDate(e.target.value)}
@@ -293,60 +307,55 @@ const DeanEvaluationPage = () => {
                     </button>
                 </div>
             </div>
-    
-            {/* Right Container: Dean Evaluation Preview */}
+
+            {/* Preview Section */}
             <div className="dean-evaluation-preview">
+                <h2 className="preview-title">Preview</h2>
                 {categories.map((category, index) => (
                     <div key={index} className="dean-category-block">
-                        <h3 className="dean-category-title">
-                            {category.name} ({category.type})
-                            <div className="dean-operation-buttons">
-                                <button
-                                    className="dean-delete-button"
-                                    onClick={() => deleteCategory(category)}
-                                >
-                                    Delete Category
-                                </button>
-                                <button
-                                    className="dean-edit-button"
-                                    onClick={() => handleEditCategory(index, category)}
-                                >
-                                    Edit Category
-                                </button>
-                            </div>
-                        </h3>
-                        <ul>
-                            {deanQuestions
-                                .filter((q) => q.category === category.name)
-                                .map((q, i) => (
-                                    <li key={i} className="dean-category-section">
-                                        <div className="question-content">
-                                            <p>{q.text}</p>
-                                            <span className="question-weight">Weight: {q.weight}</span>
-                                        </div>
-                                        <div className="dean-buttons-container">
-                                            <button
-                                                className="dean-edit-button"
-                                                onClick={() => handleEditQuestion(i)}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                className="dean-delete-button"
-                                                onClick={() => deleteQuestion(i)}
-                                            >
-                                                Delete
-                                            </button>
+                        <h3 className="dean-category-title">{category.name} ({category.type})</h3>
+                        <div className="category-actions">
+                            <button
+                                className="dean-edit-button"
+                                onClick={() => handleEditCategory(index, category)}
+                            >
+                                Edit
+                            </button>
+                            <button
+                                className="dean-delete-button"
+                                onClick={() => deleteCategory(category)}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                        <ul className="category-questions-list">
+                            {category.questions.map((question, i) => (
+                                <li key={i}>
+                                    {question.text}
+                                    <div className="question-actions">
+                                        <button onClick={() => handleEditQuestion(i)}>Edit</button>
+                                        <button onClick={() => deleteQuestion(i)}>Delete</button>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                        {category.options && (
+                            <ul className="category-options-list">
+                                {category.options.map((option, i) => (
+                                    <li key={i}>
+                                        {option}
+                                        <div className="option-actions">
+                                            <button onClick={() => deleteOption(i)}>Delete</button>
                                         </div>
                                     </li>
                                 ))}
-                        </ul>
+                            </ul>
+                        )}
                     </div>
                 ))}
             </div>
         </div>
-    );    
-    
+    );
 };
 
 export default DeanEvaluationPage;

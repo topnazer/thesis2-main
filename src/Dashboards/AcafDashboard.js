@@ -117,7 +117,7 @@ const AcafDashboard = () => {
           </div>
         <h1>ACAF Dashboard</h1>
         <div>
-          <span>{userName}</span>
+        <p style={{fontSize: "25px"}}><strong>{userName}</strong></p>
           <button onClick={handleSignOut}>Sign Out</button>
         </div>
       </nav>
@@ -138,7 +138,7 @@ const AcafDashboard = () => {
                 <td>{dean.id}</td>
                 <td>{dean.firstName} {dean.lastName}</td>
                 <td>
-                  <button onClick={() => handleEvaluateDean(dean.id)}>Evaluate</button>
+                  <button className="table-evaluate-btn" onClick={() => handleEvaluateDean(dean.id)}>Evaluate</button>
                 </td>
               </tr>
             ))}

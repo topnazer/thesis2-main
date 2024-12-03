@@ -26,6 +26,7 @@ html, body {
   padding: 0.5rem 1rem;
   border: none;
   cursor: pointer;
+  border-radius: 5px;
 }
 
 /* Section styling */
@@ -70,6 +71,7 @@ html, body {
   padding: 0.5rem 1rem;
   border: none;
   cursor: pointer;
+  border-radius: 5px;
 }
 
 .acaf-dashboard button:hover {
@@ -95,4 +97,17 @@ html, body {
   height: auto;
   border-radius: 50%;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.acaf-dashboard .table-evaluate-btn {
+  background-color: rgb(15, 2, 2); 
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  border-radius:  0 20px 0 20px;
+}
+
+.acaf-dashboard .table-evaluate-btn:hover {
+  background-color:rgb(184, 181, 181); 
 }

@@ -9,29 +9,26 @@ const DeanDashboard = () => {
   const [facultyList, setFacultyList] = useState([]);
   const [evaluationReports, setEvaluationReports] = useState([]);
   const [evaluatorNames, setEvaluatorNames] = useState({});
-  const [userName, setUserName] = useState(""); 
+  const [userName, setUserName] = useState("");
   const [evaluationsDone, setEvaluationsDone] = useState({});
-  const [showEvaluationReport, setShowEvaluationReport] = useState(false); // State for toggling evaluation report modal
-  const [loading, setLoading] = useState(true); // Loading state to manage data fetching and authentication status
+  const [showEvaluationReport, setShowEvaluationReport] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const db = getFirestore();
 
   useEffect(() => {
-    // Check authentication status and fetch data if authenticated
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        // Fetch all necessary data
         fetchUserInfo(user);
         fetchFacultyInDepartment(user);
         fetchEvaluationReports(user);
         fetchEvaluationsDone(user);
-        setLoading(false); // Set loading to false after data fetching
+        setLoading(false);
       } else {
-        // Redirect to login if not authenticated
         navigate("/");
       }
     });
-    return unsubscribe; // Cleanup on unmount
+    return unsubscribe;
   }, [db, navigate]);
 
   const fetchUserInfo = async (user) => {
@@ -119,12 +116,6 @@ const DeanDashboard = () => {
     }
   };
 
-  const handleEvaluateFaculty = (facultyId) => {
-    navigate(`/evaluate-faculty/${facultyId}`, {
-      state: { redirectTo: "/dean-dashboard" }
-    });
-  };
-
   const handleSignOut = async () => {
     try {
       await auth.signOut();
@@ -134,53 +125,59 @@ const DeanDashboard = () => {
     }
   };
 
+  const handleEvaluateFaculty = (facultyId) => {
+    navigate(`/evaluate-faculty/${facultyId}`, {
+      state: { redirectTo: "/dean-dashboard" }
+    });
+  };
+
   return (
     <div className="dean-dashboard">
       {loading ? (
         <p>Loading...</p>
+      ) : showEvaluationReport ? (
+        <div>
+          <nav>
+            <button className="backing" onClick={() => setShowEvaluationReport(false)}>Back to Dashboard</button>
+            <h1 className="hika">Evaluation Report</h1>
+          </nav>
+          {evaluationReports.length > 0 ? (
+            <table  className="deanevaluation-report-container">
+              <thead>
+                <tr>
+                  <th>Evaluator</th>
+                  <th>Average Score</th>
+                  <th>Comments</th>
+                </tr>
+              </thead>
+              <tbody>
+                {evaluationReports.map((report, index) => (
+                  <tr key={index}>
+                    <td>{evaluatorNames[report.userId] || report.userId}</td>
+                    <td>{report.percentageScore.toFixed(2)}%</td>
+                    <td>{report.comment}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          
+          ) : (
+            <p>No evaluations submitted yet.</p>
+          )}
+        </div>
       ) : (
         <>
           <nav>
-          <div className="dashboardlogo-container">
-            <img src="/spc.png" alt="Logo" className="dashboardlogo" />
-          </div>
+            <div className="dashboardlogo-container">
+              <img src="/spc.png" alt="Logo" className="dashboardlogo" />
+            </div>
             <h1>Dean Dashboard</h1>
             <div style={{ display: "flex", alignItems: "center" }}>
-              <span>{userName}</span>
-              <button onClick={() => setShowEvaluationReport(!showEvaluationReport)}>Evaluation Report</button>
+              <p style={{ fontSize: "25px" }}><strong>{userName}</strong></p>
+              <button onClick={() => setShowEvaluationReport(true)}>Evaluation Report</button>
               <button onClick={handleSignOut}>Sign Out</button>
             </div>
           </nav>
-
-          {/* Evaluation Report Modal */}
-          {showEvaluationReport && (
-            <div className="deanevaluation-report-modal">
-              <h2>Evaluation Report</h2>
-              {evaluationReports.length > 0 ? (
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Evaluator</th>
-                      <th>Average Score</th>
-                      <th>Comments</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {evaluationReports.map((report, index) => (
-                      <tr key={index}>
-                        <td>{evaluatorNames[report.userId] || report.userId}</td>
-                        <td>{report.percentageScore.toFixed(2)}%</td>
-                        <td>{report.comment}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <p>No evaluations submitted yet.</p>
-              )}
-              <button onClick={() => setShowEvaluationReport(false)}>Close</button>
-            </div>
-          )}
 
           <section>
             <h2>Evaluate Faculty</h2>
@@ -201,7 +198,12 @@ const DeanDashboard = () => {
                       {evaluationsDone[faculty.id] ? (
                         <span className="evaluation-done">Evaluation Done</span>
                       ) : (
-                        <button onClick={() => handleEvaluateFaculty(faculty.id)}>Evaluate</button>
+                        <button
+                          className="table-evaluate-btn"
+                          onClick={() => handleEvaluateFaculty(faculty.id)}
+                        >
+                          Evaluate
+                        </button>
                       )}
                     </td>
                   </tr>
