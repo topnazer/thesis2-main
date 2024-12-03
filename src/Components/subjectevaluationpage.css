@@ -71,10 +71,7 @@
     color: white;
 }
 
-.subject-preview button {
-    background-color: #008CBA;
-    color: white;
-}
+
 
 .subject-evaluation-container .expiration-date-section button {
     background-color: #4CAF50;
@@ -103,8 +100,6 @@
 
 .category-preview h3 {
     color: #333;
-    
-
 }
 
 .category-preview .edit-category-button {
@@ -121,83 +116,50 @@
     color: white;
 }
 
-.edit-category-btn {
+.edit-btn {
     background-color: #008CBA;
 }
 
-.delete-category-btn {
+.delete-btn {
     background-color: #f44336;
 }
 
-.category-preview ul {
-    list-style-type: none;
-    padding-left: 0;
-}
-
-.category-preview ul li {
-    font-size: 14px;
-    list-style: decimal;    
-    
-}
-
-.category-preview ul li strong {
-    color: #333;
-}
-
-.category-preview h2 {
-    color: #444;
-    margin: 0;
-    font-size: 24px;
-}
-
-.category-preview-section {
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
-    padding: 5px;
-}
-
-.category-preview-section ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.question-item {
-    background-color: #f9f9f9;
-    padding: 20px;
-    margin: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-.question-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
-
-.question-actions button {
-    padding: 6px 12px;
-    font-size: 14px;
-    border-radius: 5px;
-}
-
-.question-actions .edit-btn {
-    background-color: #008CBA;
-    color: white;
-}
-
-.question-actions .delete-btn {
-    background-color: #f44336;
-    color: white;
-}
-
-.expiration-date-section input {
+.subject-preview table {
     width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
 }
 
-.expiration-date-section label {
-    font-size: 1rem;
+.subject-preview th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
 }
+
+.table-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.subject-preview th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.subject-preview tr:hover {
+    background-color: #f9f9f9;
+}
+
+.subject-preview button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+}
+
+
 
 input::placeholder,
 textarea::placeholder {
@@ -222,4 +184,7 @@ textarea::placeholder {
     flex-direction: column;
     gap: 10px;
     align-items: center;
+}
+.questions-preview button:hover {
+    background-color: #4CAF50;  
 }

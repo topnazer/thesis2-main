@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import './deanevaluationpage.css';
+import { FilePenLine , Trash2 } from 'lucide-react';
 
 const DeanEvaluationPage = () => {
     const [newQuestion, setNewQuestion] = useState("");
@@ -293,7 +294,7 @@ const DeanEvaluationPage = () => {
                     )}
                 </div>
 
-                {/* Expiration Date Section */}
+                
                 <div className="dean-expiration-section">
                     <h2 className="section-title">Expiration Date:</h2>
                     <input
@@ -308,50 +309,104 @@ const DeanEvaluationPage = () => {
                 </div>
             </div>
 
-            {/* Preview Section */}
-            <div className="dean-evaluation-preview">
-                <h2 className="preview-title">Preview</h2>
-                {categories.map((category, index) => (
-                    <div key={index} className="dean-category-block">
-                        <h3 className="dean-category-title">{category.name} ({category.type})</h3>
-                        <div className="category-actions">
-                            <button
-                                className="dean-edit-button"
-                                onClick={() => handleEditCategory(index, category)}
-                            >
-                                Edit
-                            </button>
-                            <button
-                                className="dean-delete-button"
-                                onClick={() => deleteCategory(category)}
-                            >
-                                Delete
-                            </button>
-                        </div>
-                        <ul className="category-questions-list">
-                            {category.questions.map((question, i) => (
-                                <li key={i}>
-                                    {question.text}
-                                    <div className="question-actions">
-                                        <button onClick={() => handleEditQuestion(i)}>Edit</button>
-                                        <button onClick={() => deleteQuestion(i)}>Delete</button>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                        {category.options && (
-                            <ul className="category-options-list">
-                                {category.options.map((option, i) => (
-                                    <li key={i}>
-                                        {option}
-                                        <div className="option-actions">
-                                            <button onClick={() => deleteOption(i)}>Delete</button>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
+            
+            <div className="dean-evaluation-preview ">
+                <h1>Dean Evaluation Form Preview</h1>
+                <div>
+                    <h3>Expiration Date:</h3>
+                    <p>{expirationDate || "Not Set"}</p>
+                </div>
+                {categories.map((category) => (
+                   <div key={category.id} className="category-preview">
+                   <h2>
+                       Category: {category.name} ({category.type})
+                   </h2>
+                   <div className="edit-category-button">
+                       <button
+                           onClick={() => handleEditCategory(categories.findIndex(c => c.id === category.id), category)}
+                          className='edit-btn'
+                           
+                       >
+                           <FilePenLine />
+                       </button>
+                       <button
+                           onClick={() => deleteCategory(category.id)}
+                           className='delete-btn'
+                           
+                       >
+                           <Trash2 />
+                       </button>
+                   </div>
+                   {category.questions && category.questions.length > 0 && (
+                       <div className="questions-preview">
+                           <h3>Questions:</h3>
+                           <table>
+                               <thead>
+                                   <tr>
+                                       <th>#</th>
+                                       <th>Question</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {category.questions.map((question, i) => (
+                                       <tr key={i}>
+                                           <td>{i + 1}</td>
+                                           <td className='table-content'>
+                                               {question.text}
+                                               <div className="question-actions">
+                                                   <button  className='edit-btn'onClick={() => handleEditQuestion(i)}>
+                                                       <FilePenLine />
+                                                   </button>
+                                                   <button className='delete-btn' onClick={() => deleteQuestion(i)}>
+                                                       <Trash2 />
+                                                   </button>
+                                               </div>
+                                           </td>
+                                       </tr>
+                                   ))}
+                               </tbody>
+                           </table>
+                       </div>
+                   )}
+                   {category.options && category.options.length > 0 && (
+                       <div className="options-preview">
+                           <h3>Options:</h3>
+                           <table>
+                               <thead>
+                                   <tr>
+                                       <th>#</th>
+                                       <th>Option</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {category.options.map((option, i) => (
+                                       <tr key={i}>
+                                           <td>{i + 1}</td>
+                                           <td className='table-content'>
+                                               {option}
+                                               <div className="option-actions">
+                                                   <button
+                                                        className='edit-btn'
+                                                       onClick={() => {
+                                                           setFacultyOption(option);
+                                                           setEditingOptionIndex(i);
+                                                           setSelectedFacultyCategory(category.name);
+                                                       }}
+                                                   >
+                                                       <FilePenLine />
+                                                   </button>
+                                                   <button className='delete-btn' onClick={() => deleteOption(i)}>
+                                                       <Trash2 />
+                                                   </button>
+                                               </div>
+                                           </td>
+                                       </tr>
+                                   ))}
+                               </tbody>
+                           </table>
+                       </div>
+                   )}
+               </div>              
                 ))}
             </div>
         </div>

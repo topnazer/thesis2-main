@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import './subjectevaluationpage.css';
 
+import { FilePenLine , Trash2 } from 'lucide-react';
 const SubjectEvaluationPage = () => {
     const [subjectQuestion, setSubjectQuestion] = useState("");
     const [newWeight, setNewWeight] = useState("");
@@ -36,48 +37,39 @@ const SubjectEvaluationPage = () => {
     }, [fetchEvaluationData]);
 
     const addOrEditCategory = async () => {
-        if (!newCategory.trim()) return; // Ensure category name is not empty
-    
-        try {
-            const formRef = doc(db, 'evaluationForms', 'subject');
-            let updatedCategories = [...categories]; // Copy existing categories
-    
-            if (editingCategoryIndex !== null) {
-                // Update an existing category
-                updatedCategories[editingCategoryIndex] = {
-                    ...updatedCategories[editingCategoryIndex],
-                    name: newCategory,
-                    type: categoryType,
-                    options: categoryOptions,
-                };
-            } else {
-                // Add a new category
-                const newCategoryData = {
-                    id: Date.now(), // Unique ID for the category
-                    name: newCategory,
-                    type: categoryType,
-                    options: categoryOptions,
-                    questions: [],
-                };
-                updatedCategories.push(newCategoryData);
-            }
-    
-            // Save updated categories to Firestore
-            await setDoc(formRef, {
-                categories: updatedCategories,
-                expirationDate: expirationDate || null, // Preserve expiration date
-            });
-    
-            // Update the local state
-            setCategories(updatedCategories);
-            resetCategoryState();
-        } catch (error) {
-            console.error('Error saving category:', error);
-        }
-    };
-    
-    
-
+      if (!newCategory.trim()) return; 
+  
+      try {
+          const formRef = doc(db, "evaluationForms", "subject");
+          let updatedCategories = [...categories];
+  
+          if (editingCategoryIndex !== null) {
+              updatedCategories[editingCategoryIndex] = {
+                  ...updatedCategories[editingCategoryIndex],
+                  name: newCategory,
+                  type: categoryType,
+                  options: categoryOptions,
+              };
+          } else {
+              const newCategoryData = {
+                  id: Date.now(), // Unique ID
+                  name: newCategory,
+                  type: categoryType,
+                  options: categoryOptions,
+                  questions: [],
+              };
+              updatedCategories.push(newCategoryData);
+          }
+          await setDoc(formRef, {
+              categories: updatedCategories,
+              expirationDate: expirationDate || null, 
+          });
+          setCategories(updatedCategories);
+          resetCategoryState();
+      } catch (error) {
+          console.error("Error saving category:", error);
+      }
+  };
     const resetCategoryState = () => {
         setNewCategory("");
         setCategoryType("Multiple Choice");
@@ -88,16 +80,11 @@ const SubjectEvaluationPage = () => {
 
     const deleteCategory = async (categoryId) => {
         try {
-            // Filter out the category to be deleted
             const updatedCategories = categories.filter((category) => category.id !== categoryId);
-            
-            // Update the Firestore document
             await setDoc(doc(db, 'evaluationForms', 'subject'), {
                 categories: updatedCategories,
-                expirationDate: expirationDate || null, // Preserve expiration date
+                expirationDate: expirationDate || null, 
             });
-    
-            // Update the local state
             setCategories(updatedCategories);
         } catch (error) {
             console.error('Error deleting category:', error);
@@ -107,11 +94,12 @@ const SubjectEvaluationPage = () => {
     
 
     const handleEditCategory = (index, category) => {
-        setNewCategory(category.name);
-        setCategoryType(category.type);
-        setCategoryOptions(category.options || []);
-        setEditingCategoryIndex(index);
-    };
+      setEditingCategoryIndex(index);
+      setNewCategory(category.name);
+      setCategoryType(category.type);
+      setCategoryOptions(category.options || []);
+  };
+  
 
     const handleCategoryOptionsChange = (e) => {
         setNewOption(e.target.value);
@@ -235,7 +223,6 @@ const SubjectEvaluationPage = () => {
             console.error("Error saving form:", error);
         }
     };
-
     return (
         <div className="subject-evaluation-container">
             <div className="subject-form">
@@ -319,73 +306,110 @@ const SubjectEvaluationPage = () => {
         <h3>Expiration Date:</h3>
         <p>{expirationDate || "Not Set"}</p>
     </div>
-    {categories.map((category) => (
-        <div key={category.id} className="category-preview">
+    {categories.map((category, index) => (
+        <div key={category.id || index} className="category-preview">
             <h2>
                 Category: {category.name} ({category.type})
             </h2>
             <div className="edit-category-button">
                 <button
-                    onClick={() => handleEditCategory(category.id, category)}
-                    className="edit-category-btn"
+                    onClick={() => handleEditCategory(index, category)}
+                    className="edit-btn"
                 >
-                    Edit Category
+                    <FilePenLine />
                 </button>
                 <button
-                    onClick={() => deleteCategory(category.id)}  
-                    className="delete-category-btn"
+                    onClick={() => deleteCategory(category.id)}
+                    className="delete-btn"
                 >
-                    Delete Category
+                    <Trash2 />
                 </button>
             </div>
-        
-                        {category.questions.length > 0 && (
-                            <div className="questions-preview">
-                                <h3>Questions:</h3>
-                                <ul>
-                                    {category.questions.map((question, i) => (
-                                        <li key={i}>
-                                            <span>Question: {question.text}</span>
-                                            <div className="question-actions">
-                                                <button onClick={() => handleEditQuestion(i)}>
-                                                    Edit
-                                                </button>
-                                                <button onClick={() => deleteQuestion(i)}>
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                        {category.options.length > 0 && (
-                            <div className="options-preview">
-                                <h3>Options:</h3>
-                                <ul>
-                                    {category.options.map((option, i) => (
-                                        <li key={i}>
-                                            <span>{option}</span>
-                                            <div className="option-actions">
-                                                <button
-                                                    onClick={() => {
-                                                        setNewOption(option);
-                                                        setEditingOptionIndex(i);
-                                                        setSelectedCategory(category.name);
-                                                    }}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button onClick={() => deleteOption(i)}>Delete</button>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
+
+            {/* Questions */}
+            {category.questions.length > 0 && (
+                <div className="questions-preview">
+                    <h3>Questions:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Question</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {category.questions.map((question, i) => (
+                                <tr key={i}>
+                                    <td>{i + 1}</td>
+                                    <td className="table-content">
+                                        {question.text}
+                                        <div className="question-actions">
+                                            <button
+                                                className="edit-btn"
+                                                onClick={() => handleEditQuestion(i)}
+                                            >
+                                                <FilePenLine />
+                                            </button>
+                                            <button
+                                                className="delete-btn"
+                                                onClick={() => deleteQuestion(i)}
+                                            >
+                                                <Trash2 />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* Options */}
+            {category.options.length > 0 && (
+                <div className="options-preview">
+                    <h3>Options:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Option</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {category.options.map((option, i) => (
+                                <tr key={i}>
+                                    <td>{i + 1}</td>
+                                    <td className="table-content">
+                                        {option}
+                                        <div className="option-actions">
+                                            <button
+                                                className="edit-btn"
+                                                onClick={() => {
+                                                    setNewOption(option);
+                                                    setEditingOptionIndex(i);
+                                                    setSelectedCategory(category.name);
+                                                }}
+                                            >
+                                                <FilePenLine />
+                                            </button>
+                                            <button
+                                                className="delete-btn"
+                                                onClick={() => deleteOption(i)}
+                                            >
+                                                <Trash2 />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>
+    ))}
+</div>                    
         </div>
     );
     

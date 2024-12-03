@@ -1,8 +1,6 @@
-
 ::-webkit-scrollbar {
     width: 0px;
 }
-
 
 .faculty-evaluation-container {
     height: 100%;
@@ -12,7 +10,7 @@
     gap: 20px;
 }
 
-.faculty-evaluation-container h1 , h2, h3 {
+.faculty-evaluation-container h1, h2, h3 {
     color: rgb(133, 5, 5);
     margin: 0;
 }
@@ -27,27 +25,29 @@
     border-radius: 10px;
 }
 
-.faculty-evaluation-preview {
+.faculty-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     width: 50%;
     padding: 20px;
-    height: 95%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 4px rgb(0 0 0 / 50%);
     border-radius: 10px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
 }
-
-
 
 .input-category,
 .select-category {
     border: 0.5px solid rgb(0, 0, 0);
-  padding: 0.7rem 0rem;
-  font-size: 1rem;
-  border-radius: 5px;
-  box-shadow: 0 0.4rem #dfd9d9;
-  text-align: center;
-  width: 100%;
-    
+    padding: 0.7rem 0rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    box-shadow: 0 0.4rem #dfd9d9;
+    text-align: center;
+    width: 100%;
 }
+
 .input-question {
     border: 0.5px solid rgb(0, 0, 0);
     padding: 0.7rem 0rem;
@@ -64,10 +64,10 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    width: 100%;
+    
 }
 
-.save-form-btn, .category-section button, .faculty-evaluation-container button {
+.save-form-btn, .category-section button, .faculty-evaluation-form button {
     background-color: #4CAF50;
     color: white;
 }
@@ -83,7 +83,6 @@
     margin: 0 5px;
 }
 
-
 .question-item {
     padding: 10px;
     margin-bottom: 10px;
@@ -96,6 +95,7 @@
     display: flex;
     gap: 25px;
 }
+
 .category-section {
     display: flex;
     flex-direction: column;
@@ -103,9 +103,44 @@
     padding: 5px;
     gap: 10px;
 }
+
 .question-section {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
+}
+
+.faculty-preview  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.faculty-preview  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.faculty-preview  th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.faculty-preview  tr:hover {
+    background-color: #f9f9f9;
+}
+
+.faculty-preview button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+}
+
+.faculty-preview button:hover {
+    background-color: #4CAF50;  
 }

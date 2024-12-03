@@ -105,8 +105,8 @@ html, body {
 }
 
 .Admin-links a:hover, .Admin-links button:hover {
-    background-color: #5c0017; 
-    color: #F5F5DC;
+    background-color: white; 
+    color: #000000;
 }
 
 .Admin-links a:focus {
