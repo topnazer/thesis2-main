@@ -188,14 +188,11 @@
   position: relative; /* Ensures other absolutely positioned elements within stay relative to this container */
 }
 
-/* Header Container */
+
 .header-container {
-  margin-left: 5px;
-  margin-right: 5px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
   border-bottom: 2px solid #e0e0e0;
   position: relative; /* Allows absolute positioning of the logo within */
   box-shadow: 0px 4px 8px rgba(44, 18, 18, 0.15),
@@ -237,7 +234,7 @@ margin-left: 20px;
 
 /* Table Section */
 .form-table-section {
-  margin-bottom: 20px;
+
 }
 
 .evaluate-subject-page table {
@@ -322,46 +319,43 @@ margin-left: 20px;
 
 /* Comments Section */
 .form-comments-section {
-  width: 100%; /* Full width of parent container */
-  max-width: 600px; /* Limits width on larger screens */
-  margin: 0 auto 20px auto; /* Centers horizontally */
-  padding: 15px; /* Inner padding for the container */
-  border-radius: 10px; /* Rounded corners */
+  width: 50%;
+  padding: 10px;
+  border-radius: 10px;
   background: linear-gradient(45deg, rgba(29, 17, 17, 0.15), rgba(30, 12, 12, 0.1), rgba(30, 12, 12, 0));
-  box-shadow: 5px 12px 10px rgba(44, 18, 18, 0.15),
-  5px 12px 20px rgba(47, 22, 22, 0.1),
-  5px 12px 30px rgba(43, 12, 12, 0.05),
-  5px 12px 40px rgba(46, 8, 8, 0.02);
+  box-shadow: 5px 12px 10px rgb(44 18 18 / 15%), 5px 12px 20px rgb(47 22 22 / 10%), 5px 12px 30px rgb(43 12 12 / 5%), 5px 12px 40px rgb(46 8 8 / 2%);
   border: 2px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: auto;
 }
 
 .form-comments-section label {
   font-weight: bold;
-  margin-bottom: 10px;
   display: block;
   color: #333;
+  padding: 20px;
 }
 
 .form-comments-section textarea {
   width: 100%; /* Full width of the container */
   height: 120px; /* Sets a reasonable height for comments */
-  padding: 10px;
   font-size: 1rem; /* Text size for readability */
   border: 1px solid #ccc; /* Border around textarea */
   border-radius: 5px; /* Rounded corners to match container */
-  resize: vertical; /* Allows resizing only vertically */
+  resize:none;
   box-sizing: border-box; /* Ensures padding doesn't exceed container width */
 }
 
 .evaluate-subject-page textarea {
   width: 100%;
   height: 100px;
-  padding: 12px;
-  margin-top: 5px;
   border: 1px solid #ced4da;
   border-radius: 4px;
-  resize: vertical;
+  resize: none;
   font-size: 14px;
+  box-sizing: border-box;
 }
 
 /* Submit Button Section */
@@ -391,11 +385,7 @@ margin-left: 20px;
 }
 /* Outer container for the form */
 .form-container {
-  max-width: 1500px; /* Set maximum width for the form container */
-  margin-right: 20px; /* Center the container with space on left and right */
-  margin-left: 20px;
-  margin-bottom: 20px;
-  padding: 10px; /* Add padding inside the container */
+  padding: 10px;
   border: 2px solid #ddd; /* Border to give box-like appearance */
   border-radius: 8px; /* Optional: rounded corners */
   background: linear-gradient(45deg, rgba(29, 17, 17, 0.15), rgba(30, 12, 12, 0.1), rgba(30, 12, 12, 0));
@@ -406,8 +396,8 @@ margin-left: 20px;
 }
 
 .pagination-controls {
-  text-align: left; /* Align buttons to the right */
-  margin-top: 20px;
+  text-align: left; 
+  padding: 10px;
 }
 
 .pagination-controls .next-button,
@@ -441,3 +431,10 @@ margin-left: 20px;
   background: linear-gradient(45deg, rgba(29, 17, 17, 0.3), rgba(30, 12, 12, 0.25), rgba(30, 12, 12, 0.15)); /* Focus effect */
 }
 
+.evaluate-subject-page {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  height: 100%;
+  padding: 20px;
+}

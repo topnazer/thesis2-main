@@ -232,18 +232,16 @@ width: 50%;
   display: flex;
   flex-wrap: wrap; 
   gap: 15px; 
-  margin: 10px; 
   justify-content: center; 
   padding: 10px 0; 
   overflow-x: auto; 
 }
 
-
 .subj-dept-button {
   padding: 10px 20px; 
   color: black;
   background-color: rgb(201, 185, 185);
-  border-radius: 5px;
+  border-radius: 100px;
   cursor: pointer;
   border: none;
   font-weight: bold;

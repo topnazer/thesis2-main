@@ -371,7 +371,7 @@ const EvaluateSubject = () => {
   }
 
   return (
-    <div className="evaluate-subject-page evaluation-form">
+    <div className="evaluate-subject-page">
       <div className="header-container">
         <div className="form-header">
           <h1>Evaluate {subject?.name}</h1>

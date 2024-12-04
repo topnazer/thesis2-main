@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getFirestore, collection, getDocs, query, where, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { getFirestore, collection, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
 import './User.css';
 
 const UsersPage = () => {
@@ -11,7 +11,6 @@ const UsersPage = () => {
   const [selectedDepartment, setSelectedDepartment] = useState("All");
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubjects, setSelectedSubjects] = useState([]);
-  const [newPassword, setNewPassword] = useState('');
   const db = getFirestore();
 
   const fetchUsersByDepartment = useCallback(async (department) => {
@@ -98,23 +97,6 @@ const UsersPage = () => {
     );
   };
 
-  const changeUserPassword = async () => {
-    if (selectedUser && newPassword.trim()) {
-      try {
-        await updateDoc(doc(db, "users", selectedUser.id), {
-          password: newPassword,
-        });
-        setSelectedUser({ ...selectedUser, password: newPassword });
-        setNewPassword('');
-        alert("Password updated successfully.");
-      } catch (error) {
-        console.error("Error updating password:", error);
-      }
-    } else {
-      alert("Please enter a valid password.");
-    }
-  };
-
   useEffect(() => {
     fetchUsersByDepartment(selectedDepartment);
   }, [fetchUsersByDepartment, selectedDepartment]);
@@ -149,14 +131,14 @@ const UsersPage = () => {
 
   const getDepartmentColor = (department) => {
     const colors = {
-      CCS: "green",
-      COC: "red",
-      COE: "purple",
-      CASS: "orange",
-      CBA: "yellow",
-      CED: "blue",
+      CCS: "#A8D5BA",
+      COC: "#F4B8B8",
+      COE: "#D1B3DD",
+      CASS: "#F9C89B",
+      CBA: "#FFF1A4",
+      CED: "#BFD7ED",
     };
-    return colors[department] || "";
+    return colors[department] || "#F5F5F5";
   };
 
   return (
@@ -169,7 +151,7 @@ const UsersPage = () => {
                 key={dept}
                 onClick={() => setSelectedDepartment(dept)}
                 className={selectedDepartment === dept ? "active-department" : ""}
-                style={{ backgroundColor: getDepartmentColor(dept), color: getDepartmentColor(dept).color } }
+                style={{ backgroundColor: getDepartmentColor(dept), color: getDepartmentColor(dept).color }}
               >
                 {dept}
               </button>
@@ -219,9 +201,6 @@ const UsersPage = () => {
                   <strong>Email:</strong> {selectedUser.email}
                 </div>
                 <div className="grid-item">
-                  <strong>Password:</strong> {selectedUser.password}
-                </div>
-                <div className="grid-item">
                   <strong>Role:</strong> {selectedUser.role}
                 </div>
                 <div className="grid-item">
@@ -230,15 +209,6 @@ const UsersPage = () => {
                 <div className="grid-item">
                   <strong>Status:</strong> {selectedUser.status}
                 </div>
-              </div>
-              <div className="password-change">
-                <input 
-                  type="password" 
-                  placeholder="New Password" 
-                  value={newPassword} 
-                  onChange={(e) => setNewPassword(e.target.value)} 
-                />
-                <button onClick={changeUserPassword}>Change Password</button>
               </div>
               <div className="user-subject-button">
                 <button className="user-close" onClick={hideOverlay}>Close</button>                         

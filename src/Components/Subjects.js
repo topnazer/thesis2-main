@@ -179,15 +179,16 @@ const Subjects = () => {
   };
   const getDepartmentColor = (department) => {
     const colors = {
-      CCS: "green",
-      COC: "red",
-      COE: "purple",
-      CASS: "orange",
-      CBA: "yellow",
-      CED: "blue",
+      CCS: "#A8D5BA",
+      COC: "#F4B8B8",
+      COE: "#D1B3DD",
+      CASS: "#F9C89B",
+      CBA: "#FFF1A4",
+      CED: "#BFD7ED",
     };
-    return colors[department] || "white";
+    return colors[department] || "#F5F5F5";
   };
+  
   const textColors = {
     CBA: "black", 
     default: "white",

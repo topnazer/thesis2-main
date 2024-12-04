@@ -8,8 +8,8 @@ const EvaluationReportScoringPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [faculties, setFaculties] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
-  const facultiesPerPage = 5; // Number of faculties per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const facultiesPerPage = 5; 
   const db = getFirestore();
 
   useEffect(() => {

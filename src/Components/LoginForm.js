@@ -12,7 +12,6 @@ const LoginForm = ({ toggleSignUp }) => {
   const db = getFirestore();
 
   useEffect(() => {
-    // Check if a user is already logged in and redirect to the appropriate page
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -130,7 +129,7 @@ const LoginForm = ({ toggleSignUp }) => {
         <div className="auth-right">
           <div className="auth-logo">  
             <img src="spc.png" alt="SPC logo"/>
-            <h1>Evaluating for Excellence.</h1>
+            <h1>ACADEMIC GUIDANCE EVALUATION SYSTEM</h1>
           </div>
         </div>
       </div>
