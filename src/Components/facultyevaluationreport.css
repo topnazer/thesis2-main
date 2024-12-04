@@ -1,0 +1,89 @@
+/* Faculty Evaluation Report Container */
+.facuser-page-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+  }
+  
+  .facuser-page-container h1 {
+    color: rgb(133, 5, 5);
+    margin-bottom: 20px;
+  }
+  
+  .facuser-button {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .facuser-button button {
+    background-color: rgb(201, 185, 185);
+    padding: 10px 20px;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    font-weight: bold;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .facuser-button button:hover,
+  .facuser-button button:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  }
+  
+  .active-department {
+    outline: 3px solid black;
+  }
+  
+  /* Faculty List Styling */
+  .facuser-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    max-height: 90vh;
+    border-radius: 10px;
+    overflow-y: auto;
+    padding: 10px;
+  }
+  
+  .facuser-card {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    padding: 10px;
+    overflow-y: auto;
+  }
+  
+  .facuser-item {
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .facuser-info {
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  .facuser-info strong {
+    font-size: 16px;
+    color: rgb(50, 50, 50);
+  }
+  
+  .facuser-info p {
+    margin: 4px 0;
+    color: rgb(100, 100, 100);
+    font-size: 14px;
+  }
+  

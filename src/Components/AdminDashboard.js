@@ -14,6 +14,8 @@ import Evaluation from "./Evaluation";
 import Evaluationreport from "./Evaluationreport";
 import DeanEvaluationPage from "./DeanEvaluationPage";
 import EvaluationReportScoringPage from './EvaluationReportScoringPage'; 
+import Facultyevaluationreport from './Facultyevaluationreport'; // Import the component
+
 
 
 import './Admin.css';
@@ -89,6 +91,7 @@ const AdminDashboard = () => {
       </div>
       <div className="route-container">
        <Routes>
+       <Route path="faculty-evaluation-reports" element={<Facultyevaluationreport />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="subject-evaluation" element={<SubjectEvaluationPage />} />
         <Route path="faculty-evaluation" element={<FacultyEvaluationPage />} />
