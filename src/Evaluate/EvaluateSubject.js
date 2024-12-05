@@ -115,26 +115,31 @@ const EvaluateSubject = () => {
   };
 
   const calculateRatingScore = () => {
-    let totalScore = 0;
-    let maxScore = 0;
+    let totalScore = 0; // Sum of all responses
+    let maxScore = 0; // Maximum possible score
 
+    // Iterate through all categories
     categories.forEach((category, categoryIndex) => {
-      if (category.type === "Rating") {
-        const { questions } = category;
+        if (category.type === "Rating") { // Only process 'Rating' type categories
+            const { questions } = category;
 
-        questions.forEach((_, questionIndex) => {
-          const uniqueKey = `${categoryIndex}-${questionIndex}`;
-          const response = responses[uniqueKey];
+            // For each question in the category
+            questions.forEach((_, questionIndex) => {
+                const uniqueKey = `${categoryIndex}-${questionIndex}`;
+                const response = parseInt(responses[uniqueKey] || 0, 10);
 
-          totalScore += parseInt(response || 0, 10); // Add the rating value
-          maxScore += 5; // Assuming 5 is the max rating for each question
-        });
-      }
+                totalScore += response; // Add the response score
+                maxScore += 5; // Increment max score by 5 (highest rating)
+            });
+        }
     });
 
-    const percentageScore = (totalScore / maxScore) * 100;
+    // Calculate percentage score
+    const percentageScore = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
+
     return { totalScore, maxScore, percentageScore };
-  };
+};
+
 
   const calculateOptionFrequencies = () => {
     const frequencies = {};

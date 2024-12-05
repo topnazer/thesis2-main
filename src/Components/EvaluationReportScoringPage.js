@@ -3,8 +3,8 @@ import { getFirestore, doc, getDocs, setDoc, collection, query, where, onSnapsho
 import './evaluationreportscoringpage.css';
 
 const EvaluationReportScoringPage = () => {
-  const [subjectWeight, setSubjectWeight] = useState(50);
-  const [facultyWeight, setFacultyWeight] = useState(50);
+  const [subjectWeight, setSubjectWeight] = useState(60); // Default to 60%
+  const [facultyWeight, setFacultyWeight] = useState(40); // Default to 40%
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [faculties, setFaculties] = useState([]);
@@ -18,8 +18,8 @@ const EvaluationReportScoringPage = () => {
         const weightsDoc = await getDoc(doc(db, 'settings', 'scoreWeights'));
         if (weightsDoc.exists()) {
           const data = weightsDoc.data();
-          setSubjectWeight(data.subjectWeight || 50);
-          setFacultyWeight(data.facultyWeight || 50);
+          setSubjectWeight(data.subjectWeight || 60);
+          setFacultyWeight(data.facultyWeight || 40);
         }
       } catch (error) {
         console.error('Error fetching score weights:', error);
@@ -85,13 +85,17 @@ const EvaluationReportScoringPage = () => {
             const facultyEvaluationData = facultyEvaluationDoc.exists() ? facultyEvaluationDoc.data() : null;
             const facultyScore = facultyEvaluationData ? facultyEvaluationData.averageScore : 'Not scored yet';
   
-            // Calculate the final weighted score
+            // Calculate the final weighted score (overall rating)
             let finalScore = 'Not scored yet';
+            let remarks = 'Not scored yet';
             if (facultyScore !== 'Not scored yet' && subjectScore !== 'Not scored yet') {
               finalScore = (
                 subjectScore * (subjectWeight / 100) +
                 facultyScore * (facultyWeight / 100)
               ).toFixed(2);
+
+              // Determine remarks based on final score
+              remarks = finalScore >= 80 ? 'Above Average' : 'Below Average';
             }
   
             return {
@@ -100,6 +104,7 @@ const EvaluationReportScoringPage = () => {
               facultyScore,
               subjectScore,
               finalScore,
+              remarks,
             };
           })
         );
@@ -116,8 +121,6 @@ const EvaluationReportScoringPage = () => {
     return unsubscribe;
   }, [db, subjectWeight, facultyWeight]);
   
-  
-
   useEffect(() => {
     fetchFaculties();
   }, [fetchFaculties]);
@@ -198,41 +201,43 @@ const EvaluationReportScoringPage = () => {
                   <tr>
                     <th>Faculty Name</th>
                     <th>Department</th>
-                    <th>Faculty Evaluation Score</th>
-                    <th>Subject Evaluation Score</th>
-                    <th>Final Score (Weighted)</th>
+                    <th>Supervisor(40%)</th>
+                    <th>Student (60%)</th>
+                    <th>Overall Rating</th>
+                    <th>Remarks</th>
                   </tr>
                 </thead>
                 <tbody>
-  {displayedFaculties.map((faculty) => (
-    <tr key={faculty.id}>
-      <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
-      <td>{faculty.department}</td>
-      <td>
-        {typeof faculty.facultyScore === 'number'
-          ? faculty.facultyScore.toFixed(2)
-          : faculty.facultyScore}
-      </td>
-      <td>
-        {typeof faculty.subjectScore === 'number'
-          ? faculty.subjectScore.toFixed(2)
-          : faculty.subjectScore}
-      </td>
-      <td>
-        {typeof faculty.finalScore === 'number'
-          ? faculty.finalScore
-          : faculty.finalScore}
-      </td>
-    </tr>
-  ))}
-</tbody>
+                  {displayedFaculties.map((faculty) => (
+                    <tr key={faculty.id}>
+                      <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
+                      <td>{faculty.department}</td>
+                      <td>
+                        {typeof faculty.facultyScore === 'number'
+                          ? faculty.facultyScore.toFixed(2)
+                          : faculty.facultyScore}
+                      </td>
+                      <td>
+                        {typeof faculty.subjectScore === 'number'
+                          ? faculty.subjectScore.toFixed(2)
+                          : faculty.subjectScore}
+                      </td>
+                      <td>
+                        {typeof faculty.finalScore === 'number'
+                          ? faculty.finalScore
+                          : faculty.finalScore}
+                      </td>
+                      <td>{faculty.remarks}</td>
+                    </tr>
+                  ))}
+                </tbody>
               </table>
               <div className="pagination">
                 <button onClick={handlePreviousPage} disabled={currentPage === 1}>
                   Previous
                 </button>
                 <span>
-                  Page {currentPage} 
+                  Page {currentPage}
                 </span>
                 <button
                   onClick={handleNextPage}
