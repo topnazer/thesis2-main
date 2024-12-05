@@ -4,6 +4,7 @@
     flex-direction: column;
     height: 100%;
     padding: 20px;
+    width: 95%;
   }
   
   .facuser-page-container h1 {
