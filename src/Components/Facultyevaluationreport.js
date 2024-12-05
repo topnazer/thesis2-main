@@ -14,8 +14,6 @@ const Facultyevaluationreport = () => {
   const [faculty, setFaculty] = useState([]);
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [evaluations, setEvaluations] = useState([]);
-  const [questions, setQuestions] = useState([]);
-  const [questionType, setQuestionType] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const db = getFirestore();
@@ -50,61 +48,99 @@ const Facultyevaluationreport = () => {
 
     fetchFacultyByDepartment();
   }, [selectedDepartment, db]);
-
-  // Fetch evaluation form questions
-  useEffect(() => {
-    const fetchEvaluationForm = async () => {
-      try {
-        const evaluationFormRef = query(collection(db, "evaluationForms"));
-        const snapshot = await getDocs(evaluationFormRef);
-
-        if (!snapshot.empty) {
-          const formDoc = snapshot.docs[0];
-          const formData = formDoc.data();
-          setQuestions(formData.categories[0].questions || []);
-          setQuestionType(formData.categories[0].type || "");
-          console.log("Question Type:", formData.categories[0].type);
-        }
-      } catch (error) {
-        console.error("Error fetching evaluation form:", error);
-      }
-    };
-
-    fetchEvaluationForm();
-  }, [db]);
-
-  // Fetch evaluations for a selected faculty
   const fetchEvaluations = async (facultyId) => {
     setLoading(true);
     setEvaluations([]);
     try {
-      const evaluationsQuery = query(
-        collection(db, "subjectEvaluations"),
-        where("facultyId", "==", facultyId)
-      );
-      const evaluationsSnapshot = await getDocs(evaluationsQuery);
-
-      if (evaluationsSnapshot.empty) {
+      console.log("Fetching evaluations for facultyId:", facultyId);
+  
+      // Fetch all students
+      const studentsQuery = query(collection(db, "students"));
+      const studentsSnapshot = await getDocs(studentsQuery);
+  
+      if (studentsSnapshot.empty) {
+        console.log("No students found in the database.");
         setEvaluations([]);
         setLoading(false);
         return;
       }
-
-      const evaluationsData = evaluationsSnapshot.docs.map((doc) => {
-        const evalData = doc.data();
-        console.log("Evaluation Data:", evalData);
-        return {
-          subject: evalData.subjectName || "Unknown Subject",
-          date: evalData.createdAt?.toDate().toLocaleDateString() || "Unknown Date",
-          comment: evalData.comment || "No comment",
-          studentName: evalData.studentName || "Anonymous",
-          averageScore: evalData.averageScore || "N/A",
-          answers: evalData.optionFrequencies || {},
-        };
-      });
-
-      setEvaluations(evaluationsData);
-      console.log("Evaluations Fetched:", evaluationsData);
+  
+      console.log(`Found ${studentsSnapshot.size} students.`); // Log number of students
+  
+      let allEvaluations = [];
+  
+      // Iterate through each student document
+      for (const studentDoc of studentsSnapshot.docs) {
+        const studentId = studentDoc.id;
+        const studentData = studentDoc.data();
+        console.log(`Processing student: ${studentId}`, studentData);
+  
+        // Fetch the student's subjects
+        const subjectsRef = collection(studentDoc.ref, "subjects");
+        const subjectsSnapshot = await getDocs(subjectsRef);
+  
+        if (subjectsSnapshot.empty) {
+          console.log(`No subjects found for studentId: ${studentId}`);
+          continue; // Skip to next student if no subjects are found
+        }
+  
+        console.log(`Found ${subjectsSnapshot.size} subjects for studentId: ${studentId}`);
+  
+        for (const subjectDoc of subjectsSnapshot.docs) {
+          const subjectId = subjectDoc.id;
+          const subjectData = subjectDoc.data();
+          console.log(`Processing subject: ${subjectId}`, subjectData);
+  
+          // Check if the subject's faculty matches the selected faculty
+          if (subjectData.facultyId !== facultyId) {
+            console.log(`Faculty ID mismatch for subject: ${subjectId}`);
+            continue;
+          }
+  
+          console.log(`Faculty match found for subject: ${subjectData.name}`);
+  
+          // Fetch evaluations directly from `completed_evaluations`
+          const evaluationsRef = collection(
+            db,
+            `students/${studentId}/subjects/${subjectId}/completed_evaluations`
+          );
+          const evaluationsSnapshot = await getDocs(evaluationsRef);
+  
+          if (evaluationsSnapshot.empty) {
+            console.log(
+              `No completed evaluations found for subject: ${subjectId}`
+            );
+            continue; // Skip to next subject if no evaluations are found
+          }
+  
+          console.log(
+            `Found ${evaluationsSnapshot.size} evaluations for subject: ${subjectId}`
+          );
+  
+          for (const evaluationDoc of evaluationsSnapshot.docs) {
+            const evalData = evaluationDoc.data();
+            console.log(`Processing evaluation:`, evalData);
+  
+            // Combine the data
+            allEvaluations.push({
+              studentId,
+              studentName: studentData.name || "Unknown Student",
+              subjectName: subjectData.name || "Unknown Subject",
+              comment: evalData.comment || "No comment",
+              percentageScore: evalData.scores?.percentageScore || "N/A",
+              date: evalData.createdAt?.toDate().toLocaleDateString() || "Unknown Date",
+            });
+          }
+        }
+      }
+  
+      if (allEvaluations.length === 0) {
+        console.log("No evaluations matched the criteria.");
+      }
+  
+      // Update state with all evaluations
+      setEvaluations(allEvaluations);
+      console.log("Evaluations Fetched:", allEvaluations);
     } catch (error) {
       setError("Failed to load evaluations data.");
       console.error("Error fetching evaluations:", error);
@@ -112,6 +148,7 @@ const Facultyevaluationreport = () => {
       setLoading(false);
     }
   };
+  
 
   const handleFacultyClick = (facultyMember) => {
     setSelectedFaculty(facultyMember);
@@ -172,17 +209,17 @@ const Facultyevaluationreport = () => {
                     <th>Subject</th>
                     <th>Date</th>
                     <th>Comment</th>
-                    <th>Average Score</th> {/* Always include Average Score */}
+                    <th>Percentage Score</th>
                   </tr>
                 </thead>
                 <tbody>
                   {evaluations.map((evaluation, index) => (
                     <tr key={index}>
                       <td>{evaluation.studentName}</td>
-                      <td>{evaluation.subject}</td>
+                      <td>{evaluation.subjectName}</td>
                       <td>{evaluation.date}</td>
                       <td>{evaluation.comment}</td>
-                      <td>{evaluation.averageScore}</td> {/* Render Average Score */}
+                      <td>{evaluation.percentageScore}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -247,7 +247,7 @@ const EvaluateSubject = () => {
         // Save individual evaluation
         const evaluationRef = doc(
             db,
-            `students/${user.uid}/subjects/${subjectId}/sections/${sectionId}/completed_evaluations`,
+            `students/${user.uid}/subjects/${subjectId}/completed_evaluations`,
             user.uid
         );
 
@@ -287,9 +287,7 @@ const EvaluateSubject = () => {
                     completedEvaluations,
                     subjectName, // Include subject name
                     facultyId: subject?.facultyId || null,
-                    detailedQuestions, // Include the detailed questions in the subject evaluation
-                    optionFrequencies, // Include option frequencies
-                    updatedAt: new Date(), // Use updatedAt to track changes
+                    
                 },
                 { merge: true }
             );
