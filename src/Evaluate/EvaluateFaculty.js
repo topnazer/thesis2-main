@@ -4,8 +4,8 @@ import { getFirestore, doc, getDoc, setDoc, collection } from 'firebase/firestor
 import { auth } from '../firebase';
 import './Evaluate.css';
 
-const EvaluateFaculty = () => {
-  const { facultyId } = useParams();
+const EvaluateFaculty  = () => {
+  const { facultyId  } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const [faculty, setFaculty] = useState(null);
@@ -17,6 +17,7 @@ const EvaluateFaculty = () => {
   const [comment, setComment] = useState("");
   const db = getFirestore();
 
+  // Fetch subject information
   const fetchFaculty = useCallback(async () => {
     try {
       const facultyDoc = await getDoc(doc(db, "users", facultyId));
@@ -101,73 +102,6 @@ const EvaluateFaculty = () => {
     });
   };
 
-  const calculateRatingScore = () => {
-    let totalScore = 0; // Total sum of all responses
-    let maxScore = 0; // Maximum possible score
-
-    // Loop through each category
-    categories.forEach((category, categoryIndex) => {
-        if (category.type === "Rating") { // Only process categories of type 'Rating'
-            const { questions } = category;
-
-            // Loop through each question in the category
-            questions.forEach((_, questionIndex) => {
-                const uniqueKey = `${categoryIndex}-${questionIndex}`;
-                const response = responses[uniqueKey];
-
-                // Parse the response and add it to the total score
-                totalScore += parseInt(response || 0, 10);
-
-                // Increment maxScore by 5 for each question
-                maxScore += 5;
-            });
-        }
-    });
-
-    // Calculate the percentage score
-    const percentageScore = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
-
-    // Return the scores and percentage
-    return { totalScore, maxScore, percentageScore };
-};
-
-
-  const calculateOptionFrequencies = () => {
-    const frequencies = {};
-
-    categories.forEach((category, categoryIndex) => {
-      const { questions, type, options } = category;
-
-      if (type === "Multiple Choice" || type === "Checkbox") {
-        questions.forEach((question, questionIndex) => {
-          const uniqueKey = `${categoryIndex}-${questionIndex}`;
-          const response = responses[uniqueKey];
-
-          // Initialize the frequency object for this question
-          if (!frequencies[uniqueKey]) {
-            frequencies[uniqueKey] = options.reduce((acc, option) => {
-              acc[option] = 0;
-              return acc;
-            }, {});
-          }
-
-          // Count responses
-          if (type === "Multiple Choice" && response) {
-            frequencies[uniqueKey][response] += 1;
-          } else if (type === "Checkbox" && Array.isArray(response)) {
-            response.forEach((selectedOption) => {
-              if (frequencies[uniqueKey][selectedOption] !== undefined) {
-                frequencies[uniqueKey][selectedOption] += 1;
-              }
-            });
-          }
-        });
-      }
-    });
-
-    return frequencies;
-  };
-
   const handleNext = () => {
     if (!isCurrentCategoryComplete()) {
       alert("Please answer all questions in this category before proceeding.");
@@ -184,96 +118,131 @@ const EvaluateFaculty = () => {
     }
   };
 
+  const calculateRatingScore = () => {
+    let totalScore = 0; // Sum of all responses
+    let maxScore = 0; // Maximum possible score
+
+    // Iterate through all categories
+    categories.forEach((category, categoryIndex) => {
+        if (category.type === "Rating") { // Only process 'Rating' type categories
+            const { questions } = category;
+            questions.forEach((_, questionIndex) => {
+                const uniqueKey = `${categoryIndex}-${questionIndex}`;
+                const response = parseInt(responses[uniqueKey] || 0, 10);
+
+                totalScore += response; // Add the response score
+                maxScore += 5; // Increment max score by 5 (highest rating)
+            });
+        }
+    });
+    const percentageScore = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
+
+    return { totalScore, maxScore, percentageScore };
+};
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!isCurrentCategoryComplete()) {
-      alert("Please answer all questions in this category before submitting.");
-      return;
+        alert("Please answer all questions in this category before submitting.");
+        return;
     }
-  
+
     const user = auth.currentUser;
     if (!user) {
-      alert("User not authenticated.");
-      return;
+        alert("User not authenticated.");
+        return;
     }
+
   
-    // Use calculateRatingScore for score calculation
     const { totalScore, maxScore, percentageScore } = calculateRatingScore();
-  
-    // Use calculateOptionFrequencies for option frequency computation
-    const optionFrequencies = calculateOptionFrequencies();
-  
-    try {
-      // Save individual evaluation
-      const evaluationRef = doc(collection(db, "facultyEvaluations", facultyId, "completed_evaluations"), user.uid);
-  
-      await setDoc(evaluationRef, {
-        userId: user.uid,
-        facultyId,
-        scores: responses,
-        ratingScore: { totalScore, maxScore, percentageScore },
-        optionFrequencies,
-        comment,
-        percentageScore,
-        createdAt: new Date(),
-      });
-  
-      // Update or create the overall faculty evaluation
-      const facultyEvaluationRef = doc(db, "facultyEvaluations", facultyId);
-      const facultyEvaluationDoc = await getDoc(facultyEvaluationRef);
-  
-      let newAverageScore;
-      let completedEvaluations;
-  
-      if (facultyEvaluationDoc.exists()) {
-        const existingAverageScore = facultyEvaluationDoc.data().averageScore || 0;
-        completedEvaluations = (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
-        newAverageScore = ((existingAverageScore * (completedEvaluations - 1)) + percentageScore) / completedEvaluations;
-  
-        await setDoc(
-          facultyEvaluationRef,
-          {
-            averageScore: newAverageScore,
-            completedEvaluations,
-          },
-          { merge: true }
-        );
-      } else {
-        newAverageScore = percentageScore;
-        completedEvaluations = 1;
-  
-        await setDoc(facultyEvaluationRef, {
-          averageScore: newAverageScore,
-          completedEvaluations,
-        });
-      }
-  
-      alert(`Evaluation submitted successfully! Your score: ${totalScore} / ${maxScore} (${percentageScore.toFixed(2)}%)`);
-      navigate(location.state?.redirectTo || "/faculty-dashboard");
-    } catch (error) {
-      alert("Failed to submit evaluation. Please try again.");
-      console.error("Error submitting evaluation:", error.message);
-    }
-  };
+
+    // Build detailed question-response data
+    const detailedQuestions = categories.map((category, categoryIndex) => ({
+      categoryName: category.name,
+      type: category.type, // Include category type
+      questions: category.questions.map((question, questionIndex) => {
+          const uniqueKey = `${categoryIndex}-${questionIndex}`;
+          return {
+              text: question.text, // Question text
+              type: category.type, // Question type
+              response: responses[uniqueKey] || (category.type === "Checkbox" ? [] : "N/A"), // User's response
+              options: category.options || [], // Available options
+          };
+      }),
+  }));
   
 
-  const renderQuestionsForCurrentCategory = () => {
-    const currentCategory = categories[currentCategoryIndex];
-    if (!currentCategory) {
-      return <tr><td>No questions available for this category.</td></tr>;
-    }
+    try {
+        // Save individual evaluation
+        const evaluationRef = doc(collection(db, "facultyEvaluations", facultyId, "completed_evaluations"), user.uid);
+
+        await setDoc(evaluationRef, {
+          userId: user.uid,
+          facultyId,
+          scores: responses,
+          ratingScore: { percentageScore },
+          comment,
+          createdAt: new Date(),
+          detailedQuestions, // Add this line
+      });
+
+      const facultyEvaluationRef = doc(db, "facultyEvaluations", facultyId);
+      const facultyEvaluationDoc = await getDoc(facultyEvaluationRef);
+
+        let newAverageScore;
+        let completedEvaluations;
+
+        if (facultyEvaluationDoc.exists()) {
+          const existingAverageScore = facultyEvaluationDoc.data().averageScore || 0;
+          completedEvaluations = (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
+          newAverageScore = ((existingAverageScore * (completedEvaluations - 1)) + percentageScore) / completedEvaluations;
   
-    const { type, questions, options, name } = currentCategory;
+          await setDoc(
+            facultyEvaluationRef,
+            {
+              averageScore: newAverageScore,
+              completedEvaluations,
+            },
+            { merge: true }
+          );
+        } else {
+          newAverageScore = percentageScore;
+          completedEvaluations = 1;
   
-    if (!questions || questions.length === 0) {
-      return <tr><td>No questions available for this category.</td></tr>;
-    }
+          await setDoc(facultyEvaluationRef, {
+            averageScore: newAverageScore,
+            completedEvaluations,
+            createdAt: new Date(),
+            facultyId,
+          });
+        }
+  
+        alert(`Evaluation submitted successfully! Your score: ${totalScore} / ${maxScore} (${percentageScore.toFixed(2)}%)`);
+        navigate(location.state?.redirectTo || "/dean-dashboard");
+      } catch (error) {
+        alert("Failed to submit evaluation. Please try again.");
+        console.error("Error submitting evaluation:", error.message);
+      }
+    };
+  
+const renderQuestionsForCurrentCategory = () => {
+  const currentCategory = categories[currentCategoryIndex];
+  if (!currentCategory) {
+    return <tr><td>No questions available for this category.</td></tr>;
+  }
+
+  const { type, questions, options, name } = currentCategory;
+
+  if (!questions || questions.length === 0) {
+    return <tr><td>No questions available for this category.</td></tr>;
+  }
+
 
     return (
       <>
         <tr>
-        <th>{name}: Question</th>
+          <th>{name}: Question</th>
           {type === "Rating" && (
             <>
               <th>Strongly disagree</th>
@@ -338,7 +307,7 @@ const EvaluateFaculty = () => {
   };
 
   if (loading) {
-    return <p>Loading faculty data...</p>;
+    return <p>Loading dean data...</p>;
   }
 
   if (error) {
@@ -349,7 +318,7 @@ const EvaluateFaculty = () => {
     <div className="evaluate-faculty-page">
       <div className="header-container">
         <div className="form-header">
-          <h1>Evaluate {faculty ? `${faculty.firstName} ${faculty.lastName}` : "Faculty"}</h1>
+        <h1>Evaluate {faculty ? `${faculty.firstName} ${faculty.lastName}` : "Faculty"}</h1>
           <h2>Department: {faculty ? faculty.department : "No department available"}</h2>
           <div className="logo-container">
             <img src="/spc.png" alt="Logo" className="logo" />
@@ -387,7 +356,7 @@ const EvaluateFaculty = () => {
         <textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="Enter your comments about the faculty here"
+          placeholder="Enter your comments about the subject here"
         />
       </div>
     </div>

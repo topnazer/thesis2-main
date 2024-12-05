@@ -42,7 +42,9 @@ const FacultyEvaluationPage = () => {
         if (!newCategory.trim()) return;
 
         try {
-            const updatedCategories = [...categories];
+            const formRef = doc(db, "evaluationForms", "Faculty");
+            let updatedCategories = [...categories];
+
             if (editingCategoryIndex !== null) {
                 updatedCategories[editingCategoryIndex] = {
                     ...updatedCategories[editingCategoryIndex],
@@ -52,7 +54,7 @@ const FacultyEvaluationPage = () => {
                 };
             } else {
                 const newCategoryData = {
-                    id: Date.now(),
+                    id: Date.now(), // Unique ID
                     name: newCategory,
                     type: categoryType,
                     options: categoryOptions,
@@ -60,17 +62,14 @@ const FacultyEvaluationPage = () => {
                 };
                 updatedCategories.push(newCategoryData);
             }
-
-            const formRef = doc(db, "evaluationForms", "faculty");
             await setDoc(formRef, {
                 categories: updatedCategories,
                 expirationDate: expirationDate || null,
             });
-
             setFacultyCategories(updatedCategories);
             resetCategoryState();
         } catch (error) {
-            console.error('Error saving category:', error);
+            console.error("Error saving category:", error);
         }
     };
 
@@ -85,23 +84,27 @@ const FacultyEvaluationPage = () => {
     const deleteCategory = async (categoryId) => {
         try {
             const updatedCategories = categories.filter((category) => category.id !== categoryId);
-            const formRef = doc(db, "evaluationForms", "faculty");
-            await setDoc(formRef, {
+
+            await setDoc(doc(db, "evaluationForms", "subject"), {
                 categories: updatedCategories,
                 expirationDate: expirationDate || null,
             });
+
             setFacultyCategories(updatedCategories);
+            alert("Category deleted successfully!");
         } catch (error) {
-            console.error('Error deleting category:', error);
+            console.error("Error deleting category:", error);
+            alert("Failed to delete category. Please try again.");
         }
     };
 
     const handleEditCategory = (index, category) => {
+        setEditingFacultyCategoryIndex(index);
         setNewFacultyCategory(category.name);
         setFacultyCategoryType(category.type);
         setFacultyCategoryOptions(category.options || []);
-        setEditingFacultyCategoryIndex(index);
     };
+
 
     const handleCategoryOptionsChange = (e) => {
         setFacultyOption(e.target.value);
@@ -209,6 +212,7 @@ const FacultyEvaluationPage = () => {
             const formRef = doc(db, "evaluationForms", "faculty");
             await setDoc(formRef, {
                 categories: categories.map((category) => ({
+                    id: category.id,
                     name: category.name,
                     type: category.type,
                     options: category.options || [],

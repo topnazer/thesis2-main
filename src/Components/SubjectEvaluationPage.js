@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
-import './subjectevaluationpage.css';
-
+import "./subjectevaluationpage.css";
 import { FilePenLine , Trash2 } from 'lucide-react';
+
 const SubjectEvaluationPage = () => {
     const [subjectQuestion, setSubjectQuestion] = useState("");
     const [newWeight, setNewWeight] = useState("");
@@ -37,39 +37,40 @@ const SubjectEvaluationPage = () => {
     }, [fetchEvaluationData]);
 
     const addOrEditCategory = async () => {
-      if (!newCategory.trim()) return; 
-  
-      try {
-          const formRef = doc(db, "evaluationForms", "subject");
-          let updatedCategories = [...categories];
-  
-          if (editingCategoryIndex !== null) {
-              updatedCategories[editingCategoryIndex] = {
-                  ...updatedCategories[editingCategoryIndex],
-                  name: newCategory,
-                  type: categoryType,
-                  options: categoryOptions,
-              };
-          } else {
-              const newCategoryData = {
-                  id: Date.now(), // Unique ID
-                  name: newCategory,
-                  type: categoryType,
-                  options: categoryOptions,
-                  questions: [],
-              };
-              updatedCategories.push(newCategoryData);
-          }
-          await setDoc(formRef, {
-              categories: updatedCategories,
-              expirationDate: expirationDate || null, 
-          });
-          setCategories(updatedCategories);
-          resetCategoryState();
-      } catch (error) {
-          console.error("Error saving category:", error);
-      }
-  };
+        if (!newCategory.trim()) return;
+
+        try {
+            const formRef = doc(db, "evaluationForms", "subject");
+            let updatedCategories = [...categories];
+
+            if (editingCategoryIndex !== null) {
+                updatedCategories[editingCategoryIndex] = {
+                    ...updatedCategories[editingCategoryIndex],
+                    name: newCategory,
+                    type: categoryType,
+                    options: categoryOptions,
+                };
+            } else {
+                const newCategoryData = {
+                    id: Date.now(), // Unique ID
+                    name: newCategory,
+                    type: categoryType,
+                    options: categoryOptions,
+                    questions: [],
+                };
+                updatedCategories.push(newCategoryData);
+            }
+            await setDoc(formRef, {
+                categories: updatedCategories,
+                expirationDate: expirationDate || null,
+            });
+            setCategories(updatedCategories);
+            resetCategoryState();
+        } catch (error) {
+            console.error("Error saving category:", error);
+        }
+    };
+
     const resetCategoryState = () => {
         setNewCategory("");
         setCategoryType("Multiple Choice");
@@ -81,33 +82,34 @@ const SubjectEvaluationPage = () => {
     const deleteCategory = async (categoryId) => {
         try {
             const updatedCategories = categories.filter((category) => category.id !== categoryId);
-            await setDoc(doc(db, 'evaluationForms', 'subject'), {
+
+            await setDoc(doc(db, "evaluationForms", "subject"), {
                 categories: updatedCategories,
-                expirationDate: expirationDate || null, 
+                expirationDate: expirationDate || null,
             });
+
             setCategories(updatedCategories);
+            alert("Category deleted successfully!");
         } catch (error) {
-            console.error('Error deleting category:', error);
+            console.error("Error deleting category:", error);
+            alert("Failed to delete category. Please try again.");
         }
     };
-    
-    
 
     const handleEditCategory = (index, category) => {
-      setEditingCategoryIndex(index);
-      setNewCategory(category.name);
-      setCategoryType(category.type);
-      setCategoryOptions(category.options || []);
-  };
-  
+        setEditingCategoryIndex(index);
+        setNewCategory(category.name);
+        setCategoryType(category.type);
+        setCategoryOptions(category.options || []);
+    };
 
     const handleCategoryOptionsChange = (e) => {
         setNewOption(e.target.value);
     };
 
     const addOrEditOption = () => {
-        if (!newOption.trim()) return; // Ensure option is not empty
-    
+        if (!newOption.trim()) return;
+
         const updatedCategories = categories.map((category) =>
             category.name === selectedCategory
                 ? {
@@ -117,16 +119,14 @@ const SubjectEvaluationPage = () => {
                               ? category.options.map((option, index) =>
                                     index === editingOptionIndex ? newOption.trim() : option
                                 )
-                              : [...(category.options || []), newOption.trim()], // Add new option
+                              : [...(category.options || []), newOption.trim()],
                   }
                 : category
         );
-    
-        // Update the local state
+
         setCategories(updatedCategories);
         resetOptionState();
     };
-    
 
     const resetOptionState = () => {
         setNewOption("");
@@ -149,8 +149,8 @@ const SubjectEvaluationPage = () => {
     };
 
     const addOrEditQuestion = () => {
-        if (!subjectQuestion.trim() || !selectedCategory) return; // Ensure question and category are valid
-    
+        if (!subjectQuestion.trim() || !selectedCategory) return;
+
         const updatedCategories = categories.map((category) =>
             category.name === selectedCategory
                 ? {
@@ -165,16 +165,14 @@ const SubjectEvaluationPage = () => {
                               : [
                                     ...category.questions,
                                     { text: subjectQuestion, weight: parseFloat(newWeight) || 1 },
-                                ], // Add new question
+                                ],
                   }
                 : category
         );
-    
-        // Update the local state
+
         setCategories(updatedCategories);
         resetQuestionState();
     };
-    
 
     const resetQuestionState = () => {
         setSubjectQuestion("");
@@ -211,6 +209,7 @@ const SubjectEvaluationPage = () => {
             const formRef = doc(db, "evaluationForms", "subject");
             await setDoc(formRef, {
                 categories: categories.map((category) => ({
+                    id: category.id,
                     name: category.name,
                     type: category.type,
                     options: category.options || [],
@@ -223,6 +222,7 @@ const SubjectEvaluationPage = () => {
             console.error("Error saving form:", error);
         }
     };
+
     return (
         <div className="subject-evaluation-container">
             <div className="subject-form">

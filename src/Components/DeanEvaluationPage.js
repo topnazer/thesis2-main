@@ -41,7 +41,9 @@ const DeanEvaluationPage = () => {
         if (!newCategory.trim()) return;
 
         try {
-            const updatedCategories = [...categories];
+            const formRef = doc(db, "evaluationForms", "dean");
+            let updatedCategories = [...categories];
+
             if (editingCategoryIndex !== null) {
                 updatedCategories[editingCategoryIndex] = {
                     ...updatedCategories[editingCategoryIndex],
@@ -51,7 +53,7 @@ const DeanEvaluationPage = () => {
                 };
             } else {
                 const newCategoryData = {
-                    id: Date.now(),
+                    id: Date.now(), // Unique ID
                     name: newCategory,
                     type: categoryType,
                     options: categoryOptions,
@@ -59,17 +61,14 @@ const DeanEvaluationPage = () => {
                 };
                 updatedCategories.push(newCategoryData);
             }
-
-            const formRef = doc(db, "evaluationForms", "dean");
             await setDoc(formRef, {
                 categories: updatedCategories,
                 expirationDate: expirationDate || null,
             });
-
             setDeanCategories(updatedCategories);
             resetCategoryState();
         } catch (error) {
-            console.error('Error saving category:', error);
+            console.error("Error saving category:", error);
         }
     };
 
@@ -81,25 +80,28 @@ const DeanEvaluationPage = () => {
         setEditingDeanCategoryIndex(null);
     };
 
-    const deleteCategory = async (category) => {
+    const deleteCategory = async (categoryId) => {
         try {
-            const updatedCategories = categories.filter((cat) => cat.name !== category.name);
-            const formRef = doc(db, "evaluationForms", "dean");
-            await setDoc(formRef, {
+            const updatedCategories = categories.filter((category) => category.id !== categoryId);
+
+            await setDoc(doc(db, "evaluationForms", "dean"), {
                 categories: updatedCategories,
                 expirationDate: expirationDate || null,
             });
+
             setDeanCategories(updatedCategories);
+            alert("Category deleted successfully!");
         } catch (error) {
-            console.error('Error deleting category:', error);
+            console.error("Error deleting category:", error);
+            alert("Failed to delete category. Please try again.");
         }
     };
 
     const handleEditCategory = (index, category) => {
+        setEditingDeanCategoryIndex(index);
         setNewDeanCategory(category.name);
         setDeanCategoryType(category.type);
         setDeanCategoryOptions(category.options || []);
-        setEditingDeanCategoryIndex(index);
     };
 
     const handleCategoryOptionsChange = (e) => {

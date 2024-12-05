@@ -140,43 +140,6 @@ const EvaluateSubject = () => {
     return { totalScore, maxScore, percentageScore };
 };
 
-
-  const calculateOptionFrequencies = () => {
-    const frequencies = {};
-
-    categories.forEach((category, categoryIndex) => {
-      const { questions, type, options } = category;
-
-      if (type === "Multiple Choice" || type === "Checkbox") {
-        questions.forEach((question, questionIndex) => {
-          const uniqueKey = `${categoryIndex}-${questionIndex}`;
-          const response = responses[uniqueKey];
-
-          // Initialize the frequency object for this question
-          if (!frequencies[uniqueKey]) {
-            frequencies[uniqueKey] = options.reduce((acc, option) => {
-              acc[option] = 0;
-              return acc;
-            }, {});
-          }
-
-          // Count responses
-          if (type === "Multiple Choice" && response) {
-            frequencies[uniqueKey][response] += 1;
-          } else if (type === "Checkbox" && Array.isArray(response)) {
-            response.forEach((selectedOption) => {
-              if (frequencies[uniqueKey][selectedOption] !== undefined) {
-                frequencies[uniqueKey][selectedOption] += 1;
-              }
-            });
-          }
-        });
-      }
-    });
-
-    return frequencies;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -214,7 +177,6 @@ const EvaluateSubject = () => {
 
     // Calculate scores and option frequencies
     const { totalScore, maxScore, percentageScore } = calculateRatingScore();
-    const optionFrequencies = calculateOptionFrequencies();
 
     // Build detailed question-response data
     const detailedQuestions = categories.map((category, categoryIndex) => ({
@@ -243,11 +205,10 @@ const EvaluateSubject = () => {
             facultyId: subject.facultyId, // Use facultyId from subject
             studentName, // Include student name
             scores: responses, // Include raw scores
-            detailedQuestions, // Include the detailed questions here
-            ratingScore: { totalScore, maxScore, percentageScore }, // Include rating score
-            optionFrequencies, // Include option frequencies
+            ratingScore: { percentageScore }, // Include rating score
             comment, // Include comments
             createdAt: new Date(),
+            detailedQuestions
         });
 
         // Update or create subject evaluation score with facultyId, studentName, and subjectName
@@ -283,9 +244,8 @@ const EvaluateSubject = () => {
                 completedEvaluations,
                 subjectName, // Include subject name
                 facultyId: subject.facultyId, // Use facultyId from subject
-                detailedQuestions, // Include the detailed questions in the subject evaluation
-                optionFrequencies, // Include option frequencies
                 createdAt: new Date(), // Use createdAt for new document
+                detailedQuestions,
             });
         }
 
