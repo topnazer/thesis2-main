@@ -188,3 +188,9 @@ textarea::placeholder {
 .questions-preview button:hover {
     background-color: #4CAF50;  
 }
+
+.question-action{
+
+    display: flex;
+    flex-direction: row;
+ }

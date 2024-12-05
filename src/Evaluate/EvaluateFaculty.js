@@ -346,7 +346,7 @@ const EvaluateFaculty = () => {
   }
 
   return (
-    <div className="evaluate-faculty-page evaluation-form">
+    <div className="evaluate-faculty-page">
       <div className="header-container">
         <div className="form-header">
           <h1>Evaluate {faculty ? `${faculty.firstName} ${faculty.lastName}` : "Faculty"}</h1>

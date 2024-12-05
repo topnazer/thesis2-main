@@ -238,37 +238,50 @@ const Subjects = () => {
   
 
   const handleEditSubject = async () => {
+    // Validate input
     if (!editSubjectName.trim() || !subjectIdToEdit) {
       alert("Subject name and ID cannot be empty.");
       return;
-    } 
+    }
+  
     try {
-      await updateDoc(doc(db, "subjects", subjectIdToEdit), {
+      // Prepare subject data for update
+      const updatedData = {
         name: editSubjectName,
         facultyId: selectedEditFaculty,
         semester: selectedEditSemester,
         department: selectedEditDepartment,
-        schoolYear: selectedEditSchoolYear, 
-        description: editSubjectDescription, 
-      });
-      const updatedSubjectRef = doc(db, "subjects", subjectIdToEdit);
-      const updatedSubjectSnap = await getDoc(updatedSubjectRef);
+        schoolYear: selectedEditSchoolYear,
+        description: editSubjectDescription,
+      };
+  
+      const subjectRef = doc(db, "subjects", subjectIdToEdit);
+      await updateDoc(subjectRef, updatedData);
+  
+      const updatedSubjectSnap = await getDoc(subjectRef);
       if (updatedSubjectSnap.exists()) {
         const updatedSubject = { id: updatedSubjectSnap.id, ...updatedSubjectSnap.data() };
-        setViewedSubject(updatedSubject); 
+        setViewedSubject(updatedSubject);
       }
+  
       alert("Subject updated successfully!");
-      setEditSubjectName("");
-      setSelectedEditFaculty(""); 
-      setSelectedEditSemester(""); 
-      setSelectedEditDepartment(""); 
-      setSubjectIdToEdit(null);
-      setSelectedEditSchoolYear(""); 
-      setEditSubjectDescription("");
+      resetEditForm();
     } catch (error) {
       console.error("Error editing subject:", error);
+      alert("An error occurred while updating the subject. Please try again.");
     }
   };
+
+  const resetEditForm = () => {
+    setEditSubjectName("");
+    setSelectedEditFaculty("");
+    setSelectedEditSemester("");
+    setSelectedEditDepartment("");
+    setSelectedEditSchoolYear("");
+    setEditSubjectDescription("");
+    setSubjectIdToEdit(null);
+  };
+  
   
   const CancelView = () => {
     setViewedSubject(null);
