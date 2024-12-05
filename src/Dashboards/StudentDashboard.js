@@ -56,58 +56,65 @@ const StudentDashboard = () => {
 
   const fetchSubjects = async (user) => {
     try {
-        const subjectsCollection = collection(db, "students", user.uid, "subjects");
-
-        onSnapshot(subjectsCollection, async (snapshot) => {
-            const fetchedSubjects = await Promise.all(
-                snapshot.docs.map(async (document) => {
-                    const subjectData = { id: document.id, ...document.data() };
-                    subjectData.sectionId = subjectData.sectionId || "default_section";
-
-                    // Fetch faculty details
-                    if (subjectData.facultyId) {
-                        const facultyDoc = await getDoc(firestoreDoc(db, "users", subjectData.facultyId));
-                        subjectData.faculty = facultyDoc.exists() ? facultyDoc.data() : null;
-                    } else {
-                        subjectData.faculty = null;
-                    }
-
-                    // Fetch evaluation expiration data
-                    const evaluationFormRef = firestoreDoc(db, "evaluationForms", "subject");
-                    const evaluationFormDoc = await getDoc(evaluationFormRef);
-                    if (evaluationFormDoc.exists()) {
-                        const expirationDate = evaluationFormDoc.data().expirationDate;
-                        const today = new Date();
-
-                        subjectData.expired = expirationDate
-                            ? new Date(expirationDate).getTime() < today.getTime()
-                            : false;
-                    } else {
-                        subjectData.expired = false;
-                    }
-
-                    // Check if the evaluation is already done
-                    const evaluationRef = firestoreDoc(
-                        db, 
-                        `students/${user.uid}/subjects/${subjectData.id}/sections/${subjectData.sectionId}/completed_evaluations`, 
-                        user.uid
-                    );
-                    const evaluationDoc = await getDoc(evaluationRef);
-                    subjectData.evaluated = evaluationDoc.exists();
-
-                    return subjectData;
-                })
+      const subjectsCollection = collection(db, "students", user.uid, "subjects");
+  
+      onSnapshot(subjectsCollection, async (snapshot) => {
+        const fetchedSubjects = await Promise.all(
+          snapshot.docs.map(async (document) => {
+            const subjectData = { id: document.id, ...document.data() };
+            subjectData.sectionId = subjectData.sectionId || "default_section";
+  
+            console.log("Subject Data:", subjectData); // Log subject data
+  
+            // Fetch faculty details
+            if (subjectData.facultyId) {
+              const facultyDoc = await getDoc(firestoreDoc(db, "users", subjectData.facultyId));
+              subjectData.faculty = facultyDoc.exists() ? facultyDoc.data() : null;
+            } else {
+              subjectData.faculty = null;
+            }
+  
+            // Fetch evaluation expiration data
+            const evaluationFormRef = firestoreDoc(db, "evaluationForms", "subject");
+            const evaluationFormDoc = await getDoc(evaluationFormRef);
+            if (evaluationFormDoc.exists()) {
+              const expirationDate = evaluationFormDoc.data().expirationDate;
+              const today = new Date();
+  
+              subjectData.expired = expirationDate
+                ? new Date(expirationDate).getTime() < today.getTime()
+                : false;
+            } else {
+              subjectData.expired = false;
+            }
+  
+            console.log("After Expiration Check:", subjectData); // Log after expiration check
+  
+            // Check if the evaluation is already done
+            const evaluationRef = firestoreDoc(
+              db,
+              `students/${user.uid}/subjects/${subjectData.id}/sections/${subjectData.sectionId}/completed_evaluations`,
+              user.uid
             );
-
-            setSubjects(fetchedSubjects.filter((subject) => subject !== null));
-            setLoading(false);
-        });
-    } catch (error) {
-        console.error("Error fetching subjects or faculty details:", error);
+            const evaluationDoc = await getDoc(evaluationRef);
+            subjectData.evaluated = evaluationDoc.exists();
+  
+            console.log("After Evaluation Check:", subjectData); // Log after evaluation check
+  
+            return subjectData;
+          })
+        );
+  
+        console.log("Fetched Subjects:", fetchedSubjects); // Log fetched subjects
+        setSubjects(fetchedSubjects.filter((subject) => subject !== null));
         setLoading(false);
+      });
+    } catch (error) {
+      console.error("Error fetching subjects or faculty details:", error);
+      setLoading(false);
     }
-};
-
+  };
+  
 
   const handleSignOut = async () => {
     try {
