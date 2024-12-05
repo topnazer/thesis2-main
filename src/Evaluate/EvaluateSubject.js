@@ -356,22 +356,23 @@ const EvaluateSubject = () => {
 };
 
   
-  const renderQuestionsForCurrentCategory = () => {
-    const currentCategory = categories[currentCategoryIndex];
-    if (!currentCategory) {
-      return <tr><td>No questions available for this category.</td></tr>;
-    }
+const renderQuestionsForCurrentCategory = () => {
+  const currentCategory = categories[currentCategoryIndex];
+  if (!currentCategory) {
+    return <tr><td>No questions available for this category.</td></tr>;
+  }
 
-    const { type, questions, options } = currentCategory;
+  const { type, questions, options, name } = currentCategory;
 
-    if (!questions || questions.length === 0) {
-      return <tr><td>No questions available for this category.</td></tr>;
-    }
+  if (!questions || questions.length === 0) {
+    return <tr><td>No questions available for this category.</td></tr>;
+  }
+
 
     return (
       <>
         <tr>
-          <th>Question</th>
+          <th>{name}: Question</th>
           {type === "Rating" && (
             <>
               <th>Strongly disagree</th>
@@ -453,6 +454,9 @@ const EvaluateSubject = () => {
             <img src="/spc.png" alt="Logo" className="logo" />
           </div>
         </div>
+      </div>
+      <div className='raterlegend'>
+      <h3>Rating Legend: 1 = Strongly Disagree, 5 = Strongly Agree</h3>
       </div>
 
       <div className="form-container">

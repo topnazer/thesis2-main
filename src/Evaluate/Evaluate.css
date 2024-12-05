@@ -438,3 +438,9 @@ margin-left: 20px;
   height: 100%;
   padding: 20px;
 }
+.raterlegend {
+  text-align: center;
+  margin-top: 5px; /* Adjust the space above the text */
+  margin-bottom: 5px; /* Adjust the space below the text */
+  font-size: 14px; 
+}

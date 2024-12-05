@@ -86,26 +86,35 @@ const EvaluateDean = () => {
   };
 
   const calculateRatingScore = () => {
-    let totalScore = 0;
-    let maxScore = 0;
+    let totalScore = 0; // Total sum of all responses
+    let maxScore = 0; // Maximum possible score
 
+    // Loop through each category
     categories.forEach((category, categoryIndex) => {
-      if (category.type === "Rating") {
-        const { questions } = category;
+        if (category.type === "Rating") { // Only process categories of type 'Rating'
+            const { questions } = category;
 
-        questions.forEach((_, questionIndex) => {
-          const uniqueKey = `${categoryIndex}-${questionIndex}`;
-          const response = responses[uniqueKey];
+            // Loop through each question in the category
+            questions.forEach((_, questionIndex) => {
+                const uniqueKey = `${categoryIndex}-${questionIndex}`;
+                const response = responses[uniqueKey];
 
-          totalScore += parseInt(response || 0, 10); // Add the rating value
-          maxScore += 5; // Assuming 5 is the max rating for each question
-        });
-      }
+                // Parse the response and add it to the total score
+                totalScore += parseInt(response || 0, 10);
+
+                // Increment maxScore by 5 for each question
+                maxScore += 5;
+            });
+        }
     });
 
-    const percentageScore = (totalScore / maxScore) * 100;
+    // Calculate the percentage score
+    const percentageScore = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
+
+    // Return the scores and percentage
     return { totalScore, maxScore, percentageScore };
-  };
+};
+
 
   const calculateOptionFrequencies = () => {
     const frequencies = {};
@@ -230,9 +239,9 @@ const EvaluateDean = () => {
     if (!currentCategory) {
       return <tr><td>No questions available for this category.</td></tr>;
     }
-
-    const { type, questions, options } = currentCategory;
-
+  
+    const { type, questions, options, name } = currentCategory;
+  
     if (!questions || questions.length === 0) {
       return <tr><td>No questions available for this category.</td></tr>;
     }
@@ -240,7 +249,7 @@ const EvaluateDean = () => {
     return (
       <>
         <tr>
-          <th>Question</th>
+          <th>{name}: Question</th>
           {type === "Rating" && (
             <>
               <th>Strongly disagree</th>
@@ -322,6 +331,9 @@ const EvaluateDean = () => {
             <img src="/spc.png" alt="Logo" className="logo" />
           </div>
         </div>
+      </div>
+      <div className='raterlegend'>
+      <h3>Rating Legend: 1 = Strongly Disagree, 5 = Strongly Agree</h3>
       </div>
 
       <div className="form-container">
