@@ -191,155 +191,67 @@ const EvaluateSubject = () => {
         return;
     }
 
-    // Fetch the student's name
-    let studentName = "Anonymous"; // Default if name not found
+    // Fetch student and subject information
+    let studentName = "Anonymous";
+    let subjectName = "Unknown Subject";
     try {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
             const userData = userDoc.data();
             studentName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
         }
-    } catch (error) {
-        console.error("Error fetching student name:", error);
-    }
 
-    // Fetch the subject's name
-    let subjectName = "Unknown Subject"; // Default if name not found
-    try {
         const subjectDoc = await getDoc(doc(db, "subjects", subjectId));
         if (subjectDoc.exists()) {
             subjectName = subjectDoc.data().name || subjectName;
         }
     } catch (error) {
-        console.error("Error fetching subject name:", error);
+        console.error("Error fetching student/subject data:", error);
     }
 
     // Calculate scores and option frequencies
     const { totalScore, maxScore, percentageScore } = calculateRatingScore();
     const optionFrequencies = calculateOptionFrequencies();
 
-    // Build detailed question-response data
-    const detailedQuestions = categories.map((category, categoryIndex) => {
-        return {
-            categoryName: category.name,
-            type: category.type, // Include category type
-            questions: category.questions.map((question, questionIndex) => {
-                const uniqueKey = `${categoryIndex}-${questionIndex}`;
-                return {
-                    text: question.text, // Include the question text
-                    type: category.type, // Include the question type
-                    response: responses[uniqueKey] || (category.type === "Checkbox" ? [] : "N/A"), // Add response
-                    options: category.options || [], // Include available options for the question
-                };
-            }),
-        };
-    });
-
-    // Log values for debugging
-    console.log("Student Name:", studentName);
-    console.log("Subject Name:", subjectName);
-    console.log("Scores:", responses);
-    console.log("Option Frequencies:", optionFrequencies);
-    console.log("Detailed Questions:", detailedQuestions);
-    console.log("Comment:", comment);
+    const detailedQuestions = categories.map((category, categoryIndex) => ({
+        categoryName: category.name,
+        type: category.type,
+        questions: category.questions.map((question, questionIndex) => {
+            const uniqueKey = `${categoryIndex}-${questionIndex}`;
+            return {
+                text: question.text,
+                type: category.type,
+                response: responses[uniqueKey] || (category.type === "Checkbox" ? [] : "N/A"),
+                options: category.options || [],
+            };
+        }),
+    }));
 
     try {
-        // Save individual evaluation
-        const evaluationRef = doc(
-            db,
-            `students/${user.uid}/subjects/${subjectId}/completed_evaluations`,
-            user.uid
-        );
+        const facultyId = subject?.facultyId;
+        if (!facultyId) {
+            alert("No faculty assigned to this subject.");
+            return;
+        }
 
+        // Reference for the evaluation document
+        const evaluationRef = doc(db, `evaluations/${facultyId}/students`, user.uid);
+
+        // Save evaluation details
         await setDoc(evaluationRef, {
             userId: user.uid,
             sectionId,
             subjectId,
-            subjectName, // Include subject name
-            facultyId: subject?.facultyId || null,
-            studentName, // Include student name
-            scores: responses, // Include raw scores
-            detailedQuestions, // Include the detailed questions here
-            ratingScore: { totalScore, maxScore, percentageScore }, // Include rating score
-            optionFrequencies, // Include option frequencies
-            comment, // Include comments
+            subjectName,
+            facultyId,
+            studentName,
+            scores: responses,
+            detailedQuestions,
+            ratingScore: { totalScore, maxScore, percentageScore },
+            optionFrequencies,
+            comment,
             createdAt: new Date(),
         });
-
-        // Update or create subject evaluation score with facultyId, studentName, and subjectName
-        const subjectEvaluationRef = doc(db, "subjectEvaluations", subjectId);
-        const subjectEvaluationDoc = await getDoc(subjectEvaluationRef);
-
-        let newAverageScore;
-        let completedEvaluations;
-
-        if (subjectEvaluationDoc.exists()) {
-            const existingAverageScore = subjectEvaluationDoc.data().averageScore || 0;
-            completedEvaluations = (subjectEvaluationDoc.data().completedEvaluations || 0) + 1;
-            newAverageScore =
-                ((existingAverageScore * (completedEvaluations - 1)) + percentageScore) /
-                completedEvaluations;
-
-            await setDoc(
-                subjectEvaluationRef,
-                {
-                    averageScore: newAverageScore,
-                    completedEvaluations,
-                    subjectName, // Include subject name
-                    facultyId: subject?.facultyId || null,
-                    
-                },
-                { merge: true }
-            );
-        } else {
-            newAverageScore = percentageScore;
-            completedEvaluations = 1;
-
-            await setDoc(subjectEvaluationRef, {
-                averageScore: newAverageScore,
-                completedEvaluations,
-                subjectName, // Include subject name
-                facultyId: subject?.facultyId || null,
-                detailedQuestions, // Include the detailed questions in the subject evaluation
-                optionFrequencies, // Include option frequencies
-                createdAt: new Date(), // Use createdAt for new document
-            });
-        }
-
-        // Update faculty evaluation if applicable
-        if (subject?.facultyId) {
-            const facultyEvaluationRef = doc(db, "facultyEvaluations", subject.facultyId, "subjects", subjectId);
-            const facultyEvaluationDoc = await getDoc(facultyEvaluationRef);
-
-            let facultyNewAverageScore;
-
-            if (facultyEvaluationDoc.exists()) {
-                const existingFacultyAverageScore = facultyEvaluationDoc.data().averageScore || 0;
-                const facultyCompletedEvaluations =
-                    (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
-                facultyNewAverageScore =
-                    ((existingFacultyAverageScore * (facultyCompletedEvaluations - 1)) + percentageScore) /
-                    facultyCompletedEvaluations;
-
-                await setDoc(
-                    facultyEvaluationRef,
-                    {
-                        averageScore: facultyNewAverageScore,
-                        completedEvaluations: facultyCompletedEvaluations,
-                        updatedAt: new Date(), // Use updatedAt for tracking changes
-                    },
-                    { merge: true }
-                );
-            } else {
-                facultyNewAverageScore = percentageScore;
-
-                await setDoc(facultyEvaluationRef, {
-                    averageScore: facultyNewAverageScore,
-                    completedEvaluations: 1,
-                    createdAt: new Date(), // Use createdAt for new document
-                });
-            }
-        }
 
         alert(
             `Evaluation submitted successfully! Your score: ${totalScore} / ${maxScore} (${percentageScore.toFixed(
