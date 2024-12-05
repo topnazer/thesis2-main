@@ -48,107 +48,77 @@ const Facultyevaluationreport = () => {
 
     fetchFacultyByDepartment();
   }, [selectedDepartment, db]);
+
+  // Fetch evaluations for a specific faculty
   const fetchEvaluations = async (facultyId) => {
     setLoading(true);
     setEvaluations([]);
+    setError(null);
     try {
-      console.log("Fetching evaluations for facultyId:", facultyId);
-  
-      // Fetch all students
-      const studentsQuery = query(collection(db, "students"));
-      const studentsSnapshot = await getDocs(studentsQuery);
-  
-      if (studentsSnapshot.empty) {
-        console.log("No students found in the database.");
+      const evaluationsRef = collection(db, `evaluations/${facultyId}/students`);
+      const evaluationsSnapshot = await getDocs(evaluationsRef);
+
+      if (evaluationsSnapshot.empty) {
         setEvaluations([]);
-        setLoading(false);
         return;
       }
-  
-      console.log(`Found ${studentsSnapshot.size} students.`); // Log number of students
-  
-      let allEvaluations = [];
-  
-      // Iterate through each student document
-      for (const studentDoc of studentsSnapshot.docs) {
-        const studentId = studentDoc.id;
-        const studentData = studentDoc.data();
-        console.log(`Processing student: ${studentId}`, studentData);
-  
-        // Fetch the student's subjects
-        const subjectsRef = collection(studentDoc.ref, "subjects");
-        const subjectsSnapshot = await getDocs(subjectsRef);
-  
-        if (subjectsSnapshot.empty) {
-          console.log(`No subjects found for studentId: ${studentId}`);
-          continue; // Skip to next student if no subjects are found
+
+      // Map evaluation data
+      const evaluationsList = evaluationsSnapshot.docs.map((doc) => {
+        const data = doc.data();
+
+        // Extract createdAt date if available
+        const date =
+          data.createdAt && data.createdAt.toDate
+            ? data.createdAt.toDate().toLocaleDateString()
+            : "Unknown Date";
+
+        const percentageScore =
+          data.ratingScore && data.ratingScore.percentageScore !== undefined
+            ? `${data.ratingScore.percentageScore}%`
+            : "N/A";
+
+        // Collect all questions and responses
+        let questionTextArray = [];
+        let responseArray = [];
+
+        if (data.detailedQuestions && Array.isArray(data.detailedQuestions)) {
+          data.detailedQuestions.forEach((category) => {
+            const { questions } = category;
+
+            if (Array.isArray(questions)) {
+              questions.forEach((question) => {
+                questionTextArray.push(question.text || "No Question");
+                responseArray.push(
+                  Array.isArray(question.response) && question.response.length > 0
+                    ? question.response.join(", ")
+                    : question.response || "No Response"
+                );
+              });
+            }
+          });
         }
-  
-        console.log(`Found ${subjectsSnapshot.size} subjects for studentId: ${studentId}`);
-  
-        for (const subjectDoc of subjectsSnapshot.docs) {
-          const subjectId = subjectDoc.id;
-          const subjectData = subjectDoc.data();
-          console.log(`Processing subject: ${subjectId}`, subjectData);
-  
-          // Check if the subject's faculty matches the selected faculty
-          if (subjectData.facultyId !== facultyId) {
-            console.log(`Faculty ID mismatch for subject: ${subjectId}`);
-            continue;
-          }
-  
-          console.log(`Faculty match found for subject: ${subjectData.name}`);
-  
-          // Fetch evaluations directly from `completed_evaluations`
-          const evaluationsRef = collection(
-            db,
-            `students/${studentId}/subjects/${subjectId}/completed_evaluations`
-          );
-          const evaluationsSnapshot = await getDocs(evaluationsRef);
-  
-          if (evaluationsSnapshot.empty) {
-            console.log(
-              `No completed evaluations found for subject: ${subjectId}`
-            );
-            continue; // Skip to next subject if no evaluations are found
-          }
-  
-          console.log(
-            `Found ${evaluationsSnapshot.size} evaluations for subject: ${subjectId}`
-          );
-  
-          for (const evaluationDoc of evaluationsSnapshot.docs) {
-            const evalData = evaluationDoc.data();
-            console.log(`Processing evaluation:`, evalData);
-  
-            // Combine the data
-            allEvaluations.push({
-              studentId,
-              studentName: studentData.name || "Unknown Student",
-              subjectName: subjectData.name || "Unknown Subject",
-              comment: evalData.comment || "No comment",
-              percentageScore: evalData.scores?.percentageScore || "N/A",
-              date: evalData.createdAt?.toDate().toLocaleDateString() || "Unknown Date",
-            });
-          }
-        }
-      }
-  
-      if (allEvaluations.length === 0) {
-        console.log("No evaluations matched the criteria.");
-      }
-  
-      // Update state with all evaluations
-      setEvaluations(allEvaluations);
-      console.log("Evaluations Fetched:", allEvaluations);
+
+        return {
+          studentId: doc.id,
+          studentName: data.studentName || "Unknown Student",
+          subjectName: data.subjectName || "Unknown Subject",
+          comment: data.comment || "No Comment",
+          percentageScore,
+          date,
+          questionTextArray,
+          responseArray,
+        };
+      });
+
+      setEvaluations(evaluationsList);
     } catch (error) {
-      setError("Failed to load evaluations data.");
       console.error("Error fetching evaluations:", error);
+      setError("Failed to load evaluations data.");
     } finally {
       setLoading(false);
     }
   };
-  
 
   const handleFacultyClick = (facultyMember) => {
     setSelectedFaculty(facultyMember);
@@ -210,6 +180,14 @@ const Facultyevaluationreport = () => {
                     <th>Date</th>
                     <th>Comment</th>
                     <th>Percentage Score</th>
+                    {/* Dynamically generate columns for questions */}
+                    {evaluations[0].questionTextArray.map((_, index) => (
+                      <th key={`question-${index}`}>Question {index + 1}</th>
+                    ))}
+                    {/* Dynamically generate columns for responses */}
+                    {evaluations[0].responseArray.map((_, index) => (
+                      <th key={`response-${index}`}>Response {index + 1}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -218,8 +196,18 @@ const Facultyevaluationreport = () => {
                       <td>{evaluation.studentName}</td>
                       <td>{evaluation.subjectName}</td>
                       <td>{evaluation.date}</td>
-                      <td>{evaluation.comment}</td>
+                      <td>
+                        <div className="scrollablesapage">{evaluation.comment}</div>
+                      </td>
                       <td>{evaluation.percentageScore}</td>
+                      {/* Render questions dynamically */}
+                      {evaluation.questionTextArray.map((question, qIndex) => (
+                        <td key={`question-row-${qIndex}`}>{question}</td>
+                      ))}
+                      {/* Render responses dynamically */}
+                      {evaluation.responseArray.map((response, rIndex) => (
+                        <td key={`response-row-${rIndex}`}>{response}</td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
