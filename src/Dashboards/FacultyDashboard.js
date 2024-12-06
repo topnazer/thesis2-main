@@ -20,6 +20,10 @@ const FacultyDashboard = () => {
   const [viewedSubject, setViewedSubject] = useState(null); // State to store selected subject details
   const [enrolledStudents, setEnrolledStudents] = useState([]); // New state for enrolled students
   const [currentPage, setCurrentPage] = useState(0); // Pagination state
+   const [showCommentsTable, setShowCommentsTable] = useState(false); // Toggle for comments table
+  const [comments, setComments] = useState([]);
+  const [showFacultyComments, setShowFacultyComments] = useState(false);
+
 
   const facultyPerPage = 3; // Limit to 3 faculty per page
   const totalFacultyPages = Math.ceil(facultyList.length / facultyPerPage);
@@ -376,66 +380,231 @@ const FacultyDashboard = () => {
     currentPage * subjectsPerPage + subjectsPerPage
   );
 
+  const handleShowComments = async () => {
+    setLoading(true);
+    setShowCommentsTable(true);
+
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        console.error("User not authenticated.");
+        return;
+      }
+
+      const facultyId = user.uid;
+      const commentsQuery = collection(db, `evaluations/${facultyId}/students`);
+      const commentsSnapshot = await getDocs(commentsQuery);
+
+      const commentsList = commentsSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          subjectName: data.subjectName || "Unknown Subject",
+          studentName: data.studentName || "Unknown Student",
+          date: data.createdAt?.toDate().toLocaleDateString() || "Unknown Date",
+          comment: data.comment || "No Comment",
+        };
+      });
+
+      setComments(commentsList);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleShowFacultyComments = async () => {
+    setLoading(true);
+    setShowCommentsTable(true);
+  
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        console.error("User not authenticated.");
+        return;
+      }
+  
+      const facultyId = user.uid;
+      const evaluationsQuery = collection(db, `facultyEvaluations/${facultyId}/completed_evaluations`);
+      const evaluationsSnapshot = await getDocs(evaluationsQuery);
+  
+      if (evaluationsSnapshot.empty) {
+        console.warn("No evaluations found for this faculty.");
+        setComments([]);
+        return;
+      }
+  
+      const commentsList = evaluationsSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          createdAt: data.createdAt?.toDate().toLocaleDateString() || "Unknown Date",
+          comment: data.comment || "No Comment",
+        };
+      });
+  
+      setComments(commentsList); // Update the comments state with only Date and Comment
+    } catch (error) {
+      console.error("Error fetching faculty evaluations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  
   return (
     <div className="faculty-dashboard">
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <>
-          <nav>
-          <div className="dashboardlogo-container">
-            <img src="/spc.png" alt="Logo" className="dashboardlogo" />
-          </div>
-            <h1>Faculty Dashboard</h1>
-            <div style={{ display: "flex", alignItems: "center" }}>
-            <p style={{fontSize: "25px"}}><strong>{userName}</strong></p>
-              <button className="facnotification-icon" onClick={() => setShowNotifications(!showNotifications)}>
-                Notifications {notifications.length > 0 && `(${notifications.length})`}
-              </button>
-              <button onClick={() => setShowEvaluationReport(!showEvaluationReport)}>Evaluation Report</button>
-              <button onClick={() => setShowSubjects(!showSubjects)}>Subjects</button>
-              <button onClick={handleSignOut}>Sign Out</button>
-            </div>
-
-            {showNotifications && (
-              <div className="notifications-dropdown">
-                <ul>
-                  {notifications.length > 0 ? (
-                    notifications.map((notification, index) => (
-                      <li key={index}>{notification.message}</li>
-                    ))
-                  ) : (
-                    <li>No new notifications</li>
-                  )}
-                </ul>
-              </div>
-            )}
-          </nav>
-
-          {showEvaluationReport && (
-            <div className="facevaluation-report-modal">
-              <h2>Evaluation Report</h2>
-              <div className="facevaluation-box-container">
-                <div className="facevaluation-box">
-                <h3>Subject Average Score</h3>
-  {averageScore?.subject !== null ? (
-    <p>{Number(averageScore.subject).toFixed(2)}</p> // Display the subject average score
+  {loading ? (
+    <p>Loading...</p>
+  ) : showCommentsTable ? (
+    // Check if we're showing subject or faculty comments
+    showFacultyComments ? (
+      // Render Faculty Comments
+      <div className="faculty-cmmnts-tbl">
+  <h2>Faculty Evaluation Comments</h2>
+  {comments.length > 0 ? (
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Comment</th>
+        </tr>
+      </thead>
+      <tbody>
+        {comments.map((comment, index) => (
+          <tr key={index}>
+            <td>{comment.createdAt}</td>
+            <td>{comment.comment}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   ) : (
-    <p>No evaluations submitted</p> // Fallback if no subject scores are available
+    <p>No faculty comments available.</p>
   )}
+ <button
+    className="custom-button"
+    onClick={() => {
+      setShowCommentsTable(false);
+      setShowFacultyComments(false);
+    }}
+  >
+    Back
+  </button>
 </div>
-<div className="facevaluation-box">
+    ) : (
+      // Render Subject Comments
+      <div className="subject-comts-tbl">
+        <h2>Subject Evaluation</h2>
+        {comments.length > 0 ? (
+          <table>
+            <thead>
+              <tr>
+                <th>Subject Name</th>
+                <th>Date</th>
+                <th>Comment</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comments.map((comment, index) => (
+                <tr key={index}>
+                  <td>{comment.subjectName}</td>
+                  <td>{comment.date}</td>
+                  <td>{comment.comment}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No subject comments available.</p>
+        )}
+       <button
+    className="custom-button"
+    onClick={() => setShowCommentsTable(false)}
+  >
+    Back
+  </button>
+      </div>
+    )
+  ) : (
+    // The rest of the faculty dashboard content
+    <>
+      <nav>
+        <div className="dashboardlogo-container">
+          <img src="/spc.png" alt="Logo" className="dashboardlogo" />
+        </div>
+        <h1>Faculty Dashboard</h1>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <p style={{ fontSize: "25px" }}>
+            <strong>{userName}</strong>
+          </p>
+          <button
+            className="facnotification-icon"
+            onClick={() => setShowNotifications(!showNotifications)}
+          >
+            Notifications {notifications.length > 0 && `(${notifications.length})`}
+          </button>
+          <button onClick={() => setShowEvaluationReport(!showEvaluationReport)}>
+            Evaluation Report
+          </button>
+          <button onClick={() => setShowSubjects(!showSubjects)}>Subjects</button>
+          <button onClick={handleSignOut}>Sign Out</button>
+        </div>
+
+        {showNotifications && (
+          <div className="notifications-dropdown">
+            <ul>
+              {notifications.length > 0 ? (
+                notifications.map((notification, index) => (
+                  <li key={index}>{notification.message}</li>
+                ))
+              ) : (
+                <li>No new notifications</li>
+              )}
+            </ul>
+          </div>
+        )}
+      </nav>
+
+      {showEvaluationReport && (
+        <div className="facevaluation-report-modal">
+          <h2>Evaluation Report</h2>
+          <div className="facevaluation-box-container">
+            <div
+              className="facevaluation-box clickable"
+              role="button"
+              onClick={handleShowComments}
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && handleShowComments()}
+            >
+              <h3>Subject Average Score</h3>
+              {averageScore?.subject !== null ? (
+                <p>{Number(averageScore.subject).toFixed(2)}</p>
+              ) : (
+                <p>No evaluations submitted</p>
+              )}
+            </div>
+            <div
+  className="facevaluation-box clickable"
+  role="button"
+  onClick={() => {
+    handleShowFacultyComments();
+    setShowFacultyComments(true); // Show Faculty Comments
+  }}
+  tabIndex={0}
+  onKeyDown={(e) => e.key === "Enter" && handleShowFacultyComments()}
+>
   <h3>Faculty Average Score</h3>
   {averageScore?.faculty !== null ? (
-    <p>{Number(averageScore.faculty).toFixed(2)}</p> // Display the faculty average score
+    <p>{Number(averageScore.faculty).toFixed(2)}</p>
   ) : (
-    <p>No evaluations submitted</p> // Fallback if no faculty scores are available
+    <p>No evaluations submitted</p>
   )}
 </div>
-              </div>
-              <button onClick={() => setShowEvaluationReport(false)}>Close</button>
-            </div>
-          )}
+
+          </div>
+          <button onClick={() => setShowEvaluationReport(false)}>Close</button>
+        </div>
+      )}
 
           {showSubjects ? (
             <div className="facsubject-list">

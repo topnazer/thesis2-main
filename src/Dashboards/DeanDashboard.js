@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getFirestore, doc, getDoc, onSnapshot, collection, query, where, getDocs } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  onSnapshot,
+  getDocs,
+} from "firebase/firestore";
 import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import './deandashboard.css';
+import "./deandashboard.css";
 
 const DeanDashboard = () => {
   const [facultyList, setFacultyList] = useState([]);
+  const [deanList, setDeanList] = useState([]);
   const [evaluationReports, setEvaluationReports] = useState([]);
   const [evaluatorNames, setEvaluatorNames] = useState({});
   const [userName, setUserName] = useState("");
@@ -16,11 +26,42 @@ const DeanDashboard = () => {
   const navigate = useNavigate();
   const db = getFirestore();
 
+  const fetchEvaluationsDone = async (user) => {
+    try {
+      const facultyEvaluationsCollection = collection(db, "facultyEvaluations");
+      const evaluationsSnapshot = await getDocs(facultyEvaluationsCollection);
+
+      const evaluationsMap = {};
+      for (const facultyDoc of evaluationsSnapshot.docs) {
+        const facultyId = facultyDoc.id;
+
+        const completedEvaluationsCollection = collection(
+          db,
+          "facultyEvaluations",
+          facultyId,
+          "completed_evaluations"
+        );
+        const completedEvaluationsSnapshot = await getDocs(
+          completedEvaluationsCollection
+        );
+
+        const userEvaluated = completedEvaluationsSnapshot.docs.some(
+          (doc) => doc.id === user.uid
+        );
+        evaluationsMap[facultyId] = userEvaluated;
+      }
+      setEvaluationsDone(evaluationsMap);
+    } catch (error) {
+      console.error("Error fetching completed evaluations:", error);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         fetchUserInfo(user);
         fetchFacultyInDepartment(user);
+        fetchDeans(user);
         fetchEvaluationReports(user);
         fetchEvaluationsDone(user);
         setLoading(false);
@@ -56,7 +97,9 @@ const DeanDashboard = () => {
         );
 
         onSnapshot(facultyQuery, (snapshot) => {
-          setFacultyList(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+          setFacultyList(
+            snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+          );
         });
       }
     } catch (error) {
@@ -64,36 +107,44 @@ const DeanDashboard = () => {
     }
   };
 
-  const fetchEvaluationsDone = async (user) => {
+  const fetchDeans = async (user) => {
     try {
-      const facultyEvaluationsCollection = collection(db, 'facultyEvaluations');
-      const evaluationsSnapshot = await getDocs(facultyEvaluationsCollection);
-
-      const evaluationsMap = {};
-      for (const facultyDoc of evaluationsSnapshot.docs) {
-        const facultyId = facultyDoc.id;
-
-        const completedEvaluationsCollection = collection(db, 'facultyEvaluations', facultyId, 'completed_evaluations');
-        const completedEvaluationsSnapshot = await getDocs(completedEvaluationsCollection);
-
-        const userEvaluated = completedEvaluationsSnapshot.docs.some(doc => doc.id === user.uid);
-        evaluationsMap[facultyId] = userEvaluated;
+      if (!user || !user.uid) {
+        console.error("User object is undefined or missing UID.");
+        return;
       }
-      setEvaluationsDone(evaluationsMap);
+
+      const deansQuery = query(
+        collection(db, "users"),
+        where("role", "==", "Dean")
+      );
+
+      onSnapshot(deansQuery, (snapshot) => {
+        const deans = snapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((dean) => dean.id !== user.uid);
+
+        setDeanList(deans);
+      });
     } catch (error) {
-      console.error("Error fetching completed evaluations:", error);
+      console.error("Error fetching deans:", error);
     }
   };
 
   const fetchEvaluationReports = async (user) => {
     try {
-      const evaluationsCollection = collection(db, "deanEvaluations", user.uid, "completed_evaluations");
+      const evaluationsCollection = collection(
+        db,
+        "deanEvaluations",
+        user.uid,
+        "completed_evaluations"
+      );
       onSnapshot(evaluationsCollection, async (snapshot) => {
-        const reports = snapshot.docs.map(doc => doc.data());
+        const reports = snapshot.docs.map((doc) => doc.data());
         setEvaluationReports(reports);
 
-        const evaluatorIds = reports.map(report => report.userId);
-        const namesToFetch = evaluatorIds.filter(id => !evaluatorNames[id]);
+        const evaluatorIds = reports.map((report) => report.userId);
+        const namesToFetch = evaluatorIds.filter((id) => !evaluatorNames[id]);
         const evaluatorNamesCopy = { ...evaluatorNames };
 
         if (namesToFetch.length > 0) {
@@ -127,7 +178,13 @@ const DeanDashboard = () => {
 
   const handleEvaluateFaculty = (facultyId) => {
     navigate(`/evaluate-faculty/${facultyId}`, {
-      state: { redirectTo: "/dean-dashboard" }
+      state: { redirectTo: "/dean-dashboard" },
+    });
+  };
+
+  const handleEvaluateDean = (deanId) => {
+    navigate(`/evaluate-dean/${deanId}`, {
+      state: { redirectTo: "/dean-dashboard" },
     });
   };
 
@@ -138,29 +195,43 @@ const DeanDashboard = () => {
       ) : showEvaluationReport ? (
         <div>
           <nav>
-            <button className="backing" onClick={() => setShowEvaluationReport(false)}>Back to Dashboard</button>
+            <button
+              className="backing"
+              onClick={() => setShowEvaluationReport(false)}
+            >
+              Back to Dashboard
+            </button>
             <h1 className="hika">Evaluation Report</h1>
           </nav>
           {evaluationReports.length > 0 ? (
-            <table  className="deanevaluation-report-container">
+            <table className="deanevaluation-report-container">
               <thead>
                 <tr>
-                  <th>Evaluator</th>
-                  <th>Average Score</th>
+                  <th>Percentage Score</th>
+                  <th>Date</th>
                   <th>Comments</th>
                 </tr>
               </thead>
               <tbody>
                 {evaluationReports.map((report, index) => (
                   <tr key={index}>
-                    <td>{evaluatorNames[report.userId] || report.userId}</td>
-                    <td>{report.percentageScore.toFixed(2)}%</td>
-                    <td>{report.comment}</td>
+                    <td>
+                      {report.ratingScore?.percentageScore
+                        ? `${report.ratingScore.percentageScore}%`
+                        : "N/A"}
+                    </td>
+                    <td>
+                      {report.createdAt
+                        ? new Date(
+                            report.createdAt.seconds * 1000
+                          ).toLocaleDateString()
+                        : "No Date"}
+                    </td>
+                    <td>{report.comment || "No Comment"}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          
           ) : (
             <p>No evaluations submitted yet.</p>
           )}
@@ -173,8 +244,12 @@ const DeanDashboard = () => {
             </div>
             <h1>Dean Dashboard</h1>
             <div style={{ display: "flex", alignItems: "center" }}>
-              <p style={{ fontSize: "25px" }}><strong>{userName}</strong></p>
-              <button onClick={() => setShowEvaluationReport(true)}>Evaluation Report</button>
+              <p style={{ fontSize: "25px" }}>
+                <strong>{userName}</strong>
+              </p>
+              <button onClick={() => setShowEvaluationReport(true)}>
+                Evaluation Report
+              </button>
               <button onClick={handleSignOut}>Sign Out</button>
             </div>
           </nav>
@@ -193,10 +268,14 @@ const DeanDashboard = () => {
                 {facultyList.map((faculty) => (
                   <tr key={faculty.id}>
                     <td>{faculty.id}</td>
-                    <td>{faculty.firstName} {faculty.lastName}</td>
+                    <td>
+                      {faculty.firstName} {faculty.lastName}
+                    </td>
                     <td>
                       {evaluationsDone[faculty.id] ? (
-                        <span className="evaluation-done">Evaluation Done</span>
+                        <span className="evaluation-done">
+                          Evaluation Complete
+                        </span>
                       ) : (
                         <button
                           className="table-evaluate-btn"
@@ -205,6 +284,37 @@ const DeanDashboard = () => {
                           Evaluate
                         </button>
                       )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+
+          <section>
+            <h2>Evaluate Dean</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Dean Name</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {deanList.map((dean) => (
+                  <tr key={dean.id}>
+                    <td>{dean.id}</td>
+                    <td>
+                      {dean.firstName} {dean.lastName}
+                    </td>
+                    <td>
+                      <button
+                        className="table-evaluate-btn"
+                        onClick={() => handleEvaluateDean(dean.id)}
+                      >
+                        Evaluate
+                      </button>
                     </td>
                   </tr>
                 ))}
