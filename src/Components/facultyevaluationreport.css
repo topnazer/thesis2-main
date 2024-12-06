@@ -1,115 +1,239 @@
 /* Faculty Evaluation Report Container */
+.facevaluations-table th {
+  font-weight: bold; /* Makes headers bold */
+  font-size: 16px; /* Adjusts header font size */
+  font-family: Arial, sans-serif; /* Specifies font family */
+  background-color: #f0f0f0; /* Optional: Light background for headers */
+  padding: 10px; /* Adds padding for better spacing */
+  text-align: left; /* Aligns text to the left */
+} 
+
+.facevaluations-table th,
+.facevaluations-table td {
+  text-align: center; /* Center-aligns text in all columns by default */
+  vertical-align: middle; /* Vertically aligns the text in the center */
+  padding: 10px; /* Adds padding for better spacing */
+  font-family: Arial, sans-serif; /* Sets a consistent font family */
+}
+
 .facuser-page-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 20px;
-  width: 95%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+    width: 95%;
+  }
+  
+  .facuser-page-container h1 {
+    color: rgb(133, 5, 5);
+    margin-bottom: 20px;
+  }
+  
+  .facuser-button {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .facuser-page-right h2 {
+    font-size: 28px; /* Adjusts font size */
+    font-weight: bold; /* Makes the text bold */
+    font-family: 'Georgia', serif; /* Sets font family */
+    color: #000000; /* Sets text color */
+    margin-bottom: 20px; /* Adds spacing below the header */
+    text-align: center; /* Optional: Center aligns the header */
+  }
+  
+  .facuser-button button {
+    background-color: rgb(201, 185, 185);
+    padding: 10px 20px;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    font-weight: bold;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .facuser-button button:hover,
+  .facuser-button button:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  }
+  
+  .active-department {
+    outline: 3px solid black;
+  }
+  
+  /* Faculty List Styling */
+  .facuser-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    max-height: 90vh;
+    border-radius: 10px;
+    overflow-y: auto;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .facuser-card {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 14px; /* Sets font size for text inside cards */
+    font-family: 'Roboto', sans-serif; /* Sets font family */
+    color: #333; 
+    text-align: center;
+  }
+  
+  .facuser-item {
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    width: auto;
+  }
+
+  .facuser-item:hover {
+    
+    transform: translateY(-10px); /* Slight upward movement */
+    box-shadow: 6px 8px 10px rgba(0, 0, 0, 0.5) /* Add shadow on hover */
+  }
+  
+  .facuser-info {
+    margin-bottom: 8px;
+    font-size: 14px;
+    
+  }
+  
+  .facuser-info strong {
+    font-size: 20px;
+    color: rgb(50, 50, 50);
+  }
+  
+  .facuser-info p {
+    margin: 4px 0;
+    color: rgb(100, 100, 100);
+    font-size: 14px;
+  }
+  /* Scrollable Table Column */
+
+  .facmodal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7); /* Slightly darker background for better contrast */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000; /* Ensure this is higher than any other element */
+  }
+  
+  .facmodal-content {
+    background: #dacfcf;
+    padding: 20px;
+    border-radius: 10px;
+    width: 50%;
+    max-height: 80%;
+    overflow-y: auto;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    z-index: 10001; /* Higher than overlay */
+    position: relative;
+  }
+  
+
+.facmodal-details {
+  text-align: left; /* Aligns all text in the modal to the left */
+}
+.facmodal-details h3 {
+  text-align: left; /* Aligns all text in the modal to the left */
+  font-size: 28px; /* Adjusts font size */
+  font-weight: bold; /* Makes the text bold */
+  font-family: 'Georgia', serif; /* Sets font family */
+  color: #000000; /* Sets text color */
+  margin-bottom: 20px; /* Adds spacing below the header */
 }
 
-.facuser-page-container h1 {
-  color: rgb(133, 5, 5);
-  margin-bottom: 20px;
+.question-response {
+  margin-bottom: 15px;
+  line-height: 1.6; /* Adjust line height for better readability */
+  font-size: 20px;
 }
 
-.facuser-button {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 20px;
+.question-response p {
+  margin: 0; /* Removes default paragraph margin */
 }
 
-.facuser-button button {
-  background-color: rgb(201, 185, 185);
-  padding: 10px 20px;
-  color: black;
-  border-radius: 5px;
-  cursor: pointer;
-  border: none;
-  font-weight: bold;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.facuser-button button:hover,
-.facuser-button button:focus {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-}
-
-.active-department {
-  outline: 3px solid black;
-}
-
-/* Faculty List Styling */
-.facuser-list {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  max-height: 90vh;
-  border-radius: 10px;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.facuser-card {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 16px;
-  padding: 10px;
-  overflow-y: auto;
-}
-
-.facuser-item {
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  background-color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.facuser-info {
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.facuser-info strong {
-  font-size: 16px;
-  color: rgb(50, 50, 50);
-}
-
-.facuser-info p {
-  margin: 4px 0;
-  color: rgb(100, 100, 100);
-  font-size: 14px;
-}
-/* Scrollable Table Column */
 /* Scrollable Comments */
 .scrollablesapage {
-max-height: 65px; /* Limit the height to 100px */
-overflow-y: auto; /* Enable vertical scrolling */
-overflow-x: hidden; /* Disable horizontal scrolling */
-word-wrap: break-word; /* Break long words if needed */
-white-space: normal; /* Allow text wrapping */
-padding: 5px; /* Add padding for better readability */
-background-color: #f9f9f9; /* Optional: Light background for contrast */
-border: 1px solid #ddd; /* Optional: Add a border for clarity */
-box-sizing: border-box; /* Ensure padding doesn't affect width */
+  max-height: 65px; /* Limit the height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Disable horizontal scrolling */
+  word-wrap: break-word; /* Break long words if needed */
+  white-space: normal; /* Allow text wrapping */
+  padding: 5px; /* Add padding for better readability */
+  background-color: #f9f9f9; /* Optional: Light background for contrast */
+  border: 1px solid #ddd; /* Optional: Add a border for clarity */
+  box-sizing: border-box; /* Ensure padding doesn't affect width */
 }
 
 .scrollablesapage::-webkit-scrollbar {
-width: 8px; /* Set scrollbar width */
+  width: 8px; /* Set scrollbar width */
 }
 
 .scrollablesapage::-webkit-scrollbar-thumb {
-background-color: #888; /* Set scrollbar color */
-border-radius: 4px; /* Rounded scrollbar corners */
+  background-color: #888; /* Set scrollbar color */
+  border-radius: 4px; /* Rounded scrollbar corners */
 }
 
 .scrollablesapage::-webkit-scrollbar-thumb:hover {
-background-color: #555; /* Change scrollbar color on hover */
+  background-color: #555; /* Change scrollbar color on hover */
+}
+
+.show-more-btn {
+  background-color:  #dbb8b8; /* Green background */
+  color: white; /* White text color */
+  border: none; /* Remove border */
+  padding: 8px 15px; /* Add padding */
+  border-radius: 20px;
+  font-size: 14px; /* Set font size */
+  font-weight: bold; /* Make text bold */
+  cursor: pointer; /* Add pointer cursor */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+}
+
+.show-more-btn:hover {
+  background-color: #b17878; /* Darker green on hover */
+  transform: translateY(-2px); /* Slight upward movement */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Add shadow on hover */
+}
+
+.facmodal-close-btn {
+  background-color: #dbb8b8; /* Red background */
+  color: white; /* White text color */
+  border: none; /* Remove border */
+  padding: 8px 15px; /* Add padding */
+  border-radius: 0px 20px 0px 20px;
+  font-size: 14px; /* Set font size */
+  font-weight: bold; /* Make text bold */
+  cursor: pointer; /* Add pointer cursor */
+  float: right; /* Position to the top-right */
+  transition: background-color 0.3s ease; /* Smooth color transition */
+  color:black;
+}
+
+.facmodal-close-btn:hover {
+  background-color: #b17878; /* Darker red on hover */
 }

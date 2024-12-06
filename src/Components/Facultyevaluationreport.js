@@ -16,8 +16,66 @@ const Facultyevaluationreport = () => {
   const [evaluations, setEvaluations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEvaluation, setSelectedEvaluation] = useState(null);
   const db = getFirestore();
 
+  const Modal = ({ isOpen, onClose, evaluation }) => {
+    if (!isOpen) return null;
+  
+    // Debugging for detailed questions structure
+    console.log("Evaluation Data:", evaluation);
+  
+    const groupedQuestions = evaluation?.categories?.map((category) => {
+      const filteredQuestions =
+        category.questions?.map((question) => ({
+          text: question.text || "No Question Text",
+          response:
+            Array.isArray(question.response)
+              ? question.response.join(", ") // For multiple responses
+              : question.response || "No Response", // For single responses
+          type: question.type || "Unknown Type",
+        })) || [];
+  
+      return {
+        categoryName: category?.categoryName || "Unnamed Category",
+        questions: filteredQuestions,
+      };
+    }) || [];
+  
+    return (
+      <div className="facmodal-overlay">
+        <div className="facmodal-content">
+          <button className="facmodal-close-btn" onClick={onClose}>
+            Close
+          </button>
+          <h2>Questions and Responses</h2>
+          {groupedQuestions.length > 0 ? (
+            <div className="facmodal-details">
+              {groupedQuestions.map((group, groupIndex) => (
+                <div key={groupIndex}>
+                  <h3>{group.categoryName}</h3>
+                  {group.questions.map((question, questionIndex) => (
+                    <div key={questionIndex} className="question-response">
+                      <p>
+                        <strong>Question {questionIndex + 1}:</strong> {question.text}
+                      </p>
+                      <p>
+                        <strong>Response:</strong> {question.response}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No questions or responses available.</p>
+          )}
+        </div>
+      </div>
+    );
+  };
+  
   // Fetch faculty based on department
   useEffect(() => {
     const fetchFacultyByDepartment = async () => {
@@ -51,78 +109,88 @@ const Facultyevaluationreport = () => {
 
   // Fetch evaluations for a specific faculty
   const fetchEvaluations = async (facultyId) => {
-    setLoading(true);
-    setEvaluations([]);
-    setError(null);
-    try {
-      const evaluationsRef = collection(db, `evaluations/${facultyId}/students`);
-      const evaluationsSnapshot = await getDocs(evaluationsRef);
+  setLoading(true);
+  setEvaluations([]);
+  setError(null);
+  try {
+    const evaluationsRef = collection(db, `evaluations/${facultyId}/students`);
+    const evaluationsSnapshot = await getDocs(evaluationsRef);
 
-      if (evaluationsSnapshot.empty) {
-        setEvaluations([]);
-        return;
+    if (evaluationsSnapshot.empty) {
+      setEvaluations([]);
+      return;
+    }
+
+    // Map evaluation data
+    const evaluationsList = evaluationsSnapshot.docs.map((doc) => {
+      const data = doc.data();
+
+      // Extract createdAt date if available
+      const date =
+        data.createdAt && data.createdAt.toDate
+          ? data.createdAt.toDate().toLocaleDateString()
+          : "Unknown Date";
+
+      const percentageScore =
+        data.ratingScore && data.ratingScore.percentageScore !== undefined
+          ? `${data.ratingScore.percentageScore}%`
+          : "N/A";
+
+      // Collect all questions grouped by category
+      let categories = [];
+
+      if (data.detailedQuestions && Array.isArray(data.detailedQuestions)) {
+        categories = data.detailedQuestions.map((category) => {
+          const { categoryName, questions } = category;
+
+          const questionsList = questions.map((question) => ({
+            text: question.text || "No Question",
+            response:
+              Array.isArray(question.response) && question.response.length > 0
+                ? question.response.join(", ")
+                : question.response || "No Response",
+          }));
+
+          return {
+            categoryName: categoryName || "Unknown Category",
+            questions: questionsList,
+          };
+        });
       }
 
-      // Map evaluation data
-      const evaluationsList = evaluationsSnapshot.docs.map((doc) => {
-        const data = doc.data();
+      return {
+        studentId: doc.id,
+        studentName: data.studentName || "Unknown Student",
+        subjectName: data.subjectName || "Unknown Subject",
+        comment: data.comment || "No Comment",
+        percentageScore,
+        date,
+        categories,
+      };
+    });
 
-        // Extract createdAt date if available
-        const date =
-          data.createdAt && data.createdAt.toDate
-            ? data.createdAt.toDate().toLocaleDateString()
-            : "Unknown Date";
-
-        const percentageScore =
-          data.ratingScore && data.ratingScore.percentageScore !== undefined
-            ? `${data.ratingScore.percentageScore}%`
-            : "N/A";
-
-        // Collect all questions and responses
-        let questionTextArray = [];
-        let responseArray = [];
-
-        if (data.detailedQuestions && Array.isArray(data.detailedQuestions)) {
-          data.detailedQuestions.forEach((category) => {
-            const { questions } = category;
-
-            if (Array.isArray(questions)) {
-              questions.forEach((question) => {
-                questionTextArray.push(question.text || "No Question");
-                responseArray.push(
-                  Array.isArray(question.response) && question.response.length > 0
-                    ? question.response.join(", ")
-                    : question.response || "No Response"
-                );
-              });
-            }
-          });
-        }
-
-        return {
-          studentId: doc.id,
-          studentName: data.studentName || "Unknown Student",
-          subjectName: data.subjectName || "Unknown Subject",
-          comment: data.comment || "No Comment",
-          percentageScore,
-          date,
-          questionTextArray,
-          responseArray,
-        };
-      });
-
-      setEvaluations(evaluationsList);
-    } catch (error) {
-      console.error("Error fetching evaluations:", error);
-      setError("Failed to load evaluations data.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    setEvaluations(evaluationsList);
+  } catch (error) {
+    console.error("Error fetching evaluations:", error);
+    setError("Failed to load evaluations data.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleFacultyClick = (facultyMember) => {
     setSelectedFaculty(facultyMember);
     fetchEvaluations(facultyMember.id);
+  };
+
+  const openModal = (evaluation) => {
+    setSelectedEvaluation(evaluation);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedEvaluation(null);
   };
 
   return (
@@ -172,7 +240,7 @@ const Facultyevaluationreport = () => {
             {loading ? (
               <p>Loading evaluations...</p>
             ) : evaluations.length > 0 ? (
-              <table className="evaluations-table">
+              <table className="facevaluations-table">
                 <thead>
                   <tr>
                     <th>Student Name</th>
@@ -180,14 +248,7 @@ const Facultyevaluationreport = () => {
                     <th>Date</th>
                     <th>Comment</th>
                     <th>Percentage Score</th>
-                    {/* Dynamically generate columns for questions */}
-                    {evaluations[0].questionTextArray.map((_, index) => (
-                      <th key={`question-${index}`}>Question {index + 1}</th>
-                    ))}
-                    {/* Dynamically generate columns for responses */}
-                    {evaluations[0].responseArray.map((_, index) => (
-                      <th key={`response-${index}`}>Response {index + 1}</th>
-                    ))}
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -200,14 +261,11 @@ const Facultyevaluationreport = () => {
                         <div className="scrollablesapage">{evaluation.comment}</div>
                       </td>
                       <td>{evaluation.percentageScore}</td>
-                      {/* Render questions dynamically */}
-                      {evaluation.questionTextArray.map((question, qIndex) => (
-                        <td key={`question-row-${qIndex}`}>{question}</td>
-                      ))}
-                      {/* Render responses dynamically */}
-                      {evaluation.responseArray.map((response, rIndex) => (
-                        <td key={`response-row-${rIndex}`}>{response}</td>
-                      ))}
+                      <td>
+                      <button className="show-more-btn" onClick={() => openModal(evaluation)}>
+  Show More
+</button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -217,6 +275,11 @@ const Facultyevaluationreport = () => {
             )}
           </>
         )}
+        <Modal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          evaluation={selectedEvaluation}
+        />
       </div>
     </div>
   );
