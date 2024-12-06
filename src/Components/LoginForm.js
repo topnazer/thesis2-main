@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { auth } from "../firebase";
-import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "firebase/auth";
+import { getFirestore, doc, getDoc, collection, addDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import './Auth.css';
 
 const LoginForm = ({ toggleSignUp }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
+  const [showResetModal, setShowResetModal] = useState(false);
   const navigate = useNavigate();
   const db = getFirestore();
 
@@ -89,6 +91,31 @@ const LoginForm = ({ toggleSignUp }) => {
     }
   };
 
+  const handlePasswordReset = async () => {
+    if (!resetEmail) {
+      alert("Please enter your email address.");
+      return;
+    }
+  
+    try {
+      // Add a new password reset request to Firestore, without userId
+      await addDoc(collection(db, "passwordResets"), {
+        email: resetEmail,
+        status: "Pending",  // Request is initially pending
+        createdAt: new Date(),
+      });
+  
+      alert("Password reset request sent! An admin will review your request.");
+      setShowResetModal(false); // Close modal
+    } catch (error) {
+      console.error("Error sending password reset request:", error);
+      alert("Failed to send password reset request: " + error.message);
+    }
+  };
+  
+  
+  
+
   return (
     <div className="auth-page">   
       <div className="auth-container">
@@ -113,7 +140,7 @@ const LoginForm = ({ toggleSignUp }) => {
               <label>
                 <input type="checkbox" /> Remember me
               </label>
-              <a href="/forgot-password">Forgot password?</a>
+              <a href="#" onClick={() => setShowResetModal(true)}>Forgot password?</a>
             </div>
             <button type="submit" className="login-button">Login</button>
           </form>
@@ -132,6 +159,22 @@ const LoginForm = ({ toggleSignUp }) => {
             <h1>ACADEMIC GUIDANCE EVALUATION SYSTEM</h1>
           </div>
         </div>
+        {showResetModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Reset Password</h2>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              required
+            />
+            <button onClick={handlePasswordReset}>Send Reset Request</button>
+            <button onClick={() => setShowResetModal(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );

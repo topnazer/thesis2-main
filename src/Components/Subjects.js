@@ -261,7 +261,10 @@ const Subjects = () => {
       const updatedSubjectSnap = await getDoc(subjectRef);
       if (updatedSubjectSnap.exists()) {
         const updatedSubject = { id: updatedSubjectSnap.id, ...updatedSubjectSnap.data() };
-        setViewedSubject(updatedSubject);
+        setViewedSubject(updatedSubject); // Update the currently viewed subject
+  
+        // Re-fetch all subjects to ensure the updated data is reflected
+        await fetchSubjects(currentUser); // Replace `currentUser` with the appropriate user state/variable
       }
   
       alert("Subject updated successfully!");
@@ -271,6 +274,7 @@ const Subjects = () => {
       alert("An error occurred while updating the subject. Please try again.");
     }
   };
+  
 
   const resetEditForm = () => {
     setEditSubjectName("");

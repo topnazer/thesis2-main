@@ -66,7 +66,6 @@ const StudentDashboard = () => {
   
             console.log("Subject Data:", subjectData); // Log subject data
   
-            // Fetch faculty details
             if (subjectData.facultyId) {
               const facultyDoc = await getDoc(firestoreDoc(db, "users", subjectData.facultyId));
               subjectData.faculty = facultyDoc.exists() ? facultyDoc.data() : null;
@@ -74,7 +73,6 @@ const StudentDashboard = () => {
               subjectData.faculty = null;
             }
   
-            // Fetch evaluation expiration data
             const evaluationFormRef = firestoreDoc(db, "evaluationForms", "subject");
             const evaluationFormDoc = await getDoc(evaluationFormRef);
             if (evaluationFormDoc.exists()) {
@@ -90,7 +88,6 @@ const StudentDashboard = () => {
   
             console.log("After Expiration Check:", subjectData); // Log after expiration check
   
-            // Check if the evaluation is already done
             const evaluationRef = firestoreDoc(
               db,
               `students/${user.uid}/subjects/${subjectData.id}/sections/${subjectData.sectionId}/completed_evaluations`,
@@ -105,16 +102,16 @@ const StudentDashboard = () => {
           })
         );
   
-        console.log("Fetched Subjects:", fetchedSubjects); // Log fetched subjects
-        setSubjects(fetchedSubjects.filter((subject) => subject !== null));
-        setLoading(false);
+        console.log("Fetched Subjects:", fetchedSubjects);
+        setSubjects(fetchedSubjects);
+    setLoading(false);
       });
     } catch (error) {
-      console.error("Error fetching subjects or faculty details:", error);
-      setLoading(false);
+      console.error("Error fetching subjects:", error);
+   setLoading(false);
     }
   };
-  
+   
 
   const handleSignOut = async () => {
     try {

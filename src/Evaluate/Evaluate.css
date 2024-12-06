@@ -30,7 +30,7 @@
 .evaluate-dean-page table thead th {
   font-size: 15px;
   font-weight: bold;
-  background-color: #b8b9bf;
+  background-color: rgb(69, 10, 10);
   color: #000000;
   padding: 18px;
   text-align: center;
@@ -111,7 +111,7 @@
 .evaluate-faculty-page table thead th {
   font-size: 20px;
   font-weight: bold;
-  background-color: #800020;
+  background-color: rgb(69, 10, 10);
   color: white;
   padding: 18px;
   text-align: center;
@@ -198,7 +198,7 @@
   0px 4px 18px rgba(47, 22, 22, 0.1),
   0px 4px 28px rgba(43, 12, 12, 0.05),
   0px 4px 38px rgba(46, 8, 8, 0.02);
-  background-color: #800020;
+  background-color: rgb(69, 10, 10);
   height: 110px;
 }
 
@@ -257,7 +257,7 @@ margin-left: 20px;
 .evaluate-subject-page table thead th {
   font-size: 20px;
   font-weight: bold;
-  background-color: #800020;; /* Darker gray for main header */
+  background-color: rgb(69, 10, 10);
   color: #ffffff;
   padding: 18px;
   text-align: center;
@@ -319,7 +319,7 @@ margin-left: 20px;
   width: 50%;
   padding: 10px;
   border-radius: 10px;
-  background-color: #800020;
+  background-color: rgb(69, 10, 10);
   box-shadow: 5px 12px 10px rgb(44 18 18 / 15%), 5px 12px 20px rgb(47 22 22 / 10%), 5px 12px 30px rgb(43 12 12 / 5%), 5px 12px 40px rgb(46 8 8 / 2%);
   border: 2px solid #ddd;
   display: flex;
@@ -332,7 +332,8 @@ margin-left: 20px;
   display: block;
   color: #ffffff;
   padding: 20px;
-  font-size: 20px;
+  font-size: 15px;
+  overflow: hidden;
 }
 
 .form-comments-section textarea {
