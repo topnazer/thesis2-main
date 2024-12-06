@@ -75,7 +75,6 @@ const Facultyevaluationreport = () => {
       </div>
     );
   };
-  
   // Fetch faculty based on department
   useEffect(() => {
     const fetchFacultyByDepartment = async () => {

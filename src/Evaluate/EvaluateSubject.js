@@ -140,6 +140,7 @@ const EvaluateSubject = () => {
     return { totalScore, maxScore, percentageScore };
 };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -177,7 +178,6 @@ const EvaluateSubject = () => {
 
     // Calculate scores and option frequencies
     const { totalScore, maxScore, percentageScore } = calculateRatingScore();
-
     // Build detailed question-response data
     const detailedQuestions = categories.map((category, categoryIndex) => ({
         categoryName: category.name,
@@ -194,23 +194,23 @@ const EvaluateSubject = () => {
     }));
 
     try {
-        // Save individual evaluation
-        const evaluationRef = doc(db, `evaluations/${subject.facultyId}/students`, user.uid);
-
-        await setDoc(evaluationRef, {
-            userId: user.uid,
-            sectionId,
-            subjectId,
-            subjectName, // Include subject name
-            facultyId: subject.facultyId, // Use facultyId from subject
-            studentName, // Include student name
-            scores: responses, // Include raw scores
-            ratingScore: { percentageScore }, // Include rating score
-            comment, // Include comments
-            createdAt: new Date(),
-            detailedQuestions
-        });
-
+      // Generate a unique ID for the evaluation to prevent overwriting
+      const evaluationId = `${user.uid}_${new Date().getTime()}`;
+      const evaluationRef = doc(db, `evaluations/${subject.facultyId}/students`, evaluationId);
+  
+      await setDoc(evaluationRef, {
+          userId: user.uid,
+          sectionId,
+          subjectId,
+          subjectName, // Include subject name
+          facultyId: subject.facultyId, // Use facultyId from subject
+          studentName, // Include student name
+          ratingScore: { percentageScore }, // Include rating score
+          comment, // Include comments
+          createdAt: new Date(),
+          detailedQuestions
+      });
+  
         // Update or create subject evaluation score with facultyId, studentName, and subjectName
         const subjectEvaluationRef = doc(db, "subjectEvaluations", subjectId);
         const subjectEvaluationDoc = await getDoc(subjectEvaluationRef);
@@ -245,7 +245,6 @@ const EvaluateSubject = () => {
                 subjectName, // Include subject name
                 facultyId: subject.facultyId, // Use facultyId from subject
                 createdAt: new Date(), // Use createdAt for new document
-                detailedQuestions,
             });
         }
 
