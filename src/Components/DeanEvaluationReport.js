@@ -78,6 +78,8 @@ const DeanEvaluationReport = () => {
     const fetchDeansByDepartment = async () => {
       setLoading(true);
       setError(null);
+      setEvaluations([]); // Clear evaluations when department changes
+    setSelectedDean(null); // Clear the selected dean when department changes
       try {
         let deanQuery;
         if (selectedDepartment === "All") {
@@ -118,31 +120,33 @@ const DeanEvaluationReport = () => {
         `deanEvaluations/${deanId}/completed_evaluations`
       );
       const evaluationsSnapshot = await getDocs(evaluationsRef);
-
+  
       if (evaluationsSnapshot.empty) {
         setEvaluations([]);
         return;
       }
-
+  
       const evaluationsList = evaluationsSnapshot.docs.map((doc) => {
         const data = doc.data();
-
+  
+        const evaluator = data.Evaluator || "Unknown Evaluator";
+  
         const date =
           data.createdAt && data.createdAt.toDate
             ? data.createdAt.toDate().toLocaleDateString()
             : "Unknown Date";
-
+  
         const percentageScore =
           data.ratingScore && data.ratingScore.percentageScore !== undefined
             ? `${data.ratingScore.percentageScore}%`
             : "N/A";
-
+  
         let categories = [];
-
+  
         if (data.detailedQuestions && Array.isArray(data.detailedQuestions)) {
           categories = data.detailedQuestions.map((category) => {
             const { categoryName, questions } = category;
-
+  
             const questionsList = questions.map((question) => ({
               text: question.text || "No Question",
               response:
@@ -150,15 +154,16 @@ const DeanEvaluationReport = () => {
                   ? question.response.join(", ")
                   : question.response || "No Response",
             }));
-
+  
             return {
               categoryName: categoryName || "Unknown Category",
               questions: questionsList,
             };
           });
         }
-
+  
         return {
+          evaluator, // Include Evaluator
           deanName,
           comment: data.comment || "No Comment",
           percentageScore,
@@ -166,7 +171,7 @@ const DeanEvaluationReport = () => {
           categories,
         };
       });
-
+  
       setEvaluations(evaluationsList);
     } catch (error) {
       console.error("Error fetching evaluations:", error);
@@ -175,6 +180,7 @@ const DeanEvaluationReport = () => {
       setLoading(false);
     }
   };
+  
 
   const handleDeanClick = (deanMember) => {
     setSelectedDean(deanMember);
@@ -241,7 +247,7 @@ const DeanEvaluationReport = () => {
               <table className="facevaluations-table">
                 <thead>
                   <tr>
-                    <th>Dean Name</th>
+                    <th>Evaluator</th>
                     <th>Date</th>
                     <th>Comment</th>
                     <th>Percentage Score</th>
@@ -251,9 +257,9 @@ const DeanEvaluationReport = () => {
                 <tbody>
                   {evaluations.map((evaluation, index) => (
                     <tr key={index}>
-                      <td>{evaluation.deanName}</td>
+                      <td>{evaluation.evaluator}</td>
                       <td>{evaluation.date}</td>
-                      <td>{evaluation.comment}</td>
+                      <td> <div className="scrollablesapage">{evaluation.comment}</div></td>
                       <td>{evaluation.percentageScore}</td>
                       <td>
                         <button className="show-more-btn" onClick={() => openModal(evaluation)}>

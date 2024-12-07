@@ -118,31 +118,31 @@ const PeerEvaluationReport = () => {
         `facultyEvaluations/${facultyId}/completed_evaluations`
       );
       const evaluationsSnapshot = await getDocs(evaluationsRef);
-
+  
       if (evaluationsSnapshot.empty) {
         setEvaluations([]);
         return;
       }
-
+  
       const evaluationsList = evaluationsSnapshot.docs.map((doc) => {
         const data = doc.data();
-
+  
         const date =
           data.createdAt && data.createdAt.toDate
             ? data.createdAt.toDate().toLocaleDateString()
             : "Unknown Date";
-
+  
         const percentageScore =
           data.ratingScore && data.ratingScore.percentageScore !== undefined
             ? `${data.ratingScore.percentageScore}%`
             : "N/A";
-
+  
         let categories = [];
-
+  
         if (data.detailedQuestions && Array.isArray(data.detailedQuestions)) {
           categories = data.detailedQuestions.map((category) => {
             const { categoryName, questions } = category;
-
+  
             const questionsList = questions.map((question) => ({
               text: question.text || "No Question",
               response:
@@ -150,23 +150,23 @@ const PeerEvaluationReport = () => {
                   ? question.response.join(", ")
                   : question.response || "No Response",
             }));
-
+  
             return {
               categoryName: categoryName || "Unknown Category",
               questions: questionsList,
             };
           });
         }
-
+  
         return {
-        facultyName,
+          facultyName: data.facultyName || "Unknown Faculty", // Extract facultyName
           comment: data.comment || "No Comment",
           percentageScore,
           date,
           categories,
         };
       });
-
+  
       setEvaluations(evaluationsList);
     } catch (error) {
       console.error("Error fetching evaluations:", error);
@@ -175,6 +175,7 @@ const PeerEvaluationReport = () => {
       setLoading(false);
     }
   };
+  
 
   const handleFacultyClick = (facultyMember) => {
     setSelectedFaculty(facultyMember);
@@ -239,29 +240,34 @@ const PeerEvaluationReport = () => {
               <p>Loading evaluations...</p>
             ) : evaluations.length > 0 ? (
               <table className="facevaluations-table">
-             <thead>
-  <tr>
-    <th>Faculty Name</th>
-    <th>Date</th>
-    <th>Comment</th>
-    <th>Percentage Score</th>
-    <th>Actions</th>
-  </tr>
-</thead>
-<tbody>
-  {evaluations.map((evaluation, index) => (
-    <tr key={index}>
-      <td>{evaluation.facultyName}</td> {/* Use facultyName here */}
-      <td>{evaluation.date}</td>
-      <td>{evaluation.comment}</td>
-      <td>{evaluation.percentageScore}</td>
-      <td>
-        <button className="show-more-btn" onClick={() => openModal(evaluation)}>Show More</button>
-      </td>
-    </tr>
-  ))}
-</tbody>
-              </table>
+              <thead>
+                <tr>
+                  <th>Faculty Name</th> {/* Column for Faculty Name */}
+                  <th>Date</th>
+                  <th>Comment</th>
+                  <th>Percentage Score</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {evaluations.map((evaluation, index) => (
+                  <tr key={index}>
+                    <td>{evaluation.facultyName}</td> {/* Display Faculty Name */}
+                    <td>{evaluation.date}</td>
+                    <td> <div className="scrollablesapage">{evaluation.comment}</div></td>
+                    <td>{evaluation.percentageScore}</td>
+                    <td>
+                      <button
+                        className="show-more-btn"
+                        onClick={() => openModal(evaluation)}
+                      >
+                        Show More
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
             ) : (
               <p>No evaluations found for this faculty.</p>
             )}
