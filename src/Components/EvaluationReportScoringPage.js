@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getFirestore, doc, getDocs, setDoc, collection, query, where, onSnapshot, getDoc } from 'firebase/firestore';
+import {
+  getFirestore,
+  doc,
+  getDocs,
+  setDoc,
+  collection,
+  query,
+  where,
+  onSnapshot,
+  getDoc,
+} from 'firebase/firestore';
 import './evaluationreportscoringpage.css';
 
 const EvaluationReportScoringPage = () => {
@@ -9,7 +19,7 @@ const EvaluationReportScoringPage = () => {
   const [loading, setLoading] = useState(true);
   const [faculties, setFaculties] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const facultiesPerPage = 5; 
+  const facultiesPerPage = 5;
   const db = getFirestore();
 
   useEffect(() => {
@@ -49,8 +59,11 @@ const EvaluationReportScoringPage = () => {
   };
 
   const fetchFaculties = useCallback(() => {
-    const facultyQuery = query(collection(db, 'users'), where('role', '==', 'Faculty'));
-  
+    const facultyQuery = query(
+      collection(db, 'users'),
+      where('role', '==', 'Faculty')
+    );
+
     const unsubscribe = onSnapshot(
       facultyQuery,
       async (snapshot) => {
@@ -58,18 +71,20 @@ const EvaluationReportScoringPage = () => {
           snapshot.docs.map(async (facultyDoc) => {
             const facultyData = facultyDoc.data();
             const facultyId = facultyDoc.id;
-  
+
             // Fetch subject evaluations for this faculty
             const subjectEvaluationsQuery = query(
               collection(db, 'subjectEvaluations'),
               where('facultyId', '==', facultyId)
             );
-            const subjectEvaluationsSnapshot = await getDocs(subjectEvaluationsQuery);
-  
+            const subjectEvaluationsSnapshot = await getDocs(
+              subjectEvaluationsQuery
+            );
+
             // Calculate subject scores
             let totalSubjectScore = 0;
             let subjectCount = 0;
-  
+
             if (!subjectEvaluationsSnapshot.empty) {
               subjectEvaluationsSnapshot.forEach((doc) => {
                 const evaluationData = doc.data();
@@ -77,38 +92,60 @@ const EvaluationReportScoringPage = () => {
                 subjectCount += 1;
               });
             }
-  
-            const subjectScore = subjectCount > 0 ? (totalSubjectScore / subjectCount).toFixed(2) : 'Not scored yet';
-  
-            // Fetch faculty evaluation score
-            const facultyEvaluationDoc = await getDoc(doc(db, 'facultyEvaluations', facultyId));
-            const facultyEvaluationData = facultyEvaluationDoc.exists() ? facultyEvaluationDoc.data() : null;
-            const facultyScore = facultyEvaluationData ? facultyEvaluationData.averageScore : 'Not scored yet';
-  
-            // Calculate the final weighted score (overall rating)
-            let finalScore = 'Not scored yet';
-            let remarks = 'Not scored yet';
-            if (facultyScore !== 'Not scored yet' && subjectScore !== 'Not scored yet') {
-              finalScore = (
-                subjectScore * (subjectWeight / 100) +
-                facultyScore * (facultyWeight / 100)
-              ).toFixed(2);
 
-              // Determine remarks based on final score
-              remarks = finalScore >= 80 ? 'Above Average' : 'Below Average';
-            }
-  
+            const subjectScore =
+              subjectCount > 0
+                ? totalSubjectScore / subjectCount
+                : 'Not scored yet';
+
+            // Fetch faculty evaluation score
+            const facultyEvaluationDoc = await getDoc(
+              doc(db, 'facultyEvaluations', facultyId)
+            );
+            const facultyEvaluationData = facultyEvaluationDoc.exists()
+              ? facultyEvaluationDoc.data()
+              : null;
+            const facultyScore = facultyEvaluationData
+              ? facultyEvaluationData.averageScore
+              : 'Not scored yet';
+
+
+    const weightedSubjectScore =
+    typeof subjectScore === 'number'
+      ? parseFloat(((subjectScore * subjectWeight) / 100).toFixed(2)) // Only apply weights without modifying subjectScore
+      : 'Not scored yet';
+
+            const weightedFacultyScore =
+              typeof facultyScore === 'number'
+                ? (facultyScore * facultyWeight) / 100
+                : 'Not scored yet';
+
+            // Calculate the final score as the sum of weighted scores
+            const finalScore =
+              typeof weightedSubjectScore === 'number' &&
+              typeof weightedFacultyScore === 'number'
+                ? weightedSubjectScore + weightedFacultyScore
+                : 'Not scored yet';
+
+            // Determine remarks based on the final score
+            const remarks =
+              typeof finalScore === 'number'
+                ? finalScore >= 80
+                  ? 'Above Average'
+                  : 'Below Average'
+                : 'Not scored yet';
+
             return {
               id: facultyId,
               ...facultyData,
-              facultyScore,
-              subjectScore,
+              facultyScore: weightedFacultyScore,
+              subjectScore: weightedSubjectScore,
               finalScore,
               remarks,
             };
           })
         );
-  
+
         setFaculties(facultyList);
         setLoading(false);
       },
@@ -117,10 +154,10 @@ const EvaluationReportScoringPage = () => {
         setLoading(false);
       }
     );
-  
+
     return unsubscribe;
   }, [db, subjectWeight, facultyWeight]);
-  
+
   useEffect(() => {
     fetchFaculties();
   }, [fetchFaculties]);
@@ -183,7 +220,9 @@ const EvaluationReportScoringPage = () => {
                 />
               </div>
               <button type="submit">Save Weights</button>
-              <button type="button" onClick={() => setShowModal(false)}>Cancel</button>
+              <button type="button" onClick={() => setShowModal(false)}>
+                Cancel
+              </button>
             </form>
           </div>
         </div>
@@ -224,7 +263,7 @@ const EvaluationReportScoringPage = () => {
                       </td>
                       <td>
                         {typeof faculty.finalScore === 'number'
-                          ? faculty.finalScore
+                          ? faculty.finalScore.toFixed(2)
                           : faculty.finalScore}
                       </td>
                       <td>{faculty.remarks}</td>
@@ -236,9 +275,7 @@ const EvaluationReportScoringPage = () => {
                 <button onClick={handlePreviousPage} disabled={currentPage === 1}>
                   Previous
                 </button>
-                <span>
-                  Page {currentPage}
-                </span>
+                <span>Page {currentPage}</span>
                 <button
                   onClick={handleNextPage}
                   disabled={currentPage * facultiesPerPage >= faculties.length}

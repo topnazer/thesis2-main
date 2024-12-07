@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, setDoc, collection } from 'firebase/firestore';
 import { auth } from '../firebase';
 import './Evaluate.css';
 
@@ -250,37 +250,41 @@ const EvaluateSubject = () => {
 
         // Update faculty evaluation if applicable
         if (subject.facultyId) {
-            const facultyEvaluationRef = doc(db, "facultyEvaluations", subject.facultyId, "subjects", subjectId);
-            const facultyEvaluationDoc = await getDoc(facultyEvaluationRef);
+          const subjectEvaluationRef = doc(collection(db, "subjectDone", subjectId, "completed_evaluations"), user.uid);
+          const subjectEvaluationDoc = await getDoc(subjectEvaluationRef);
 
-            let facultyNewAverageScore;
+          let newAverageScore;
+          let completedEvaluations;
 
-            if (facultyEvaluationDoc.exists()) {
-                const existingFacultyAverageScore = facultyEvaluationDoc.data().averageScore || 0;
-                const facultyCompletedEvaluations =
-                    (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
-                facultyNewAverageScore =
-                    ((existingFacultyAverageScore * (facultyCompletedEvaluations - 1)) + percentageScore) /
-                    facultyCompletedEvaluations;
+          if (subjectEvaluationDoc.exists()) {
+            const existingAverageScore = subjectEvaluationDoc.data().averageScore || 0;
+            completedEvaluations = (subjectEvaluationDoc.data().completedEvaluations || 0) + 1;
+            newAverageScore =
+                ((existingAverageScore * (completedEvaluations - 1)) + percentageScore) /
+                completedEvaluations;
 
-                await setDoc(
-                    facultyEvaluationRef,
-                    {
-                        averageScore: facultyNewAverageScore,
-                        completedEvaluations: facultyCompletedEvaluations,
-                        updatedAt: new Date(), // Use updatedAt for tracking changes
-                    },
-                    { merge: true }
-                );
-            } else {
-                facultyNewAverageScore = percentageScore;
+            await setDoc(
+                subjectEvaluationRef,
+                {
+                    averageScore: newAverageScore,
+                    completedEvaluations,
+                    subjectName, // Include subject name
+                    facultyId: subject.facultyId, // Use facultyId from subject
+                },
+                { merge: true }
+            );
+        }  else {
+          newAverageScore = percentageScore;
+          completedEvaluations = 1;
 
-                await setDoc(facultyEvaluationRef, {
-                    averageScore: facultyNewAverageScore,
-                    completedEvaluations: 1,
-                    createdAt: new Date(), // Use createdAt for new document
-                });
-            }
+          await setDoc(subjectEvaluationRef, {
+              averageScore: newAverageScore,
+              completedEvaluations,
+              subjectName, // Include subject name
+              facultyId: subject.facultyId, // Use facultyId from subject
+              createdAt: new Date(), // Use createdAt for new document
+          });
+      }
         }
 
         alert(
@@ -315,11 +319,11 @@ const renderQuestionsForCurrentCategory = () => {
           <th>{name}: Question</th>
           {type === "Rating" && (
             <>
-              <th>1</th>
-              <th>2</th>
-              <th>3</th>
-              <th>4</th>
-              <th>5</th>
+              <th>Strongly disagree</th>
+              <th>Disagree</th>
+              <th>Neutral</th>
+              <th>Agree</th>
+              <th>Strongly agree</th>
             </>
           )}
           {(type === "Multiple Choice" || type === "Checkbox") && options.map((option, index) => (
@@ -396,7 +400,7 @@ const renderQuestionsForCurrentCategory = () => {
         </div>
       </div>
       <div className='raterlegend'>
-      <h3>Rating:1 - Poor, 2 - Fair, 3 - Satisfactory, 4 - Good, 5 - Excellent</h3>
+      <h3>Rating Legend: 1 = Strongly Disagree, 5 = Strongly Agree</h3>
       </div>
 
       <div className="form-container">

@@ -89,8 +89,7 @@ const StudentDashboard = () => {
             console.log("After Expiration Check:", subjectData); // Log after expiration check
   
             const evaluationRef = firestoreDoc(
-              db,
-              `students/${user.uid}/subjects/${subjectData.id}/sections/${subjectData.sectionId}/completed_evaluations`,
+              collection(db, "subjectDone", subjectData.id, "completed_evaluations"),
               user.uid
             );
             const evaluationDoc = await getDoc(evaluationRef);
@@ -195,16 +194,19 @@ const StudentDashboard = () => {
                   <td>{subject.name}</td>
                   <td>{subject.faculty ? `${subject.faculty.firstName} ${subject.faculty.lastName}` : "No faculty assigned"}</td>
                   <td>
-                    {subject.expired ? (
-                      <span className="evaluation-expired">Evaluation Expired</span>
-                    ) : subject.evaluated ? (
-                      <span className="evaluation-done">Evaluation Done</span>
-                    ) : (
-                      <button className="table-evaluate-btn" onClick={() => handleEvaluateSubject(subject.id, subject.sectionId)}>
-                        Evaluate
-                      </button>
-                    )}
-                  </td>
+  {subject.evaluated ? (
+    <span className="evaluation-done">Evaluation Done</span>
+  ) : subject.expired ? (
+    <span className="evaluation-expired">Evaluation Expired</span>
+  ) : (
+    <button
+      className="table-evaluate-btn"
+      onClick={() => handleEvaluateSubject(subject.id, subject.sectionId)}
+    >
+      Evaluate
+    </button>
+  )}
+</td>
                 </tr>
               ))}
             </tbody>

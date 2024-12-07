@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, getDocs } from "firebase/firestore";
+import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, getDocs, setDoc } from "firebase/firestore";
 import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import './facultydashboard.css';
@@ -23,7 +23,11 @@ const FacultyDashboard = () => {
    const [showCommentsTable, setShowCommentsTable] = useState(false); // Toggle for comments table
   const [comments, setComments] = useState([]);
   const [showFacultyComments, setShowFacultyComments] = useState(false);
-
+  const [enrollSubject, setEnrollSubject] = useState(null);
+  const [searchStudent, setSearchStudent] = useState("");
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  const [allStudents, setAllStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]); 
 
   const facultyPerPage = 3; // Limit to 3 faculty per page
   const totalFacultyPages = Math.ceil(facultyList.length / facultyPerPage);
@@ -43,6 +47,7 @@ const FacultyDashboard = () => {
         fetchDeansInDepartment(user);
         fetchEvaluationsDoneForUser(user);
         fetchScores();
+        fetchAllStudents()
         fetchSubjects(user);
         setLoading(false);
       } else {
@@ -51,6 +56,97 @@ const FacultyDashboard = () => {
     });
     return unsubscribe; // Cleanup on unmount
   }, [db, navigate]);
+
+  const fetchAllStudents = async () => {
+    try {
+      const studentsQuery = query(
+        collection(db, "users"),
+        where("role", "==", "Student")
+      );
+      const querySnapshot = await getDocs(studentsQuery);
+      const studentsList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setAllStudents(studentsList); // Store all students
+      setFilteredStudents(studentsList); // Initialize filtered students
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
+  };
+  
+  useEffect(() => {
+    setFilteredStudents(
+      allStudents.filter(
+        (student) =>
+          student.email.toLowerCase().includes(searchStudent.toLowerCase()) ||
+          student.id.toLowerCase().includes(searchStudent.toLowerCase()) ||
+          `${student.firstName} ${student.lastName}`
+            .toLowerCase()
+            .includes(searchStudent.toLowerCase())
+      )
+    );
+  }, [searchStudent, allStudents]);
+
+  const handleEnrollStudent = async (subjectId, studentIds) => {
+    const subjectToEnroll = subjects.find((subject) => subject.id === subjectId);
+    if (!subjectToEnroll) {
+      alert("Subject not found.");
+      return;
+    }
+    const studentsToEnroll = allStudents.filter((student) => studentIds.includes(student.id));
+    if (studentsToEnroll.length === 0) {
+      alert("No valid students selected.");
+      return;
+    }
+    const enrollmentPromises = studentsToEnroll.map(async (student) => {
+      const studentSubjectsRef = doc(db, `students/${student.id}/subjects/${subjectId}`);
+      const subjectEnrolledStudentRef = doc(db, `subjects/${subjectId}/enrolledStudents/${student.id}`);
+  
+      try {
+        await Promise.all([
+          setDoc(studentSubjectsRef, {
+            id: subjectId,
+            name: subjectToEnroll.name,
+            facultyId: subjectToEnroll.facultyId || null,
+            sectionId: subjectToEnroll.sectionId || "default_section",
+            semester: subjectToEnroll.semester || "",
+            department: subjectToEnroll.department || "",
+          }),
+          setDoc(subjectEnrolledStudentRef, {
+            id: student.id,
+            email: student.email,
+            name: `${student.firstName} ${student.lastName}` || "Unknown",
+          })
+        ]);
+      } catch (error) {
+        console.error(`Error enrolling student ${student.email}:`, error);
+      }
+    });
+  
+    try {
+      await Promise.all(enrollmentPromises);
+      const enrolledEmails = studentsToEnroll.map(student => student.email).join(", ");
+      alert(`Successfully enrolled the following students: ${enrolledEmails}`);
+    } catch (error) {
+      console.error("Error enrolling students in subject:", error);
+      alert("There was an error enrolling the students. Please try again.");
+    }
+  };
+  
+  const handleShowEnroll = (subject) => {
+    setEnrollSubject(subject);
+    setSearchStudent(""); // Reset search input
+    setSelectedStudents([]); // Clear previous selections
+  };
+
+  // Function to cancel enrollment and reset states
+  const handleCancelEnroll = () => {
+    setEnrollSubject(null);
+    setSearchStudent(""); // Reset search input
+    setSelectedStudents([]); // Clear previous selections
+  };
+
 
   const handleNextFacultyPage = () => {
     if (currentPage < totalFacultyPages - 1) {
@@ -606,20 +702,25 @@ const FacultyDashboard = () => {
         </div>
       )}
 
-          {showSubjects ? (
-            <div className="facsubject-list">
-              <h2>Your Subjects</h2>
-              {currentSubjects.length > 0 ? (
-                currentSubjects.map((subject) => (
-                  <div key={subject.id} className="facsubject-card">
-                    <h3>{subject.name} (ID: {subject.id})</h3>
-                    <p><strong>Department:</strong> {subject.department}</p>
-                    <button onClick={() => handleViewClassList(subject)}>View Class List</button>
-                  </div>
-                ))
-              ) : (
-                <p>No subjects assigned.</p>
-              )}
+{showSubjects ? (
+  <div className="facsubject-list">
+    <h2>Your Subjects</h2>
+    {currentSubjects.length > 0 ? (
+      currentSubjects.map((subject) => (
+        <div key={subject.id} className="facsubject-card">
+          <h3>{subject.name} (ID: {subject.id})</h3>
+          <p><strong>Department:</strong> {subject.department}</p>
+          <button onClick={() => handleViewClassList(subject)}>
+            View Class List
+          </button>
+          <button onClick={() => handleShowEnroll(subject)}>
+            Enroll Students
+          </button>
+        </div>
+      ))
+    ) : (
+      <p>No subjects assigned.</p>
+    )}
 
               {/* Pagination Controls */}
               <div className="facpagination-controls">
@@ -647,6 +748,66 @@ const FacultyDashboard = () => {
                   <button className="close-subdetails" onClick={() => setViewedSubject(null)}>Close</button>
                 </div>
               )}
+              {enrollSubject && (
+  <div className="enroll-student-container">
+    <h2>Enroll Students in {enrollSubject.name}</h2>
+
+    {/* Search bar for filtering students */}
+    <input
+      type="text"
+      value={searchStudent}
+      onChange={(e) => setSearchStudent(e.target.value)}
+      placeholder="Search students by name, email, or ID"
+      className="enroll-search-bar"
+    />
+
+    {/* List of filtered students with checkboxes */}
+    <div className="student-list">
+      {filteredStudents.length > 0 ? (
+        filteredStudents.map((student) => (
+          <div key={student.id} className="student-item">
+            <input
+              type="checkbox"
+              id={`student-${student.id}`}
+              value={student.id}
+              checked={selectedStudents.includes(student.id)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedStudents((prev) => [...prev, student.id]);
+                } else {
+                  setSelectedStudents((prev) =>
+                    prev.filter((id) => id !== student.id)
+                  );
+                }
+              }}
+            />
+            <label htmlFor={`student-${student.id}`}>
+              {student.firstName} {student.lastName} - {student.email}
+            </label>
+          </div>
+        ))
+      ) : (
+        <p>No students found</p>
+      )}
+    </div>
+
+    {/* Buttons for enrolling students or canceling */}
+    <div className="enroll-buttons">
+      <button
+        onClick={() => {
+          handleEnrollStudent(enrollSubject.id, selectedStudents);
+          handleCancelEnroll(); // Reset states after enrollment
+        }}
+        className="enroll-button"
+      >
+        Enroll Students
+      </button>
+      <button onClick={handleCancelEnroll} className="cancel-button">
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
             </div>
           ) : (
             <>
