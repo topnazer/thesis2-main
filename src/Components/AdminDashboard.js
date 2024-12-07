@@ -93,7 +93,7 @@ const AdminDashboard = () => {
       <div className="route-container">
        <Routes>      
        <Route path="dean-evaluation-reports" element={<DeanEvaluationReport />} />
-       <Route path="faculty-evaluation-reports" element={<Facultyevaluationreport />} />
+       <Route path="subject-evaluation-reports" element={<Facultyevaluationreport />} />
        <Route path="peer-evaluation-reports" element={<PeerEvaluationReport />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="subject-evaluation" element={<SubjectEvaluationPage />} />
