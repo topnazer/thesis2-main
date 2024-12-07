@@ -94,9 +94,6 @@ const NotificationsPage = () => {
       const resetDocRef = doc(db, "passwordResets", request.id);
       await updateDoc(resetDocRef, { status: "Approved" });
 
-      // Send notification/email to the user (use your actual email sending function here)
-      await sendEmail(request.email, "Password Reset Approved", `Your new password is: ${newPassword}`);
-
       setResetRequests((prev) => prev.filter((req) => req.id !== request.id));
 
       alert("Password reset approved! The user has been notified with the new password.");

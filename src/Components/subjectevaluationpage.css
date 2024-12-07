@@ -190,7 +190,6 @@ textarea::placeholder {
 }
 
 .question-action{
-
     display: flex;
     flex-direction: row;
  }

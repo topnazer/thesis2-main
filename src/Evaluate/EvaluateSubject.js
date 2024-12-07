@@ -315,11 +315,11 @@ const renderQuestionsForCurrentCategory = () => {
           <th>{name}: Question</th>
           {type === "Rating" && (
             <>
-              <th>Strongly disagree</th>
-              <th>Disagree</th>
-              <th>Neutral</th>
-              <th>Agree</th>
-              <th>Strongly agree</th>
+              <th>1</th>
+              <th>2</th>
+              <th>3</th>
+              <th>4</th>
+              <th>5</th>
             </>
           )}
           {(type === "Multiple Choice" || type === "Checkbox") && options.map((option, index) => (
@@ -396,7 +396,7 @@ const renderQuestionsForCurrentCategory = () => {
         </div>
       </div>
       <div className='raterlegend'>
-      <h3>Rating Legend: 1 = Strongly Disagree, 5 = Strongly Agree</h3>
+      <h3>Rating:1 - Poor, 2 - Fair, 3 - Satisfactory, 4 - Good, 5 - Excellent</h3>
       </div>
 
       <div className="form-container">
