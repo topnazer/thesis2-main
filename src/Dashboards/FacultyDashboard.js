@@ -255,50 +255,50 @@ const FacultyDashboard = () => {
 
   const fetchFacultyInDepartment = async (user) => {
     try {
-        // Fetch current user's department
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-            const department = userDoc.data().department;
-
-            // Fetch all faculty in the department
-            const facultyQuery = query(
-                collection(db, "users"),
-                where("department", "==", department),
-                where("role", "==", "Faculty")
-            );
-
-            // Fetch the expiration date from Firestore
-            const evaluationFormRef = doc(db, "evaluationForms", "faculty");
-            const evaluationFormSnap = await getDoc(evaluationFormRef);
-
-            let expirationDate = null;
-            if (evaluationFormSnap.exists()) {
-                const data = evaluationFormSnap.data();
-                expirationDate = data.expirationDate ? new Date(data.expirationDate) : null;
-            }
-
-            const today = new Date();
-
-            // Check if the evaluation period has expired
-            const expired = expirationDate ? today > expirationDate : false;
-
-            // Fetch faculty list and include expiration status
-            onSnapshot(facultyQuery, (snapshot) => {
-                setFacultyList(
-                    snapshot.docs.map((doc) => ({
-                        id: doc.id,
-                        ...doc.data(),
-                        expired, // Add the expiration status to each faculty
-                    }))
-                );
-            });
+      // Fetch current user's department
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const department = userDoc.data().department;
+  
+        // Fetch all faculty in the department
+        const facultyQuery = query(
+          collection(db, "users"),
+          where("department", "==", department),
+          where("role", "==", "Faculty")
+        );
+  
+        // Fetch the expiration date from Firestore
+        const evaluationFormRef = doc(db, "evaluationForms", "faculty");
+        const evaluationFormSnap = await getDoc(evaluationFormRef);
+  
+        let expirationDate = null;
+        if (evaluationFormSnap.exists()) {
+          const data = evaluationFormSnap.data();
+          expirationDate = data.expirationDate ? new Date(data.expirationDate) : null;
         }
+  
+        const today = new Date();
+  
+        // Check if the evaluation period has expired
+        const expired = expirationDate ? today > expirationDate : false;
+  
+        onSnapshot(facultyQuery, (snapshot) => {
+          setFacultyList(
+            snapshot.docs
+              .map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+                expired, // Add the expiration status to each faculty
+              }))
+              .filter((faculty) => faculty.id !== user.uid) // Exclude logged-in user
+          );
+        });
+      }
     } catch (error) {
-        console.error("Error fetching faculty in department:", error);
+      console.error("Error fetching faculty in department:", error);
     }
-};
-
-
+  };
+  
   const fetchDeansInDepartment = async (user) => {
     try {
       const userDoc = await getDoc(doc(db, "users", user.uid));

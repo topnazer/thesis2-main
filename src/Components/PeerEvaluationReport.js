@@ -8,7 +8,7 @@ import {
 } from "firebase/firestore";
 import "./allevaluationreport.css";
 
-const Facultyevaluationreport = () => {
+const PeerEvaluationReport = () => {
   const [departments] = useState(["All", "CCS", "COC", "CED", "CASS", "COE", "CBA"]);
   const [selectedDepartment, setSelectedDepartment] = useState("All");
   const [faculty, setFaculty] = useState([]);
@@ -22,27 +22,24 @@ const Facultyevaluationreport = () => {
 
   const Modal = ({ isOpen, onClose, evaluation }) => {
     if (!isOpen) return null;
-  
-    // Debugging for detailed questions structure
-    console.log("Evaluation Data:", evaluation);
-  
-    const groupedQuestions = evaluation?.categories?.map((category) => {
-      const filteredQuestions =
-        category.questions?.map((question) => ({
-          text: question.text || "No Question Text",
-          response:
-            Array.isArray(question.response)
-              ? question.response.join(", ") // For multiple responses
-              : question.response || "No Response", // For single responses
-          type: question.type || "Unknown Type",
-        })) || [];
-  
-      return {
-        categoryName: category?.categoryName || "Unnamed Category",
-        questions: filteredQuestions,
-      };
-    }) || [];
-  
+
+    const groupedQuestions =
+      evaluation?.categories?.map((category) => {
+        const filteredQuestions =
+          category.questions?.map((question) => ({
+            text: question.text || "No Question Text",
+            response:
+              Array.isArray(question.response)
+                ? question.response.join(", ")
+                : question.response || "No Response",
+          })) || [];
+
+        return {
+          categoryName: category?.categoryName || "Unnamed Category",
+          questions: filteredQuestions,
+        };
+      }) || [];
+
     return (
       <div className="facmodal-overlay">
         <div className="facmodal-content">
@@ -75,7 +72,8 @@ const Facultyevaluationreport = () => {
       </div>
     );
   };
-  // Fetch faculty based on department
+
+  // Fetch faculty by department
   useEffect(() => {
     const fetchFacultyByDepartment = async () => {
       setLoading(true);
@@ -93,7 +91,10 @@ const Facultyevaluationreport = () => {
         }
 
         const facultySnapshot = await getDocs(facultyQuery);
-        const facultyList = facultySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const facultyList = facultySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         setFaculty(facultyList);
       } catch (error) {
         setError("Failed to load faculty data.");
@@ -107,79 +108,77 @@ const Facultyevaluationreport = () => {
   }, [selectedDepartment, db]);
 
   // Fetch evaluations for a specific faculty
-  const fetchEvaluations = async (facultyId) => {
-  setLoading(true);
-  setEvaluations([]);
-  setError(null);
-  try {
-    const evaluationsRef = collection(db, `evaluations/${facultyId}/students`);
-    const evaluationsSnapshot = await getDocs(evaluationsRef);
+  const fetchEvaluations = async (facultyId, facultyName) => {
+    setLoading(true);
+    setEvaluations([]);
+    setError(null);
+    try {
+      const evaluationsRef = collection(
+        db,
+        `facultyEvaluations/${facultyId}/completed_evaluations`
+      );
+      const evaluationsSnapshot = await getDocs(evaluationsRef);
 
-    if (evaluationsSnapshot.empty) {
-      setEvaluations([]);
-      return;
-    }
-
-    // Map evaluation data
-    const evaluationsList = evaluationsSnapshot.docs.map((doc) => {
-      const data = doc.data();
-
-      // Extract createdAt date if available
-      const date =
-        data.createdAt && data.createdAt.toDate
-          ? data.createdAt.toDate().toLocaleDateString()
-          : "Unknown Date";
-
-      const percentageScore =
-        data.ratingScore && data.ratingScore.percentageScore !== undefined
-          ? `${data.ratingScore.percentageScore}%`
-          : "N/A";
-
-      // Collect all questions grouped by category
-      let categories = [];
-
-      if (data.detailedQuestions && Array.isArray(data.detailedQuestions)) {
-        categories = data.detailedQuestions.map((category) => {
-          const { categoryName, questions } = category;
-
-          const questionsList = questions.map((question) => ({
-            text: question.text || "No Question",
-            response:
-              Array.isArray(question.response) && question.response.length > 0
-                ? question.response.join(", ")
-                : question.response || "No Response",
-          }));
-
-          return {
-            categoryName: categoryName || "Unknown Category",
-            questions: questionsList,
-          };
-        });
+      if (evaluationsSnapshot.empty) {
+        setEvaluations([]);
+        return;
       }
 
-      return {
-        studentId: doc.id,
-        studentName: data.studentName || "Unknown Student",
-        subjectName: data.subjectName || "Unknown Subject",
-        comment: data.comment || "No Comment",
-        percentageScore,
-        date,
-        categories,
-      };
-    });
+      const evaluationsList = evaluationsSnapshot.docs.map((doc) => {
+        const data = doc.data();
 
-    setEvaluations(evaluationsList);
-  } catch (error) {
-    console.error("Error fetching evaluations:", error);
-    setError("Failed to load evaluations data.");
-  } finally {
-    setLoading(false);
-  }
-};
+        const date =
+          data.createdAt && data.createdAt.toDate
+            ? data.createdAt.toDate().toLocaleDateString()
+            : "Unknown Date";
+
+        const percentageScore =
+          data.ratingScore && data.ratingScore.percentageScore !== undefined
+            ? `${data.ratingScore.percentageScore}%`
+            : "N/A";
+
+        let categories = [];
+
+        if (data.detailedQuestions && Array.isArray(data.detailedQuestions)) {
+          categories = data.detailedQuestions.map((category) => {
+            const { categoryName, questions } = category;
+
+            const questionsList = questions.map((question) => ({
+              text: question.text || "No Question",
+              response:
+                Array.isArray(question.response) && question.response.length > 0
+                  ? question.response.join(", ")
+                  : question.response || "No Response",
+            }));
+
+            return {
+              categoryName: categoryName || "Unknown Category",
+              questions: questionsList,
+            };
+          });
+        }
+
+        return {
+        facultyName,
+          comment: data.comment || "No Comment",
+          percentageScore,
+          date,
+          categories,
+        };
+      });
+
+      setEvaluations(evaluationsList);
+    } catch (error) {
+      console.error("Error fetching evaluations:", error);
+      setError("Failed to load evaluations data.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFacultyClick = (facultyMember) => {
     setSelectedFaculty(facultyMember);
-    fetchEvaluations(facultyMember.id);
+    fetchEvaluations(facultyMember.id, `${facultyMember.firstName} ${facultyMember.lastName}`);
   };
 
   const openModal = (evaluation) => {
@@ -240,34 +239,28 @@ const Facultyevaluationreport = () => {
               <p>Loading evaluations...</p>
             ) : evaluations.length > 0 ? (
               <table className="facevaluations-table">
-                <thead>
-                  <tr>
-                    <th>Student Name</th>
-                    <th>Subject</th>
-                    <th>Date</th>
-                    <th>Comment</th>
-                    <th>Percentage Score</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {evaluations.map((evaluation, index) => (
-                    <tr key={index}>
-                      <td>{evaluation.studentName}</td>
-                      <td>{evaluation.subjectName}</td>
-                      <td>{evaluation.date}</td>
-                      <td>
-                        <div className="scrollablesapage">{evaluation.comment}</div>
-                      </td>
-                      <td>{evaluation.percentageScore}</td>
-                      <td>
-                      <button className="show-more-btn" onClick={() => openModal(evaluation)}>
-  Show More
-</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
+             <thead>
+  <tr>
+    <th>Faculty Name</th>
+    <th>Date</th>
+    <th>Comment</th>
+    <th>Percentage Score</th>
+    <th>Actions</th>
+  </tr>
+</thead>
+<tbody>
+  {evaluations.map((evaluation, index) => (
+    <tr key={index}>
+      <td>{evaluation.facultyName}</td> {/* Use facultyName here */}
+      <td>{evaluation.date}</td>
+      <td>{evaluation.comment}</td>
+      <td>{evaluation.percentageScore}</td>
+      <td>
+        <button className="show-more-btn" onClick={() => openModal(evaluation)}>Show More</button>
+      </td>
+    </tr>
+  ))}
+</tbody>
               </table>
             ) : (
               <p>No evaluations found for this faculty.</p>
@@ -284,4 +277,4 @@ const Facultyevaluationreport = () => {
   );
 };
 
-export default Facultyevaluationreport;
+export default PeerEvaluationReport;

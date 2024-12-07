@@ -15,7 +15,8 @@ import Evaluationreport from "./Evaluationreport";
 import DeanEvaluationPage from "./DeanEvaluationPage";
 import EvaluationReportScoringPage from './EvaluationReportScoringPage'; 
 import Facultyevaluationreport from './Facultyevaluationreport'; // Import the component
-
+import PeerEvaluationReport from "./PeerEvaluationReport";
+import DeanEvaluationReport from "./DeanEvaluationReport";
 
 
 import './Admin.css';
@@ -90,8 +91,10 @@ const AdminDashboard = () => {
         </div>
       </div>
       <div className="route-container">
-       <Routes>
+       <Routes>      
+       <Route path="dean-evaluation-reports" element={<DeanEvaluationReport />} />
        <Route path="faculty-evaluation-reports" element={<Facultyevaluationreport />} />
+       <Route path="peer-evaluation-reports" element={<PeerEvaluationReport />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="subject-evaluation" element={<SubjectEvaluationPage />} />
         <Route path="faculty-evaluation" element={<FacultyEvaluationPage />} />

@@ -11,9 +11,14 @@ const Evaluationreport = () => (
                 <FileChartColumn style={{ width: '50px', height: '50px', color: 'black' }} />
                 <p>Faculty Report</p>
             </Link>
-            <Link to="/admin-dashboard/subject-evaluation-report" className='evaluationreport-button'>
+            <Link to="/admin-dashboard/peer-evaluation-reports" className='evaluationreport-button'>
                 <FileChartColumn style={{ width: '50px', height: '50px', color: 'black' }} />
                 <p>Subjects Report</p>
+            </Link>
+
+            <Link to="/admin-dashboard/dean-evaluation-reports" className='evaluationreport-button'>
+                <FileChartColumn style={{ width: '50px', height: '50px', color: 'black' }} />
+                <p>Dean Report</p>
             </Link>
         </div>
         

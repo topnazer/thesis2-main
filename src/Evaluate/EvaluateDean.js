@@ -147,17 +147,43 @@ const EvaluateDean = () => {
     }
 
     const { totalScore, maxScore, percentageScore } = calculateRatingScore();
-    try {
-      const evaluationRef = doc(collection(db, "deanEvaluations", deanId, "completed_evaluations"), user.uid);
+    const detailedQuestions = categories.map((category, categoryIndex) => ({
+      categoryName: category.name,
+      type: category.type, // Include category type
+      questions: category.questions.map((question, questionIndex) => {
+          const uniqueKey = `${categoryIndex}-${questionIndex}`;
+          return {
+              text: question.text, // Include the question text
+              type: category.type, // Include the question type
+              response: responses[uniqueKey] || (category.type === "Checkbox" ? [] : "N/A"), // Add response
+              options: category.options || [], // Include available options for the question
+          };
+      }),
+  }));
 
-      await setDoc(evaluationRef, {
-        userId: user.uid,
-        deanId,
-        ratingScore: { percentageScore },
-        comment,
-        percentageScore,
-        createdAt: new Date(),
-      });
+  
+
+  try {
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (!userDoc.exists()) {
+      alert("Evaluator information is missing.");
+      return;
+    }
+    const evaluatorData = userDoc.data();
+    const evaluatorName = `${evaluatorData.firstName || "Unknown"} ${evaluatorData.lastName || "User"}`;
+    // Save individual evaluation
+    const evaluationRef = doc(collection(db, "deanEvaluations", deanId, "completed_evaluations"), user.uid);
+
+    await setDoc(evaluationRef, {
+      userId: user.uid,
+      deanId,
+      Evaluator: evaluatorName,
+      ratingScore: { totalScore, maxScore, percentageScore },
+      comment,
+      percentageScore,
+      createdAt: new Date(),
+      detailedQuestions, 
+    });
 
       const deanEvaluationRef = doc(db, "deanEvaluations", deanId);
       const deanEvaluationDoc = await getDoc(deanEvaluationRef);
