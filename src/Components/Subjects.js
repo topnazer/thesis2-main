@@ -45,18 +45,10 @@ const Subjects = () => {
   const departments = ["CCS", "COC", "CED", "CASS", "COE", "CBA"];
   const db = getFirestore();
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "subjects"), (snapshot) => {
-      const subjectsList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setSubjects(subjectsList);
-      console.log(subjectsList);
-    });
   
+    // Define the fetchInitialData function outside the useEffect scope
     const fetchInitialData = async () => {
-      fetchFacultyList(); 
+      fetchFacultyList();
       try {
         const studentsQuery = query(collection(db, "users"), where("role", "==", "Student"));
         const querySnapshot = await getDocs(studentsQuery);
@@ -69,9 +61,22 @@ const Subjects = () => {
         console.error("Error fetching students:", error);
       }
     };
-    fetchInitialData(); 
-    return () => unsubscribe();
-  }, [db]);
+
+    useEffect(() => {
+      const unsubscribe = onSnapshot(collection(db, "subjects"), (snapshot) => {
+        const subjectsList = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setSubjects(subjectsList);
+        console.log(subjectsList);
+      });
+    
+      fetchInitialData(); // Calls the function defined outside useEffect
+    
+      return () => unsubscribe();
+    }, [db]);
+  
 
     const fetchFacultyList = async () => {
     const q = query(collection(db, "users"), where("role", "==", "Faculty"));
@@ -228,7 +233,6 @@ const Subjects = () => {
       setSelectedFaculty(""); 
       setSelectedSemester(""); 
       setSelectedDepartment(""); 
-      setDescription(""),
       setSelectedSchoolYear(""); 
       alert("Subject added successfully!");
     } catch (error) {
@@ -264,7 +268,8 @@ const Subjects = () => {
         setViewedSubject(updatedSubject); // Update the currently viewed subject
   
         // Re-fetch all subjects to ensure the updated data is reflected
-        await fetchSubjects(currentUser); // Replace `currentUser` with the appropriate user state/variable
+        await fetchInitialData(); // Re-fetch data after editing a subject
+        
       }
   
       alert("Subject updated successfully!");
@@ -347,7 +352,13 @@ const Subjects = () => {
                 <p>
                   <strong>{subject.name}</strong> (ID: {subject.id})
                 </p>
-                  <button onClick={() => { setViewedSubject(subject); cancelEdit(); setShowEnrolledStudents(false); setEnroll(null) }} className="subject-view-button">View</button>
+                <button onClick={() => {
+  setViewedSubject(subject);
+  cancelEdit();
+  setShowEnrolledStudents(false);
+  setEnroll(null);
+}} className="subject-view-button">View</button>
+
                 </div>
               
             ))}

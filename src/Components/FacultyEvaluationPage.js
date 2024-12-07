@@ -85,7 +85,7 @@ const FacultyEvaluationPage = () => {
         try {
             const updatedCategories = categories.filter((category) => category.id !== categoryId);
 
-            await setDoc(doc(db, "evaluationForms", "subject"), {
+            await setDoc(doc(db, "evaluationForms", "faculty"), {
                 categories: updatedCategories,
                 expirationDate: expirationDate || null,
             });

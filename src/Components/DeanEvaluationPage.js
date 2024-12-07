@@ -390,9 +390,7 @@ const DeanEvaluationPage = () => {
                                                    <button
                                                         className='edit-btn'
                                                        onClick={() => {
-                                                           setFacultyOption(option);
                                                            setEditingOptionIndex(i);
-                                                           setSelectedFacultyCategory(category.name);
                                                        }}
                                                    >
                                                        <FilePenLine />
