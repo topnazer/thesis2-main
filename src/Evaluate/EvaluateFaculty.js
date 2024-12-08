@@ -347,7 +347,8 @@ const EvaluateFaculty = () => {
         </div>
       </div>
       <div className='raterlegend'>
-      <h3>Rating Legend: 1 = Strongly Disagree, 5 = Strongly Agree</h3>
+      <h3>Guidance Service Center | St. Peter's College Rating Scale:</h3>
+      <h3>5 - Strongly Agree 4 - Agree 3 - Neutral 2 - Disagree 1 - Strongly Disagree</h3>
       </div>
 
       <div className="form-container">
@@ -373,11 +374,12 @@ const EvaluateFaculty = () => {
       </div>
 
       <div className="form-comments-section">
-        <label>Comments/Feedback</label>
+        <label>Please provide any additional comments, suggestions, or concerns you may have regarding the course or instructor. Your feedback is highly appreciated and will be used to enhance future course offerings.</label>
+        <label>Additional Comments (Optional):</label>
         <textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="Enter your comments about the faculty here"
+          placeholder="Your Answer"
         />
       </div>
     </div>

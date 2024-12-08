@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import './facultyevaluationpage.css';
 
 import { FilePenLine , Trash2 } from 'lucide-react';
@@ -42,7 +42,7 @@ const FacultyEvaluationPage = () => {
         if (!newCategory.trim()) return;
 
         try {
-            const formRef = doc(db, "evaluationForms", "Faculty");
+            const formRef = doc(db, "evaluationForms", "faculty");
             let updatedCategories = [...categories];
 
             if (editingCategoryIndex !== null) {
@@ -81,22 +81,28 @@ const FacultyEvaluationPage = () => {
         setEditingFacultyCategoryIndex(null);
     };
 
-    const deleteCategory = async (categoryId) => {
-        try {
-            const updatedCategories = categories.filter((category) => category.id !== categoryId);
+   
 
-            await setDoc(doc(db, "evaluationForms", "faculty"), {
-                categories: updatedCategories,
-                expirationDate: expirationDate || null,
-            });
+const deleteCategory = async (categoryId) => {
+    try {
+        // Filter out the category to be deleted
+        const updatedCategories = categories.filter((category) => category.id !== categoryId);
 
-            setFacultyCategories(updatedCategories);
-            alert("Category deleted successfully!");
-        } catch (error) {
-            console.error("Error deleting category:", error);
-            alert("Failed to delete category. Please try again.");
-        }
-    };
+        // Update only the 'categories' field in Firestore
+        const formRef = doc(db, "evaluationForms", "faculty");
+        await updateDoc(formRef, {
+            categories: updatedCategories,
+        });
+
+        // Update local state
+        setFacultyCategories(updatedCategories);
+        alert("Category deleted successfully!");
+    } catch (error) {
+        console.error("Error deleting category:", error);
+        alert("Failed to delete category. Please try again.");
+    }
+};
+
 
     const handleEditCategory = (index, category) => {
         setEditingFacultyCategoryIndex(index);

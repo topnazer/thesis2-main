@@ -17,10 +17,10 @@ const FacultyDashboard = () => {
   const [showEvaluationReport, setShowEvaluationReport] = useState(false);
   const [showSubjects, setShowSubjects] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [viewedSubject, setViewedSubject] = useState(null); // State to store selected subject details
-  const [enrolledStudents, setEnrolledStudents] = useState([]); // New state for enrolled students
-  const [currentPage, setCurrentPage] = useState(0); // Pagination state
-   const [showCommentsTable, setShowCommentsTable] = useState(false); // Toggle for comments table
+  const [viewedSubject, setViewedSubject] = useState(null);
+  const [enrolledStudents, setEnrolledStudents] = useState([]); 
+  const [currentPage, setCurrentPage] = useState(0); 
+   const [showCommentsTable, setShowCommentsTable] = useState(false); 
   const [comments, setComments] = useState([]);
   const [showFacultyComments, setShowFacultyComments] = useState(false);
   const [enrollSubject, setEnrollSubject] = useState(null);
@@ -28,13 +28,10 @@ const FacultyDashboard = () => {
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [allStudents, setAllStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]); 
-
-  const facultyPerPage = 3; // Limit to 3 faculty per page
+  const facultyPerPage = 3;
   const totalFacultyPages = Math.ceil(facultyList.length / facultyPerPage);
-
-  const subjectsPerPage = 5; // Limit to 5 subjects per page
+  const subjectsPerPage = 5;
   const totalPages = Math.ceil(subjects.length / subjectsPerPage);
-
   const navigate = useNavigate();
   const db = getFirestore();
 
@@ -51,10 +48,10 @@ const FacultyDashboard = () => {
         fetchSubjects(user);
         setLoading(false);
       } else {
-        navigate("/"); // Redirect to login if not authenticated
+        navigate("/"); 
       }
     });
-    return unsubscribe; // Cleanup on unmount
+    return unsubscribe; 
   }, [db, navigate]);
 
   const fetchAllStudents = async () => {
@@ -68,8 +65,8 @@ const FacultyDashboard = () => {
         id: doc.id,
         ...doc.data(),
       }));
-      setAllStudents(studentsList); // Store all students
-      setFilteredStudents(studentsList); // Initialize filtered students
+      setAllStudents(studentsList); 
+      setFilteredStudents(studentsList); 
     } catch (error) {
       console.error("Error fetching students:", error);
     }
@@ -136,16 +133,16 @@ const FacultyDashboard = () => {
   
   const handleShowEnroll = (subject) => {
     setEnrollSubject(subject);
-    setSearchStudent(""); // Reset search input
-    setSelectedStudents([]); // Clear previous selections
+    setSearchStudent("");
+    setSelectedStudents([]); 
   };
 
-  // Function to cancel enrollment and reset states
+ 
   const handleCancelEnroll = () => {
     setEnrollSubject(null);
-    setSearchStudent(""); // Reset search input
-    setSelectedStudents([]); // Clear previous selections
-  };
+    setSearchStudent(""); 
+    setSelectedStudents([]);
+  }
 
 
   const handleNextFacultyPage = () => {
@@ -206,7 +203,7 @@ const FacultyDashboard = () => {
       const subjectAverageScore =
         totalSubjects > 0 ? totalSubjectScore / totalSubjects : 0;
   
-      // Fetch faculty's average score using the document ID
+     
       const facultyDocRef = doc(db, "facultyEvaluations", facultyId);
       const facultyDocSnapshot = await getDoc(facultyDocRef);
   
@@ -217,7 +214,7 @@ const FacultyDashboard = () => {
         console.warn("No faculty evaluation found for this user.");
       }
   
-      // Update the single state with both scores
+     
       setAverageScore({
         faculty: facultyAverageScore.toFixed(2),
         subject: subjectAverageScore.toFixed(2),
@@ -255,19 +252,19 @@ const FacultyDashboard = () => {
 
   const fetchFacultyInDepartment = async (user) => {
     try {
-      // Fetch current user's department
+     
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const department = userDoc.data().department;
   
-        // Fetch all faculty in the department
+       
         const facultyQuery = query(
           collection(db, "users"),
           where("department", "==", department),
           where("role", "==", "Faculty")
         );
   
-        // Fetch the expiration date from Firestore
+       
         const evaluationFormRef = doc(db, "evaluationForms", "faculty");
         const evaluationFormSnap = await getDoc(evaluationFormRef);
   
@@ -279,7 +276,7 @@ const FacultyDashboard = () => {
   
         const today = new Date();
   
-        // Check if the evaluation period has expired
+       
         const expired = expirationDate ? today > expirationDate : false;
   
         onSnapshot(facultyQuery, (snapshot) => {
@@ -358,14 +355,14 @@ const FacultyDashboard = () => {
         }
       });
   
-      // Dean Evaluations Listener
+     
       onSnapshot(deanEvaluationsCollection, async (deanSnapshot) => {
         const deanEvaluationsMap = {};
   
         for (const deanDoc of deanSnapshot.docs) {
           const deanId = deanDoc.id;
   
-          // Existing logic: Fetch all documents in the subcollection
+          
           const completedEvaluationsCollection = collection(
             db,
             "deanEvaluations",
@@ -380,7 +377,7 @@ const FacultyDashboard = () => {
   
             deanEvaluationsMap[deanId] = userEvaluated;
   
-            // Merge dean evaluations into the state
+            
             setEvaluationsDone((prev) => ({
               ...prev,
               deanEvaluations: {
@@ -390,7 +387,7 @@ const FacultyDashboard = () => {
             }));
           });
   
-          // New logic: Fetch a specific document by ID
+          
           const specificCompletedEvaluationDocId = "4beCH594G1WUDb6sHTdNQUJ1C2G3";
           const completedEvaluationDocRef = doc(
             db,
@@ -407,7 +404,7 @@ const FacultyDashboard = () => {
   
             deanEvaluationsMap[deanId] = userEvaluated;
   
-            // Merge the specific evaluation result into the state
+            
             setEvaluationsDone((prev) => ({
               ...prev,
               deanEvaluations: {
@@ -442,7 +439,7 @@ const FacultyDashboard = () => {
     });
   };
 
-  // Fetch enrolled students for a specific subject
+  
   const fetchEnrolledStudents = async (subjectId) => {
     try {
       const enrolledStudentsSnapshot = await getDocs(collection(db, "subjects", subjectId, "enrolledStudents"));
@@ -452,13 +449,13 @@ const FacultyDashboard = () => {
     }
   };
 
-  // Handle viewing class list for a specific subject
+ 
   const handleViewClassList = (subject) => {
     setViewedSubject(subject);
     fetchEnrolledStudents(subject.id);
   };
 
-  // Pagination functions
+ 
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);

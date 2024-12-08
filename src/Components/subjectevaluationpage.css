@@ -193,3 +193,9 @@ textarea::placeholder {
     display: flex;
     flex-direction: row;
  }
+
+ .question-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+ }

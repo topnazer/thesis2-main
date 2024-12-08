@@ -20,7 +20,7 @@
 
 .evaluate-dean-page table th, 
 .evaluate-dean-page table td {
-  border: 1px solid #d49a9a;
+  border: 1px solid #000000;
   padding: 20px;
   text-align: center;
   font-size: 15px;
@@ -28,10 +28,10 @@
 }
 
 .evaluate-dean-page table thead th {
-  font-size: 15px;
+  font-size: 20px;
   font-weight: bold;
   background-color: rgb(69, 10, 10);
-  color: #000000;
+  color: white;
   padding: 18px;
   text-align: center;
 }
@@ -331,19 +331,19 @@ margin-left: 20px;
   font-weight: bold;
   display: block;
   color: #ffffff;
-  padding: 20px;
+  padding: 5px;
   font-size: 15px;
   overflow: hidden;
 }
 
 .form-comments-section textarea {
-  width: 100%; /* Full width of the container */
-  height: 120px; /* Sets a reasonable height for comments */
-  font-size: 20px; /* Text size for readability */
-  border: 1px solid #ccc; /* Border around textarea */
-  border-radius: 5px; /* Rounded corners to match container */
+  width: 100%; 
+  height: 60px;
+  font-size: 15px; 
+  border: 1px solid #ccc;
+  border-radius: 5px;
   resize:none;
-  box-sizing: border-box; /* Ensures padding doesn't exceed container width */
+  box-sizing: border-box; 
   text-align: center;
   
 }

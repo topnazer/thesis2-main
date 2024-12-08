@@ -53,7 +53,7 @@ const DeanEvaluationPage = () => {
                 };
             } else {
                 const newCategoryData = {
-                    id: Date.now(), // Unique ID
+                    id: Date.now(), 
                     name: newCategory,
                     type: categoryType,
                     options: categoryOptions,
@@ -208,16 +208,18 @@ const DeanEvaluationPage = () => {
     const handleSaveForm = async () => {
         try {
             const formRef = doc(db, "evaluationForms", "dean");
-            await setDoc(formRef, {
+            const formData = {
                 categories: categories.map((category) => ({
-                    id: category.id || Date.now(),
+                    id: category.id,
                     name: category.name,
                     type: category.type,
                     options: category.options || [],
                     questions: category.questions || [],
                 })),
                 expirationDate: expirationDate || null,
-            });
+            };
+            await setDoc(formRef, formData);
+            await fetchEvaluationData();
             alert("Form saved successfully!");
         } catch (error) {
             console.error("Error saving form:", error);

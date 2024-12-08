@@ -26,7 +26,7 @@
     border-radius: 20px;
     color: black;
     text-align: center;
-    background-color: #A3C1AD  ; /* Light gray background */
+    background-color: #86a3c3;
 }
 .facevaluationreport-button {
     display: flex;
@@ -41,7 +41,7 @@
     border-radius: 20px;
     color: black;
     text-align: center;
-    background-color: #D0F0C0 ; /* Light gray background */
+    background-color: #86a3c3;
 }
 .studentevaluationreport-button {
     display: flex;
@@ -56,7 +56,7 @@
     border-radius: 20px;
     color: black;
     text-align: center;
-    background-color: #F5FFFA ; /* Light gray background */
+    background-color: #86a3c3;
 }
 
 

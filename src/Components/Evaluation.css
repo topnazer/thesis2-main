@@ -28,7 +28,7 @@
     border-radius: 20px;
     color: black;
     text-align: center;
-    background-color: #86a3c3; /* Light gray background */
+    background-color: #86a3c3;
 }
 .facevaluation-tool-button {
     display: flex;
@@ -43,7 +43,7 @@
     border-radius: 20px;
     color: black;
     text-align: center;
-    background-color: #b6cec7; /* Light gray background */
+    background-color: #86a3c3;
 }
 .studentevaluation-tool-button {
     display: flex;
@@ -58,15 +58,15 @@
     border-radius: 20px;
     color: black;
     text-align: center;
-    background-color: #d8e0bb; /* Light gray background */
+    background-color: #86a3c3;
 }
 
 .studentevaluation-tool-button:hover, 
 .deanevaluation-tool-button:hover, 
 .facevaluation-tool-button:hover {
-    background-color: #6c7f92; /* Change background color on hover */
+    background-color: #6c7f92; 
     opacity: 0.9;
-    transform: translateY(-10px) scale(1.05);  /* Slightly enlarge the button on hover */
-    transition: 0.3s; /* Smooth transition */
+    transform: translateY(-10px) scale(1.050);  
+    transition: 0.3s; 
     box-shadow: 6px 8px 10px rgba(0, 0, 0, 0.5);
 }
