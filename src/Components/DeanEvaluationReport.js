@@ -27,9 +27,9 @@ const DeanEvaluationReport = () => {
 
   const Modal = ({ isOpen, onClose, evaluation }) => {
     if (!isOpen) return null;
-
+  
     const groupedQuestions =
-      evaluation?.categories?.map((category) => {
+      evaluation?.detailedQuestions?.map((category) => {
         const filteredQuestions =
           category.questions?.map((question) => ({
             text: question.text || "No Question Text",
@@ -38,13 +38,13 @@ const DeanEvaluationReport = () => {
                 ? question.response.join(", ")
                 : question.response || "No Response",
           })) || [];
-
+  
         return {
-          categoryName: category?.categoryName || "Unnamed Category",
+          categoryName: category.categoryName || "Unnamed Category",
           questions: filteredQuestions,
         };
       }) || [];
-
+  
     return (
       <div className="facmodal-overlay">
         <div className="facmodal-content">
@@ -77,6 +77,7 @@ const DeanEvaluationReport = () => {
       </div>
     );
   };
+  
 
   // Fetch deans by department
   useEffect(() => {
@@ -125,9 +126,27 @@ const DeanEvaluationReport = () => {
         `deanEvaluations/${deanId}/completed_evaluations`
       );
       const evaluationsSnapshot = await getDocs(evaluationsRef);
-
+  
       const evaluationsList = evaluationsSnapshot.docs.map((doc) => {
         const data = doc.data();
+  
+        // Extract detailedQuestions and format them for the modal
+        const detailedQuestions =
+          data.detailedQuestions?.map((category) => {
+            const formattedQuestions =
+              category.questions?.map((question) => ({
+                text: question.text || "No Question",
+                response: Array.isArray(question.response)
+                  ? question.response.join(", ")
+                  : question.response || "No Response",
+              })) || [];
+  
+            return {
+              categoryName: category.categoryName || "Unnamed Category",
+              questions: formattedQuestions,
+            };
+          }) || [];
+  
         return {
           evaluator: data.Evaluator || "Unknown Evaluator",
           deanName,
@@ -139,6 +158,7 @@ const DeanEvaluationReport = () => {
           date: data.createdAt?.toDate
             ? data.createdAt.toDate().toLocaleDateString()
             : "Unknown Date",
+          detailedQuestions, // Include detailed questions for modal
         };
       });
       setEvaluations(evaluationsList);
@@ -149,6 +169,7 @@ const DeanEvaluationReport = () => {
       setLoading(false);
     }
   };
+  
 
   const handleDeanClick = (deanMember) => {
     setSelectedDean(deanMember);
@@ -174,12 +195,13 @@ const DeanEvaluationReport = () => {
   return (
     <div className="facuser-page-container">
       <div className="facuser-page-left">
+      <div className="facuser-list">
         <div className="facuser-button">
           {departments.map((dept) => (
             <button
               key={dept}
               onClick={() => setSelectedDepartment(dept)}
-              className={selectedDepartment === dept ? "active-department" : ""}
+              className={selectedDepartment === dept ? "report-department" : ""}
             >
               {dept}
             </button>
@@ -208,6 +230,7 @@ const DeanEvaluationReport = () => {
           </div>
         )}
       </div>
+      </div>
       <div className="facuser-page-right">
         {selectedDean && (
           <>
@@ -225,6 +248,7 @@ const DeanEvaluationReport = () => {
                       <th>Date</th>
                       <th>Comment</th>
                       <th>Percentage Score</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -236,6 +260,17 @@ const DeanEvaluationReport = () => {
                         <div className="scrollablesapage">{evaluation.comment}</div>
                       </td>
                         <td>{evaluation.percentageScore}</td>
+                        <td>
+          <button
+            className="show-more-btn"
+            onClick={() => {
+              setSelectedEvaluation(evaluation);
+              setIsModalOpen(true);
+            }}
+          >
+            Show More
+          </button>
+        </td>
                       </tr>
                     ))}
                   </tbody>

@@ -80,6 +80,7 @@ const PeerEvaluationReport = () => {
     const fetchFacultyByDepartment = async () => {
       setLoading(true);
       setError(null);
+      setSelectedFaculty(null);
       try {
         let facultyQuery;
         if (selectedDepartment === "All") {
