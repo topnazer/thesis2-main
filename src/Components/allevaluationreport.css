@@ -150,13 +150,13 @@ td {
   }
   
   .facmodal-content {
-    background: #dacfcf;
+    background: rgb(240, 255, 240);
     padding: 20px;
     border-radius: 10px;
     width: 50%;
     max-height: 80%;
     overflow-y: auto;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 10px rgba(47, 65, 48, 0.5);
     z-index: 10001; /* Higher than overlay */
     position: relative;
   }
@@ -229,8 +229,8 @@ td {
 }
 
 .facmodal-close-btn {
-  background-color: #dbb8b8; /* Red background */
-  color: white; /* White text color */
+  background-color: #9FE2BF; /* Red background */
+  color: #333333; /* White text color */
   border: none; /* Remove border */
   padding: 8px 15px; /* Add padding */
   border-radius: 0px 20px 0px 20px;
@@ -243,7 +243,7 @@ td {
 }
 
 .facmodal-close-btn:hover {
-  background-color: #b17878; /* Darker red on hover */
+  background-color: #AEEAD4; /* Darker red on hover */
 }
 
 .paginationreport {
