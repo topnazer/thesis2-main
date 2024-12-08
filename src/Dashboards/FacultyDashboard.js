@@ -734,80 +734,93 @@ const FacultyDashboard = () => {
               </div>
 
               {viewedSubject && (
-                <div className="Facviewed-subject-details">
-                  <h2>Class List for {viewedSubject.name}</h2>
-                  {enrolledStudents.length > 0 ? (
-                    <ul>
-                      {enrolledStudents.map((studentId) => (
-                        <li key={studentId}>{studentId}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>No students enrolled.</p>
-                  )}
-                  <button className="close-subdetails" onClick={() => setViewedSubject(null)}>Close</button>
+  <div className="Facviewed-subject-details">
+    <h2>Class List for {viewedSubject.name}</h2>
+
+    <div className="Facviewed-content">
+      {/* Enroll students container on the left */}
+      {enrollSubject && enrollSubject.id === viewedSubject.id && (
+        <div className="facenroll-student-container">
+          <h2>Enroll Students in {enrollSubject.name}</h2>
+
+          {/* Search bar for filtering students */}
+          <input
+            type="text"
+            value={searchStudent}
+            onChange={(e) => setSearchStudent(e.target.value)}
+            placeholder="Search students by name or email"
+            className="enroll-search-bar"
+          />
+
+          {/* List of filtered students with checkboxes */}
+          <div className="facstudent-list">
+            {filteredStudents.length > 0 ? (
+              filteredStudents.map((student) => (
+                <div key={student.id} className="facstudent-item">
+                  <input
+                    type="checkbox"
+                    id={`student-${student.id}`}
+                    value={student.id}
+                    checked={selectedStudents.includes(student.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedStudents((prev) => [...prev, student.id]);
+                      } else {
+                        setSelectedStudents((prev) =>
+                          prev.filter((id) => id !== student.id)
+                        );
+                      }
+                    }}
+                  />
+                  <label htmlFor={`student-${student.id}`}>
+                    {student.firstName} {student.lastName} - {student.email}
+                  </label>
                 </div>
-              )}
-              {enrollSubject && (
-  <div className="enroll-student-container">
-    <h2>Enroll Students in {enrollSubject.name}</h2>
-
-    {/* Search bar for filtering students */}
-    <input
-      type="text"
-      value={searchStudent}
-      onChange={(e) => setSearchStudent(e.target.value)}
-      placeholder="Search students by name, email, or ID"
-      className="enroll-search-bar"
-    />
-
-    {/* List of filtered students with checkboxes */}
-    <div className="student-list">
-      {filteredStudents.length > 0 ? (
-        filteredStudents.map((student) => (
-          <div key={student.id} className="student-item">
-            <input
-              type="checkbox"
-              id={`student-${student.id}`}
-              value={student.id}
-              checked={selectedStudents.includes(student.id)}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setSelectedStudents((prev) => [...prev, student.id]);
-                } else {
-                  setSelectedStudents((prev) =>
-                    prev.filter((id) => id !== student.id)
-                  );
-                }
-              }}
-            />
-            <label htmlFor={`student-${student.id}`}>
-              {student.firstName} {student.lastName} - {student.email}
-            </label>
+              ))
+            ) : (
+              <p>No students found</p>
+            )}
           </div>
-        ))
-      ) : (
-        <p>No students found</p>
+
+          {/* Buttons for enrolling students or canceling */}
+          <div className="facenroll-buttons">
+            <button
+              onClick={() => {
+                handleEnrollStudent(enrollSubject.id, selectedStudents);
+                handleCancelEnroll(); // Reset states after enrollment
+              }}
+              className="facenroll-button"
+            >
+              Enroll Students
+            </button>
+            <button onClick={handleCancelEnroll} className="faccancel-button">
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
+
+      {/* Student list on the right */}
+      <div className="Facviewed-student-list">
+        {enrolledStudents.length > 0 ? (
+          <ul>
+            {enrolledStudents.map((studentId) => (
+              <li key={studentId}>{studentId}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>No students enrolled.</p>
+        )}
+      </div>
     </div>
 
-    {/* Buttons for enrolling students or canceling */}
-    <div className="enroll-buttons">
-      <button
-        onClick={() => {
-          handleEnrollStudent(enrollSubject.id, selectedStudents);
-          handleCancelEnroll(); // Reset states after enrollment
-        }}
-        className="enroll-button"
-      >
-        Enroll Students
-      </button>
-      <button onClick={handleCancelEnroll} className="cancel-button">
-        Cancel
-      </button>
-    </div>
+    <button className="close-subdetails" onClick={() => setViewedSubject(null)}>
+      Close
+    </button>
   </div>
 )}
+
+
             </div>
           ) : (
             <>

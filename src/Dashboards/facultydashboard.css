@@ -289,60 +289,6 @@ html, body {
   background-color: rgb(85, 31, 31); /* Slightly lighter shade on hover */
 }
 
-.Facviewed-subject-details {
-  background-color: #f9f9f9;
-  padding: 1.5rem;
-  border-radius: 8px; /* Keep a slight border radius for consistency */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 100%; /* Full width of the container */
-  margin: 20px auto; /* Center and add space above */
-  width: 100%; /* Optional: adjust width to keep it consistent */
-  box-sizing: border-box; /* Ensures padding is included in width */
-  margin-right: 20px;
-}
-
-.Facviewed-subject-details h2 {
-  text-align: center;
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.Facviewed-subject-details ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Columns will fill the row */
-  grid-auto-rows: min-content; /* Adjust row height to content */
-  gap: 15px; /* Space between each student */
-  max-width: 600px;
- 
-}
-
-.Facviewed-subject-details ul li {
-  background-color: #f2f2f2;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #333;
-  font-weight: bold;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s;
-  white-space: nowrap;
-}
-
-/* Additional rule to limit each column to 6 items */
-.Facviewed-subject-details ul {
-  grid-auto-flow: column; /* Fill columns before adding rows */
-  grid-template-rows: repeat(10, auto); /* Limit each column to 6 rows */
-}
-
-
-.Facviewed-subject-details ul li:hover {
-  background-color: #e0e0e0;
-}
-
 .close-subdetails {
   display: block;
   margin-top: 1rem; /* Space above the button */
@@ -449,4 +395,148 @@ html, body {
 
 .custom-button:focus {
   outline: 2px solid white; /* Optional focus outline for accessibility */
+}
+.Facviewed-subject-details {
+  background-color: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  margin: 20px auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.Facviewed-subject-details h2 {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.Facviewed-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.Facviewed-student-list {
+  flex: 2;
+
+  max-width: 100%;
+  
+  width: 100%;
+  background-color: #f2f2f2;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.Facviewed-student-list ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-auto-rows: min-content;
+  gap: 15px;
+}
+
+.Facviewed-student-list ul li {
+  background-color: #f2f2f2;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #333;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+  white-space: nowrap;
+}
+
+.Facviewed-student-list ul li:hover {
+  background-color: #e0e0e0;
+}
+
+/* Additional rule to limit each column to 10 items */
+.Facviewed-student-list ul {
+  grid-auto-flow: column;
+  grid-template-rows: repeat(10, auto);
+}
+
+.facenroll-student-container {
+  flex: 1;
+  background-color: #f2f2f2;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 500px;
+  box-sizing: border-box;
+  height: fit-content;
+}
+
+.facstudent-list {
+  margin-top: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.5rem;
+  background-color: #f2f2f2;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.facstudent-item {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.facstudent-item input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.facenroll-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.facenroll-button {
+  background-color: #143315;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.facenroll-button:hover {
+  background-color: #1a471d;
+}
+
+.faccancel-button {
+  background-color: #3a1816;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.faccancel-button:hover {
+  background-color: #5a2926;
+}
+
+.enroll-search-bar {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: #f2f2f2;
 }
