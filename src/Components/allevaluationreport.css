@@ -246,3 +246,41 @@ td {
   background-color: #b17878; /* Darker red on hover */
 }
 
+.paginationreport {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.paginationreport button {
+  background-color: #D0F0C0; /* Tea Green */
+  color: #2F4F2F; /* Dark Green for better contrast */
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  margin: 0 5px;
+  border-radius: 20px 20px 0 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  font-size: 1rem;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+}
+
+.paginationreport button:hover {
+  background-color: #A9DFA7; /* Slightly darker green for hover */
+  color: #FFFFFF; /* White text for contrast on hover */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3); /* Slightly deeper shadow */
+}
+
+.paginationreport button:disabled {
+  background-color: #E5E5E5; /* Muted gray for disabled state */
+  color: #999999; /* Soft gray text */
+  cursor: not-allowed;
+  box-shadow: none; /* Remove shadow for disabled state */
+}
+
+.paginationreport span {
+  font-size: 1rem;
+  color: #333333; /* Neutral gray text for page numbers */
+  margin: 0 10px;
+}

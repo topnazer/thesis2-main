@@ -186,7 +186,10 @@ const EvaluationReportScoringPage = () => {
           <img src="/spc.png" alt="Logo" className="dashboardlogoscoring" />
         </div>
         <h1>Evaluation Report Scoring Page</h1>
-        <button onClick={() => setShowModal(true)}>Set Score Weights</button>
+        <button className="score-weights-btn" onClick={() => setShowModal(true)}>
+  Set Score Weights
+</button>
+
       </nav>
 
       {showModal && (
@@ -271,7 +274,7 @@ const EvaluationReportScoringPage = () => {
                   ))}
                 </tbody>
               </table>
-              <div className="pagination">
+              <div className="paginationreport">
                 <button onClick={handlePreviousPage} disabled={currentPage === 1}>
                   Previous
                 </button>

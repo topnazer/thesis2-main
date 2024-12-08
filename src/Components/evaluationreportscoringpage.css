@@ -29,17 +29,22 @@
   padding: 10px; /* Adds padding for better readability */
   border: 1px solid #ccc; /* Adds border around cells */
   text-align: left; /* Aligns text to the left */
-  background-color: #f4f4f4; /* Light gray background for cells */
+  background-color: #ffffff; /* White background for cells */
+  font-size: 18px; /* Font size for readability */
+ font-family: 'Roboto', sans-serif;
 }
 
 /* Table header row styling */
 .eval-scoring-page .faculty-list th {
-  background-color: #e0e0e0; /* Slightly darker gray background */
+  background-color: #F0FFF0; /* Light green background for header */
+  font-size: 20px; /* Slightly larger font for headers */
+  font-weight: bold; /* Makes the header text bold */
 }
 
-/* Alternating row background */
-.eval-scoring-page .faculty-list tr:nth-child(even) {
-  background-color: #f9f9f9; /* Lighter gray background for alternating rows */
+/* Hover effect for table rows (td) */
+.eval-scoring-page .faculty-list tr:hover td {
+  background-color: #E8F5E9; /* Light green for hover effect */
+  cursor: pointer; /* Pointer cursor for interactivity */
 }
 
 /* Navbar styling */
@@ -110,4 +115,34 @@
   height: auto;
   border-radius: 50%;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+.score-weights-btn {
+  background-color: #B22222; /* Base background color */
+  color: #FFFFFF; /* White text */
+  border: none; /* No border */
+  border-radius: 5px; /* Rounded corners */
+  padding: 10px 20px; /* Padding for a comfortable size */
+  font-size: 16px; /* Font size for readability */
+  font-weight: bold; /* Bold text */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover effect */
+}
+
+/* Hover Effect */
+.score-weights-btn:hover {
+  background-color: #DC143C; /* Slightly darker green for hover */
+  color: #333333; /* Dark gray text for contrast */
+}
+
+/* Active State (When Button is Clicked) */
+.score-weights-btn:active {
+  background-color: #8B0000; /* Teal for pressed state */
+  transform: scale(0.98); /* Slight scale-down effect */
+}
+
+/* Disabled State (Optional) */
+.score-weights-btn:disabled {
+  background-color: #E0E0E0; /* Light gray for disabled state */
+  color: #A0A0A0; /* Muted gray for text */
+  cursor: not-allowed; /* Show not-allowed cursor */
 }

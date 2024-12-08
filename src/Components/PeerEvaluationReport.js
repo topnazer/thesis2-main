@@ -289,7 +289,7 @@ const PeerEvaluationReport = () => {
                 ))}
               </tbody>
             </table>
-            <div className="pagination">
+            <div className="paginationreport">
                   <button
                     disabled={evaluationsCurrentPage === 1}
                     onClick={() =>
