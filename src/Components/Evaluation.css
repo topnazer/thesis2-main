@@ -15,7 +15,7 @@
     
 }
 
-.evaluation-tool-button {
+.deanevaluation-tool-button {
     display: flex;
     justify-content: center;
     flex-direction: column;
@@ -28,10 +28,45 @@
     border-radius: 20px;
     color: black;
     text-align: center;
+    background-color: #d8e0bb; /* Light gray background */
+}
+.facevaluation-tool-button {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    width: 220px;
+    height:220px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.7), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    cursor: pointer; 
+    text-decoration: none;
+    border-radius: 20px;
+    color: black;
+    text-align: center;
+    background-color: #b6cec7; /* Light gray background */
+}
+.studentevaluation-tool-button {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    width: 220px;
+    height:220px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.7), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    cursor: pointer; 
+    text-decoration: none;
+    border-radius: 20px;
+    color: black;
+    text-align: center;
+    background-color: #86a3c3; /* Light gray background */
 }
 
-
-.subject-evaluation-button:hover, .faculty-evaluation-button:hover, .dean-evaluation-button:hover {
-    opacity: 0.5;
+.studentevaluation-tool-button:hover, 
+.deanevaluation-tool-button:hover, 
+.facevaluation-tool-button:hover {
+    background-color: #6c7f92; /* Change background color on hover */
+    opacity: 0.9;
+    transform: translateY(-10px) scale(1.05);  /* Slightly enlarge the button on hover */
+    transition: 0.3s; /* Smooth transition */
+    box-shadow: 6px 8px 10px rgba(0, 0, 0, 0.5);
 }
-

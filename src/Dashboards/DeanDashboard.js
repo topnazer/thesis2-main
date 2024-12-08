@@ -141,12 +141,11 @@ const DeanDashboard = () => {
       );
       onSnapshot(evaluationsCollection, async (snapshot) => {
         const reports = snapshot.docs.map((doc) => doc.data());
-        setEvaluationReports(reports);
-
         const evaluatorIds = reports.map((report) => report.userId);
-        const namesToFetch = evaluatorIds.filter((id) => !evaluatorNames[id]);
+  
         const evaluatorNamesCopy = { ...evaluatorNames };
-
+        const namesToFetch = evaluatorIds.filter((id) => !evaluatorNamesCopy[id]);
+  
         if (namesToFetch.length > 0) {
           const namePromises = namesToFetch.map(async (userId) => {
             const userDoc = await getDoc(doc(db, "users", userId));
@@ -157,15 +156,23 @@ const DeanDashboard = () => {
               evaluatorNamesCopy[userId] = "Unknown Evaluator";
             }
           });
-
+  
           await Promise.all(namePromises);
           setEvaluatorNames(evaluatorNamesCopy);
         }
+  
+        const enrichedReports = reports.map((report) => ({
+          ...report,
+          evaluatorName: evaluatorNamesCopy[report.userId] || "Unknown Evaluator",
+        }));
+  
+        setEvaluationReports(enrichedReports);
       });
     } catch (error) {
       console.error("Error fetching evaluation reports:", error);
     }
   };
+  
 
   const handleSignOut = async () => {
     try {
@@ -207,6 +214,7 @@ const DeanDashboard = () => {
             <table className="deanevaluation-report-container">
               <thead>
                 <tr>
+                  <th>Evaluator</th>
                   <th>Percentage Score</th>
                   <th>Date</th>
                   <th>Comments</th>
@@ -215,6 +223,7 @@ const DeanDashboard = () => {
               <tbody>
                 {evaluationReports.map((report, index) => (
                   <tr key={index}>
+                       <td>{report.evaluatorName}</td>
                     <td>
                       {report.ratingScore?.percentageScore
                         ? `${report.ratingScore.percentageScore}%`

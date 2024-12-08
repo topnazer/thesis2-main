@@ -61,9 +61,13 @@
 
 
 
-.evaluationreport-button:hover {
-    background-color: #e0e0e0; /* Change background color on hover */
+.studentevaluationreport-button:hover, 
+.deanevaluationreport-button:hover, 
+.facevaluationreport-button:hover {
+    background-color: #6c7f92; /* Change background color on hover */
     opacity: 0.9;
-    transform: scale(1.05); /* Slightly enlarge the button on hover */
+    transform: translateY(-10px) scale(1.05);  /* Slightly enlarge the button on hover */
     transition: 0.3s; /* Smooth transition */
+    box-shadow: 6px 8px 10px rgba(0, 0, 0, 0.5);
 }
+

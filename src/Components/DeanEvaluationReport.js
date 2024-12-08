@@ -18,6 +18,11 @@ const DeanEvaluationReport = () => {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvaluation, setSelectedEvaluation] = useState(null);
+
+  // Pagination states
+  const [evaluationsCurrentPage, setEvaluationsCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Items per page for both deans and evaluations
+
   const db = getFirestore();
 
   const Modal = ({ isOpen, onClose, evaluation }) => {
@@ -78,8 +83,8 @@ const DeanEvaluationReport = () => {
     const fetchDeansByDepartment = async () => {
       setLoading(true);
       setError(null);
-      setEvaluations([]); // Clear evaluations when department changes
-    setSelectedDean(null); // Clear the selected dean when department changes
+      setEvaluations([]);
+      setSelectedDean(null);
       try {
         let deanQuery;
         if (selectedDepartment === "All") {
@@ -120,58 +125,22 @@ const DeanEvaluationReport = () => {
         `deanEvaluations/${deanId}/completed_evaluations`
       );
       const evaluationsSnapshot = await getDocs(evaluationsRef);
-  
-      if (evaluationsSnapshot.empty) {
-        setEvaluations([]);
-        return;
-      }
-  
+
       const evaluationsList = evaluationsSnapshot.docs.map((doc) => {
         const data = doc.data();
-  
-        const evaluator = data.Evaluator || "Unknown Evaluator";
-  
-        const date =
-          data.createdAt && data.createdAt.toDate
-            ? data.createdAt.toDate().toLocaleDateString()
-            : "Unknown Date";
-  
-        const percentageScore =
-          data.ratingScore && data.ratingScore.percentageScore !== undefined
-            ? `${data.ratingScore.percentageScore}%`
-            : "N/A";
-  
-        let categories = [];
-  
-        if (data.detailedQuestions && Array.isArray(data.detailedQuestions)) {
-          categories = data.detailedQuestions.map((category) => {
-            const { categoryName, questions } = category;
-  
-            const questionsList = questions.map((question) => ({
-              text: question.text || "No Question",
-              response:
-                Array.isArray(question.response) && question.response.length > 0
-                  ? question.response.join(", ")
-                  : question.response || "No Response",
-            }));
-  
-            return {
-              categoryName: categoryName || "Unknown Category",
-              questions: questionsList,
-            };
-          });
-        }
-  
         return {
-          evaluator, // Include Evaluator
+          evaluator: data.Evaluator || "Unknown Evaluator",
           deanName,
           comment: data.comment || "No Comment",
-          percentageScore,
-          date,
-          categories,
+          percentageScore:
+            data.ratingScore?.percentageScore !== undefined
+              ? `${data.ratingScore.percentageScore}%`
+              : "N/A",
+          date: data.createdAt?.toDate
+            ? data.createdAt.toDate().toLocaleDateString()
+            : "Unknown Date",
         };
       });
-  
       setEvaluations(evaluationsList);
     } catch (error) {
       console.error("Error fetching evaluations:", error);
@@ -180,60 +149,64 @@ const DeanEvaluationReport = () => {
       setLoading(false);
     }
   };
-  
 
   const handleDeanClick = (deanMember) => {
     setSelectedDean(deanMember);
     fetchEvaluations(deanMember.id, `${deanMember.firstName} ${deanMember.lastName}`);
   };
 
-  const openModal = (evaluation) => {
-    setSelectedEvaluation(evaluation);
-    setIsModalOpen(true);
+  const paginate = (items, currentPage) => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return items.slice(startIndex, startIndex + itemsPerPage);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedEvaluation(null);
+  const displayedEvaluations = paginate(evaluations, evaluationsCurrentPage);
+
+  const totalPages = (items) => Math.ceil(items.length / itemsPerPage);
+
+  const handlePageChange = (setCurrentPage, direction, items) => {
+    setCurrentPage((prev) => {
+      const newPage = direction === "next" ? prev + 1 : prev - 1;
+      return Math.max(1, Math.min(newPage, totalPages(items)));
+    });
   };
 
   return (
     <div className="facuser-page-container">
       <div className="facuser-page-left">
-        <div className="facuser-list">
-          <div className="facuser-button">
-            {departments.map((dept) => (
-              <button
-                key={dept}
-                onClick={() => setSelectedDepartment(dept)}
-                className={selectedDepartment === dept ? "active-department" : ""}
-              >
-                {dept}
-              </button>
-            ))}
-          </div>
-          {loading && <p>Loading...</p>}
-          {error && <p>{error}</p>}
-          {!loading && !error && deans.length > 0 && (
-            <div className="facuser-card">
-              {deans.map((member) => (
-                <div
-                  key={member.id}
-                  className="facuser-item"
-                  onClick={() => handleDeanClick(member)}
-                >
-                  <div className="facuser-info">
-                    <strong>
-                      {member.firstName} {member.lastName}
-                    </strong>
-                    <p>Email: {member.email}</p>
-                    <p>Department: {member.department}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="facuser-button">
+          {departments.map((dept) => (
+            <button
+              key={dept}
+              onClick={() => setSelectedDepartment(dept)}
+              className={selectedDepartment === dept ? "active-department" : ""}
+            >
+              {dept}
+            </button>
+          ))}
         </div>
+        {loading && <p>Loading...</p>}
+        {error && <p>{error}</p>}
+        {!loading && deans.length > 0 && (
+          <div className="facuser-card">
+            {deans.map((member) => (
+              <div
+                key={member.id}
+                className="facuser-item"
+                onClick={() => handleDeanClick(member)}
+              >
+                <div className="facuser-info">
+                  <strong>
+                    {member.firstName} {member.lastName}
+                  </strong>
+                  <p>Email: {member.email}</p>
+                  <p>Department: {member.department}</p>
+                </div>
+              </div>
+            ))}
+          
+          </div>
+        )}
       </div>
       <div className="facuser-page-right">
         {selectedDean && (
@@ -243,44 +216,63 @@ const DeanEvaluationReport = () => {
             </h2>
             {loading ? (
               <p>Loading evaluations...</p>
-            ) : evaluations.length > 0 ? (
-              <table className="facevaluations-table">
-                <thead>
-                  <tr>
-                    <th>Evaluator</th>
-                    <th>Date</th>
-                    <th>Comment</th>
-                    <th>Percentage Score</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {evaluations.map((evaluation, index) => (
-                    <tr key={index}>
-                      <td>{evaluation.evaluator}</td>
-                      <td>{evaluation.date}</td>
-                      <td> <div className="scrollablesapage">{evaluation.comment}</div></td>
-                      <td>{evaluation.percentageScore}</td>
-                      <td>
-                        <button className="show-more-btn" onClick={() => openModal(evaluation)}>
-                          Show More
-                        </button>
-                      </td>
+            ) : displayedEvaluations.length > 0 ? (
+              <>
+                <table className="facevaluations-table">
+                  <thead>
+                    <tr>
+                      <th>Evaluator</th>
+                      <th>Date</th>
+                      <th>Comment</th>
+                      <th>Percentage Score</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {displayedEvaluations.map((evaluation, index) => (
+                      <tr key={index}>
+                        <td>{evaluation.evaluator}</td>
+                        <td>{evaluation.date}</td>
+                        <td>
+                        <div className="scrollablesapage">{evaluation.comment}</div>
+                      </td>
+                        <td>{evaluation.percentageScore}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="pagination">
+                  <button
+                    disabled={evaluationsCurrentPage === 1}
+                    onClick={() =>
+                      handlePageChange(setEvaluationsCurrentPage, "prev", evaluations)
+                    }
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Page {evaluationsCurrentPage} of {totalPages(evaluations)}
+                  </span>
+                  <button
+                    disabled={evaluationsCurrentPage === totalPages(evaluations)}
+                    onClick={() =>
+                      handlePageChange(setEvaluationsCurrentPage, "next", evaluations)
+                    }
+                  >
+                    Next
+                  </button>
+                </div>
+              </>
             ) : (
               <p>No evaluations found for this dean.</p>
             )}
           </>
         )}
-        <Modal
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          evaluation={selectedEvaluation}
-        />
       </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        evaluation={selectedEvaluation}
+      />
     </div>
   );
 };

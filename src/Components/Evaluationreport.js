@@ -13,7 +13,7 @@ const Evaluationreport = () => (
             </Link>
             <Link to="/admin-dashboard/peer-evaluation-reports" className='facevaluationreport-button'>
                 <FileChartColumn style={{ width: '50px', height: '50px', color: 'black' }} />
-                <p>Faculty Report</p>
+                <p>Peer to Peer Report</p>
             </Link>
 
             <Link to="/admin-dashboard/dean-evaluation-reports" className='deanevaluationreport-button'>

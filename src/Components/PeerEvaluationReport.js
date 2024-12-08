@@ -18,6 +18,8 @@ const PeerEvaluationReport = () => {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvaluation, setSelectedEvaluation] = useState(null);
+  const [evaluationsCurrentPage, setEvaluationsCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Items per page for both deans and evaluations
   const db = getFirestore();
 
   const Modal = ({ isOpen, onClose, evaluation }) => {
@@ -182,6 +184,23 @@ const PeerEvaluationReport = () => {
     fetchEvaluations(facultyMember.id, `${facultyMember.firstName} ${facultyMember.lastName}`);
   };
 
+  const paginate = (items, currentPage) => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return items.slice(startIndex, startIndex + itemsPerPage);
+  };
+
+  const displayedEvaluations = paginate(evaluations, evaluationsCurrentPage);
+
+  const totalPages = (items) => Math.ceil(items.length / itemsPerPage);
+
+  const handlePageChange = (setCurrentPage, direction, items) => {
+    setCurrentPage((prev) => {
+      const newPage = direction === "next" ? prev + 1 : prev - 1;
+      return Math.max(1, Math.min(newPage, totalPages(items)));
+    });
+  };
+
+
   const openModal = (evaluation) => {
     setSelectedEvaluation(evaluation);
     setIsModalOpen(true);
@@ -238,7 +257,8 @@ const PeerEvaluationReport = () => {
             </h2>
             {loading ? (
               <p>Loading evaluations...</p>
-            ) : evaluations.length > 0 ? (
+            ) : displayedEvaluations.length > 0 ? (
+              <>
               <table className="facevaluations-table">
               <thead>
                 <tr>
@@ -268,6 +288,28 @@ const PeerEvaluationReport = () => {
                 ))}
               </tbody>
             </table>
+            <div className="pagination">
+                  <button
+                    disabled={evaluationsCurrentPage === 1}
+                    onClick={() =>
+                      handlePageChange(setEvaluationsCurrentPage, "prev", evaluations)
+                    }
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Page {evaluationsCurrentPage} of {totalPages(evaluations)}
+                  </span>
+                  <button
+                    disabled={evaluationsCurrentPage === totalPages(evaluations)}
+                    onClick={() =>
+                      handlePageChange(setEvaluationsCurrentPage, "next", evaluations)
+                    }
+                  >
+                    Next
+                  </button>
+                </div>
+              </>
             ) : (
               <p>No evaluations found for this faculty.</p>
             )}
