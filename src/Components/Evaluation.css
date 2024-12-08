@@ -28,7 +28,7 @@
     border-radius: 20px;
     color: black;
     text-align: center;
-    background-color: #d8e0bb; /* Light gray background */
+    background-color: #86a3c3; /* Light gray background */
 }
 .facevaluation-tool-button {
     display: flex;
@@ -58,7 +58,7 @@
     border-radius: 20px;
     color: black;
     text-align: center;
-    background-color: #86a3c3; /* Light gray background */
+    background-color: #d8e0bb; /* Light gray background */
 }
 
 .studentevaluation-tool-button:hover, 

@@ -19,6 +19,8 @@ html, body {
   color: white;
   border-radius: 2px; /* Adds rounded corners */
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+
 }
 
 .faculty-dashboard nav h1 {

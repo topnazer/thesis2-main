@@ -10,6 +10,7 @@
   color: white;
   border-radius: 2px; /* Adds rounded corners */
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3); /* Adds a subtle shadow effect */
+  position: relative;
 }
 
 .student-dashboard nav h1 {
@@ -143,6 +144,7 @@
   left: 0; /* Aligns the logo to the right of the header */
   margin-left: 15px;
   margin-top: 15px;
+  position: absolute;
 }
 
 .dashboardlogo {
