@@ -13,8 +13,8 @@ import {
 import './evaluationreportscoringpage.css';
 
 const EvaluationReportScoringPage = () => {
-  const [subjectWeight, setSubjectWeight] = useState(60); // Default to 60%
-  const [facultyWeight, setFacultyWeight] = useState(40); // Default to 40%
+  const [subjectWeight, setSubjectWeight] = useState(60);
+  const [facultyWeight, setFacultyWeight] = useState(40);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [faculties, setFaculties] = useState([]);
@@ -72,7 +72,6 @@ const EvaluationReportScoringPage = () => {
             const facultyData = facultyDoc.data();
             const facultyId = facultyDoc.id;
 
-            // Fetch subject evaluations for this faculty
             const subjectEvaluationsQuery = query(
               collection(db, 'subjectEvaluations'),
               where('facultyId', '==', facultyId)
@@ -81,7 +80,6 @@ const EvaluationReportScoringPage = () => {
               subjectEvaluationsQuery
             );
 
-            // Calculate subject scores
             let totalSubjectScore = 0;
             let subjectCount = 0;
 
@@ -98,7 +96,6 @@ const EvaluationReportScoringPage = () => {
                 ? totalSubjectScore / subjectCount
                 : 'Not scored yet';
 
-            // Fetch faculty evaluation score
             const facultyEvaluationDoc = await getDoc(
               doc(db, 'facdeanEvaluations', facultyId)
             );
@@ -109,25 +106,22 @@ const EvaluationReportScoringPage = () => {
               ? facultyEvaluationData.averageScore
               : 'Not scored yet';
 
-
-    const weightedSubjectScore =
-    typeof subjectScore === 'number'
-      ? parseFloat(((subjectScore * subjectWeight) / 100).toFixed(2)) // Only apply weights without modifying subjectScore
-      : 'Not scored yet';
+            const weightedSubjectScore =
+              typeof subjectScore === 'number'
+                ? parseFloat(((subjectScore * subjectWeight) / 100).toFixed(2))
+                : 'Not scored yet';
 
             const weightedFacultyScore =
               typeof facultyScore === 'number'
                 ? (facultyScore * facultyWeight) / 100
                 : 'Not scored yet';
 
-            // Calculate the final score as the sum of weighted scores
             const finalScore =
               typeof weightedSubjectScore === 'number' &&
               typeof weightedFacultyScore === 'number'
                 ? weightedSubjectScore + weightedFacultyScore
                 : 'Not scored yet';
 
-            // Determine remarks based on the final score
             const remarks =
               typeof finalScore === 'number'
                 ? finalScore >= 80
@@ -174,11 +168,75 @@ const EvaluationReportScoringPage = () => {
     }
   };
 
+  const handlePrint = (faculty) => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Faculty Evaluation Report</title>
+          <style>
+            .print-header {
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            .print-header img {
+              width: 100px;
+            }
+            .print-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 20px 0;
+            }
+            .print-table th, .print-table td {
+              border: 1px solid #000;
+              padding: 8px;
+              text-align: left;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-header">
+            <img src="/spc.png" alt="Logo" />
+            <h1>Faculty Evaluation Report</h1>
+          </div>
+          <table class="print-table">
+            <thead>
+              <tr>
+                <th>Faculty Name</th>
+                <th>Department</th>
+                <th>Supervisor Score (40%)</th>
+                <th>Student Score (60%)</th>
+                <th>Final Score</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${faculty.firstName} ${faculty.lastName}</td>
+                <td>${faculty.department}</td>
+                <td>${typeof faculty.facultyScore === 'number'
+                  ? faculty.facultyScore.toFixed(2)
+                  : faculty.facultyScore}</td>
+                <td>${typeof faculty.subjectScore === 'number'
+                  ? faculty.subjectScore.toFixed(2)
+                  : faculty.subjectScore}</td>
+                <td>${typeof faculty.finalScore === 'number'
+                  ? faculty.finalScore.toFixed(2)
+                  : faculty.finalScore}</td>
+                <td>${faculty.remarks}</td>
+              </tr>
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
   const displayedFaculties = faculties.slice(
     (currentPage - 1) * facultiesPerPage,
     currentPage * facultiesPerPage
   );
-
   return (
     <div className="eval-scoring-page">
       <nav className="navbar">
@@ -238,42 +296,46 @@ const EvaluationReportScoringPage = () => {
             <p>Loading faculty data...</p>
           ) : (
             <div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Faculty Name</th>
-                    <th>Department</th>
-                    <th>Supervisor(40%)</th>
-                    <th>Student (60%)</th>
-                    <th>Overall Rating</th>
-                    <th>Remarks</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayedFaculties.map((faculty) => (
-                    <tr key={faculty.id}>
-                      <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
-                      <td>{faculty.department}</td>
-                      <td>
-                        {typeof faculty.facultyScore === 'number'
-                          ? faculty.facultyScore.toFixed(2)
-                          : faculty.facultyScore}
-                      </td>
-                      <td>
-                        {typeof faculty.subjectScore === 'number'
-                          ? faculty.subjectScore.toFixed(2)
-                          : faculty.subjectScore}
-                      </td>
-                      <td>
-                        {typeof faculty.finalScore === 'number'
-                          ? faculty.finalScore.toFixed(2)
-                          : faculty.finalScore}
-                      </td>
-                      <td>{faculty.remarks}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+               <table>
+        <thead>
+          <tr>
+            <th>Faculty Name</th>
+            <th>Department</th>
+            <th>Supervisor (40%)</th>
+            <th>Student (60%)</th>
+            <th>Overall Rating</th>
+            <th>Remarks</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+  {displayedFaculties.map((faculty) => (
+    <tr key={faculty.id}>
+      <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
+      <td>{faculty.department}</td>
+      <td>
+        {typeof faculty.facultyScore === 'number'
+          ? faculty.facultyScore.toFixed(2)
+          : faculty.facultyScore}
+      </td>
+      <td>
+        {typeof faculty.subjectScore === 'number'
+          ? faculty.subjectScore.toFixed(2)
+          : faculty.subjectScore}
+      </td>
+      <td>
+        {typeof faculty.finalScore === 'number'
+          ? faculty.finalScore.toFixed(2)
+          : faculty.finalScore}
+      </td>
+      <td>{faculty.remarks}</td>
+      <td>
+        <button onClick={() => handlePrint(faculty)}>Print</button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+      </table>
               <div className="paginationreport">
                 <button onClick={handlePreviousPage} disabled={currentPage === 1}>
                   Previous

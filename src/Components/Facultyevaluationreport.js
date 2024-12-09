@@ -56,22 +56,31 @@ const Facultyevaluationreport = () => {
           <h2>Questions and Responses</h2>
           {groupedQuestions.length > 0 ? (
             <div className="facmodal-details">
-              {groupedQuestions.map((group, groupIndex) => (
-                <div key={groupIndex}>
-                  <h3>{group.categoryName}</h3>
-                  {group.questions.map((question, questionIndex) => (
-                    <div key={questionIndex} className="question-response">
-                      <p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Question</th>
+                  <th>Response</th>
+                </tr>
+              </thead>
+              <tbody>
+                {groupedQuestions.map((group, groupIndex) => (
+                  group.questions.map((question, questionIndex) => (
+                    <tr key={`${groupIndex}-${questionIndex}`}>
+                      {questionIndex === 0 && (
+                        <td rowSpan={group.questions.length}>{group.categoryName}</td>
+                      )}
+                      <td>
                         <strong>Question {questionIndex + 1}:</strong> {question.text}
-                      </p>
-                      <p>
-                        <strong>Response:</strong> {question.response}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
+                      </td>
+                      <td>{question.response}</td>
+                    </tr>
+                  ))
+                ))}
+              </tbody>
+            </table>
+          </div>
           ) : (
             <p>No questions or responses available.</p>
           )}
@@ -140,7 +149,7 @@ const Facultyevaluationreport = () => {
           ? `${data.ratingScore.percentageScore}%`
           : "N/A";
 
-      // Collect all questions grouped by category
+     
       let categories = [];
 
       if (data.detailedQuestions && Array.isArray(data.detailedQuestions)) {
@@ -167,6 +176,7 @@ const Facultyevaluationreport = () => {
         studentName: data.studentName || "Unknown Student",
         subjectName: data.subjectName || "Unknown Subject",
         comment: data.comment || "No Comment",
+        subjectId: data.subjectId || "Unknown ID",
         percentageScore,
         date,
         categories,
@@ -261,36 +271,40 @@ const Facultyevaluationreport = () => {
               <p>Loading evaluations...</p>
             ) : displayedEvaluations.length > 0 ? (
               <>
-              <table className="facevaluations-table">
-                <thead>
-                  <tr>
-                    <th>Student Name</th>
-                    <th>Subject</th>
-                    <th>Date</th>
-                    <th>Comment</th>
-                    <th>Percentage Score</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayedEvaluations.map((evaluation, index) => (
-                    <tr key={index}>
-                      <td>{evaluation.studentName}</td>
-                      <td>{evaluation.subjectName}</td>
-                      <td>{evaluation.date}</td>
-                      <td>
-                        <div className="scrollablesapage">{evaluation.comment}</div>
-                      </td>
-                      <td>{evaluation.percentageScore}</td>
-                      <td>
-                      <button className="show-more-btn" onClick={() => openModal(evaluation)}>
-  Show More
-</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <table className="facevaluations-table">
+  <thead>
+    <tr>
+      <th>Student Name</th>
+      <th>Subject</th>
+      <th>Date</th>
+      <th>Comment</th>
+      <th>Percentage Score</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {displayedEvaluations.map((evaluation, index) => (
+      <tr key={index}>
+        <td>{evaluation.studentName}</td>
+        <td>
+          {evaluation.subjectName} <br />
+          <small>Offer number: {evaluation.subjectId}</small>
+        </td>
+        <td>{evaluation.date}</td>
+        <td>
+          <div className="scrollablesapage">{evaluation.comment}</div>
+        </td>
+        <td>{evaluation.percentageScore}</td>
+        <td>
+          <button className="show-more-btn" onClick={() => openModal(evaluation)}>
+            Show More
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
               <div className="paginationreport">
                   <button
                     disabled={evaluationsCurrentPage === 1}
