@@ -380,24 +380,6 @@ html, body {
   outline: 2px solid #007bff;
 }
 
-.custom-button {
-  background-color: rgb(15, 2, 2); /* Dark background color */
-  color: white; /* White text color */
-  padding: 0.5rem 1rem; /* Add spacing inside the button */
-  border: none; /* Remove default border */
-  cursor: pointer; /* Change cursor to pointer on hover */
-  border-radius: 0 20px 0 20px; /* Apply custom border radius */
-  transition: background-color 0.3s ease; /* Smooth background color transition */
-  margin-top: 20px;
-}
-
-.custom-button:hover {
-  background-color: rgb(30, 15, 15); /* Slightly lighter background on hover */
-}
-
-.custom-button:focus {
-  outline: 2px solid white; /* Optional focus outline for accessibility */
-}
 .Facviewed-subject-details {
   background-color: #f9f9f9;
   padding: 1.5rem;
@@ -541,4 +523,75 @@ html, body {
   border-radius: 4px;
   box-sizing: border-box;
   background-color: #f2f2f2;
+}
+.commentstables table {
+  width: 100%; /* Full width of the container */
+  border-collapse: collapse; /* Remove gaps between table cells */
+  margin-top: 10px; /* Add spacing above the table */
+}
+
+.commentstablesnav {
+  background-color: rgb(69, 10, 10);   
+  color: white; /* White text */
+  padding: 15px; /* Add padding for spacing */
+  font-size: 20px; /* Adjust font size */
+  font-weight: bold; /* Bold text */
+  font-family: 'Arial', sans-serif; /* Consistent font with the nav bar */
+  display: flex; /* Use flex for alignment */
+  justify-content: space-between; /* Space out items */
+  align-items: center; /* Center align items vertically */
+  border-radius: 2px; /* Add rounded corners if needed */
+  margin-bottom: 20px; /* Space below the nav header */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Optional shadow for elevation */
+}
+
+.commentstablesnav h2 {
+  margin: 0; /* Remove margin for alignment */
+  color: white;
+}
+
+.commentstablesnav button {
+  background-color: rgb(15, 2, 2); /* Dark background color */
+  color: white; /* White text color */
+  padding: 0.5rem 1rem; /* Add spacing inside the button */
+  border: none; /* Remove default border */
+  cursor: pointer; /* Change cursor to pointer on hover */
+  border-radius: 0 20px 0 20px; /* Apply custom border radius */
+  transition: background-color 0.3s ease; /* Smooth background color transition */
+  
+}
+
+.commentstablesnav button:hover {
+  background-color: rgb(30, 15, 15); /* Slightly lighter background on hover */
+}
+
+.commentstablesnav:focus {
+  outline: 2px solid white; /* Optional focus outline for accessibility */
+}
+
+.commentstables td {
+  padding: 10px;
+  vertical-align: top; /* Align content to the top */
+  word-wrap: break-word; /* Allow long comments to wrap */
+  white-space: pre-wrap; /* Preserve formatting and wrap text */
+}
+
+.commentstables td:nth-child(3) {
+  width: 70%; /* Allocate more space for the comment column */
+}
+
+.commentstables td:nth-child(1),
+.commentstables td:nth-child(2) {
+  width: 15%; /* Allocate equal space for other columns */
+}
+
+/* Add borders */
+.commentstables th,
+.commentstables td {
+  border: 10px solid #ccc; /* Light gray borders */
+}
+
+/* Row hover effect */
+.commentstables tr:hover {
+  background-color: #f9f9f9; /* Subtle background color on hover */
 }

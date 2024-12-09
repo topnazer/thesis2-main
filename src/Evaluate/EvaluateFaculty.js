@@ -149,104 +149,142 @@ const EvaluateFaculty = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!isCurrentCategoryComplete()) {
-      alert("Please answer all questions in this category before submitting.");
-      return;
+        alert("Please answer all questions in this category before submitting.");
+        return;
     }
-  
+
     const user = auth.currentUser;
     if (!user) {
-      alert("User not authenticated.");
-      return;
-    }
-  
-    const { totalScore, maxScore, percentageScore } = calculateRatingScore();
-  
-    const detailedQuestions = categories.map((category, categoryIndex) => ({
-      categoryName: category.name,
-      type: category.type, // Include category type
-      questions: category.questions.map((question, questionIndex) => {
-        const uniqueKey = `${categoryIndex}-${questionIndex}`;
-        return {
-          text: question.text, // Include the question text
-          type: category.type, // Include the question type
-          response: responses[uniqueKey] || (category.type === "Checkbox" ? [] : "N/A"), // Add response
-          options: category.options || [], // Include available options for the question
-        };
-      }),
-    }));
-  
-    try {
-      // Fetch evaluator's details
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) {
-        alert("Evaluator information is missing.");
+        alert("User not authenticated.");
         return;
-      }
-      const evaluatorData = userDoc.data();
-      const evaluatorName = `${evaluatorData.firstName || "Unknown"} ${evaluatorData.lastName || "User"}`;
-  
-      // Save individual evaluation
-      const evaluationRef = doc(
-        collection(db, "facultyEvaluations", facultyId, "completed_evaluations"),
-        user.uid
-      );
-  
-      await setDoc(evaluationRef, {
-        userId: user.uid,
-        facultyId,
-        facultyName: evaluatorName, // Use evaluator's name
-        ratingScore: { totalScore, maxScore, percentageScore },
-        comment,
-        percentageScore,
-        createdAt: new Date(),
-        detailedQuestions, // Include detailed questions here
-      });
-  
-      // Update or create the overall faculty evaluation
-      const facultyEvaluationRef = doc(db, "facultyEvaluations", facultyId);
-      const facultyEvaluationDoc = await getDoc(facultyEvaluationRef);
-  
-      let newAverageScore;
-      let completedEvaluations;
-  
-      if (facultyEvaluationDoc.exists()) {
-        const existingAverageScore = facultyEvaluationDoc.data().averageScore || 0;
-        completedEvaluations = (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
-        newAverageScore =
-          (existingAverageScore * (completedEvaluations - 1) + percentageScore) / completedEvaluations;
-  
-        await setDoc(
-          facultyEvaluationRef,
-          {
-            averageScore: newAverageScore,
-            completedEvaluations,
-          },
-          { merge: true }
-        );
-      } else {
-        newAverageScore = percentageScore;
-        completedEvaluations = 1;
-  
-        await setDoc(facultyEvaluationRef, {
-          averageScore: newAverageScore,
-          completedEvaluations,
-        });
-      }
-  
-      alert(
-        `Evaluation submitted successfully! Your score: ${totalScore} / ${maxScore} (${percentageScore.toFixed(
-          2
-        )}%)`
-      );
-      navigate(location.state?.redirectTo || "/faculty-dashboard");
-    } catch (error) {
-      alert("Failed to submit evaluation. Please try again.");
-      console.error("Error submitting evaluation:", error.message);
     }
-  };
-  
+
+    const { totalScore, maxScore, percentageScore } = calculateRatingScore();
+
+    const detailedQuestions = categories.map((category, categoryIndex) => ({
+        categoryName: category.name,
+        type: category.type, // Include category type
+        questions: category.questions.map((question, questionIndex) => {
+            const uniqueKey = `${categoryIndex}-${questionIndex}`;
+            return {
+                text: question.text, // Include the question text
+                type: category.type, // Include the question type
+                response: responses[uniqueKey] || (category.type === "Checkbox" ? [] : "N/A"), // Add response
+                options: category.options || [], // Include available options for the question
+            };
+        }),
+    }));
+
+    try {
+        // Fetch evaluator's details
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists()) {
+            alert("Evaluator information is missing.");
+            return;
+        }
+        const evaluatorData = userDoc.data();
+        const evaluatorName = `${evaluatorData.firstName || "Unknown"} ${evaluatorData.lastName || "User"}`;
+
+        // Save individual evaluation in facultyEvaluations
+        const evaluationRef = doc(
+            collection(db, "facultyEvaluations", facultyId, "completed_evaluations"),
+            user.uid
+        );
+
+        const evaluationData = {
+            userId: user.uid,
+            facultyId,
+            evaluatorName,
+            ratingScore: { totalScore, maxScore, percentageScore },
+            comment,
+            createdAt: new Date(),
+            detailedQuestions, // Include detailed questions
+        };
+
+        await setDoc(evaluationRef, evaluationData);
+
+        // Check if evaluator is a dean and store in "facdeanEvaluations" collection
+        if (evaluatorData.role === "Dean") {
+            const deanEvaluationRef = doc(
+                collection(db, "facdeanEvaluations", facultyId, "completed_evaluations"),
+                user.uid
+            );
+            await setDoc(deanEvaluationRef, evaluationData);
+
+            // Update or create the overall `averageScore` for facdeanEvaluations
+            const facDeanEvaluationRef = doc(db, "facdeanEvaluations", facultyId);
+            const facDeanEvaluationDoc = await getDoc(facDeanEvaluationRef);
+
+            let newAverageScore;
+            let completedEvaluations;
+
+            if (facDeanEvaluationDoc.exists()) {
+                const existingAverageScore = facDeanEvaluationDoc.data().averageScore || 0;
+                completedEvaluations = (facDeanEvaluationDoc.data().completedEvaluations || 0) + 1;
+                newAverageScore =
+                    (existingAverageScore * (completedEvaluations - 1) + percentageScore) / completedEvaluations;
+
+                await setDoc(
+                    facDeanEvaluationRef,
+                    {
+                        averageScore: newAverageScore,
+                        completedEvaluations,
+                    },
+                    { merge: true }
+                );
+            } else {
+                newAverageScore = percentageScore;
+                completedEvaluations = 1;
+
+                await setDoc(facDeanEvaluationRef, {
+                    averageScore: newAverageScore,
+                    completedEvaluations,
+                });
+            }
+        }
+
+        // Update or create the overall faculty evaluation for facultyEvaluations
+        const facultyEvaluationRef = doc(db, "facultyEvaluations", facultyId);
+        const facultyEvaluationDoc = await getDoc(facultyEvaluationRef);
+
+        let newAverageScore;
+        let completedEvaluationsFaculty;
+
+        if (facultyEvaluationDoc.exists()) {
+            const existingAverageScore = facultyEvaluationDoc.data().averageScore || 0;
+            completedEvaluationsFaculty = (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
+            newAverageScore =
+                (existingAverageScore * (completedEvaluationsFaculty - 1) + percentageScore) / completedEvaluationsFaculty;
+
+            await setDoc(
+                facultyEvaluationRef,
+                {
+                    averageScore: newAverageScore,
+                    completedEvaluations: completedEvaluationsFaculty,
+                },
+                { merge: true }
+            );
+        } else {
+            newAverageScore = percentageScore;
+            completedEvaluationsFaculty = 1;
+
+            await setDoc(facultyEvaluationRef, {
+                averageScore: newAverageScore,
+                completedEvaluations: completedEvaluationsFaculty,
+            });
+        }
+
+       
+        navigate(location.state?.redirectTo || "/faculty-dashboard");
+    } catch (error) {
+        alert("Failed to submit evaluation. Please try again.");
+        console.error("Error submitting evaluation:", error.message);
+    }
+};
+
+
 
   const renderQuestionsForCurrentCategory = () => {
     const currentCategory = categories[currentCategoryIndex];

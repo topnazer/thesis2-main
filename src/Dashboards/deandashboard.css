@@ -131,6 +131,16 @@ html, body {
   width: 100%; /* Full width inside the container */
   border-collapse: collapse; /* Remove double borders */
 }
+.deanevaluation-report-container td:nth-child(4) {
+  width: 70%; /* Allocate more space for the comment column */
+}
+
+.deanevaluation-report-container td:nth-child(1),
+.deanevaluation-report-container td:nth-child(2),
+.deanevaluation-report-container td:nth-child(3) {
+  width: 15%; /* Allocate equal space for other columns */
+}
+
 
 .deanevaluation-report-container th,
 .deanevaluation-report-container td {

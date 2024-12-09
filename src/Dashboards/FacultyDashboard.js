@@ -32,6 +32,13 @@ const FacultyDashboard = () => {
   const totalFacultyPages = Math.ceil(facultyList.length / facultyPerPage);
   const subjectsPerPage = 5;
   const totalPages = Math.ceil(subjects.length / subjectsPerPage);
+  const commentsPerPage = 10; // Define items per page for comments
+const totalCommentPages = Math.ceil(comments.length / commentsPerPage);
+const [commentsCurrentPage, setCommentsCurrentPage] = useState(0);
+const subjectCommentsPerPage = 10; // Define items per page for subject comments
+const totalSubjectCommentPages = Math.ceil(comments.length / subjectCommentsPerPage);
+const [subjectCommentsCurrentPage, setSubjectCommentsCurrentPage] = useState(0);
+
   const navigate = useNavigate();
   const db = getFirestore();
 
@@ -53,6 +60,7 @@ const FacultyDashboard = () => {
     });
     return unsubscribe; 
   }, [db, navigate]);
+
 
   const fetchAllStudents = async () => {
     try {
@@ -156,6 +164,23 @@ const FacultyDashboard = () => {
       setCurrentPage(currentPage - 1);
     }
   };
+  const handleNextCommentPage = () => {
+    if (commentsCurrentPage < totalCommentPages - 1) {
+      setCommentsCurrentPage(commentsCurrentPage + 1);
+    }
+  };
+  
+  const handlePreviousCommentPage = () => {
+    if (commentsCurrentPage > 0) {
+      setCommentsCurrentPage(commentsCurrentPage - 1);
+    }
+  };
+  
+  // Paginate comments for current page
+  const currentComments = comments.slice(
+    commentsCurrentPage * commentsPerPage,
+    commentsCurrentPage * commentsPerPage + commentsPerPage
+  );
 
 
   const fetchUserInfo = async (user) => {
@@ -473,6 +498,24 @@ const FacultyDashboard = () => {
     currentPage * subjectsPerPage + subjectsPerPage
   );
 
+  const handleNextSubjectCommentPage = () => {
+    if (subjectCommentsCurrentPage < totalSubjectCommentPages - 1) {
+      setSubjectCommentsCurrentPage(subjectCommentsCurrentPage + 1);
+    }
+  };
+  
+  const handlePreviousSubjectCommentPage = () => {
+    if (subjectCommentsCurrentPage > 0) {
+      setSubjectCommentsCurrentPage(subjectCommentsCurrentPage - 1);
+    }
+  };
+  
+  // Paginate subject comments for current page
+  const currentSubjectComments = comments.slice(
+    subjectCommentsCurrentPage * subjectCommentsPerPage,
+    subjectCommentsCurrentPage * subjectCommentsPerPage + subjectCommentsPerPage
+  );
+
   const handleShowComments = async () => {
     setLoading(true);
     setShowCommentsTable(true);
@@ -552,43 +595,72 @@ const FacultyDashboard = () => {
     // Check if we're showing subject or faculty comments
     showFacultyComments ? (
       // Render Faculty Comments
-      <div className="faculty-cmmnts-tbl">
-  <h2>Faculty Evaluation Comments</h2>
+      <div className="commentstables">
+  <div className="commentstablesnav">
+    <h2>Faculty Evaluation Comments</h2>
+    <button
+      onClick={() => {
+        setShowCommentsTable(false);
+        setShowFacultyComments(false);
+      }}
+    >
+      Back
+    </button>
+  </div>
   {comments.length > 0 ? (
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Comment</th>
-        </tr>
-      </thead>
-      <tbody>
-        {comments.map((comment, index) => (
-          <tr key={index}>
-            <td>{comment.createdAt}</td>
-            <td>{comment.comment}</td>
+    <>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Comment</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {currentComments.map((comment, index) => (
+            <tr key={index}>
+              <td>{comment.createdAt}</td>
+              <td>{comment.comment}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {/* Pagination Controls */}
+      <div className="facpagination-controls">
+        <button
+          onClick={handlePreviousCommentPage}
+          disabled={commentsCurrentPage === 0}
+        >
+          Previous
+        </button>
+        <span>
+          Page {commentsCurrentPage + 1} of {totalCommentPages}
+        </span>
+        <button
+          onClick={handleNextCommentPage}
+          disabled={commentsCurrentPage === totalCommentPages - 1}
+        >
+          Next
+        </button>
+      </div>
+    </>
   ) : (
     <p>No faculty comments available.</p>
   )}
- <button
-    className="custom-button"
-    onClick={() => {
-      setShowCommentsTable(false);
-      setShowFacultyComments(false);
-    }}
-  >
-    Back
-  </button>
 </div>
     ) : (
       // Render Subject Comments
-      <div className="subject-comts-tbl">
-        <h2>Subject Evaluation</h2>
-        {comments.length > 0 ? (
+      <div className="commentstables">
+      <div className="commentstablesnav">
+        <h2>Subject Evaluation Comments</h2>
+        <button
+          onClick={() => setShowCommentsTable(false)}
+        >
+          Back
+        </button>
+      </div>
+      {comments.length > 0 ? (
+        <>
           <table>
             <thead>
               <tr>
@@ -598,7 +670,7 @@ const FacultyDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {comments.map((comment, index) => (
+              {currentSubjectComments.map((comment, index) => (
                 <tr key={index}>
                   <td>{comment.subjectName}</td>
                   <td>{comment.date}</td>
@@ -607,16 +679,29 @@ const FacultyDashboard = () => {
               ))}
             </tbody>
           </table>
-        ) : (
-          <p>No subject comments available.</p>
-        )}
-       <button
-    className="custom-button"
-    onClick={() => setShowCommentsTable(false)}
-  >
-    Back
-  </button>
-      </div>
+          {/* Pagination Controls */}
+          <div className="facpagination-controls">
+            <button
+              onClick={handlePreviousSubjectCommentPage}
+              disabled={subjectCommentsCurrentPage === 0}
+            >
+              Previous
+            </button>
+            <span>
+              Page {subjectCommentsCurrentPage + 1} of {totalSubjectCommentPages}
+            </span>
+            <button
+              onClick={handleNextSubjectCommentPage}
+              disabled={subjectCommentsCurrentPage === totalSubjectCommentPages - 1}
+            >
+              Next
+            </button>
+          </div>
+        </>
+      ) : (
+        <p>No subject comments available.</p>
+      )}
+    </div>
     )
   ) : (
     // The rest of the faculty dashboard content

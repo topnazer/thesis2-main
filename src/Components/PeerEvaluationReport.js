@@ -263,7 +263,7 @@ const PeerEvaluationReport = () => {
               <table className="facevaluations-table">
               <thead>
                 <tr>
-                  <th>Faculty Name</th> {/* Column for Faculty Name */}
+                  <th>Evaluator</th> {/* Column for Faculty Name */}
                   <th>Date</th>
                   <th>Comment</th>
                   <th>Percentage Score</th>
@@ -271,7 +271,7 @@ const PeerEvaluationReport = () => {
                 </tr>
               </thead>
               <tbody>
-                {evaluations.map((evaluation, index) => (
+                {displayedEvaluations.map((evaluation, index) => (
                   <tr key={index}>
                     <td>{evaluation.facultyName}</td> {/* Display Faculty Name */}
                     <td>{evaluation.date}</td>

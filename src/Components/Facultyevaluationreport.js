@@ -203,7 +203,6 @@ const Facultyevaluationreport = () => {
     });
   };
 
-
   const openModal = (evaluation) => {
     setSelectedEvaluation(evaluation);
     setIsModalOpen(true);
@@ -274,7 +273,7 @@ const Facultyevaluationreport = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {evaluations.map((evaluation, index) => (
+                  {displayedEvaluations.map((evaluation, index) => (
                     <tr key={index}>
                       <td>{evaluation.studentName}</td>
                       <td>{evaluation.subjectName}</td>

@@ -177,7 +177,7 @@ const EvaluateSubject = () => {
     let subjectName = subject.name || "Unknown Subject";
 
     // Calculate scores and option frequencies
-    const { totalScore, maxScore, percentageScore } = calculateRatingScore();
+    const { percentageScore } = calculateRatingScore();
     // Build detailed question-response data
     const detailedQuestions = categories.map((category, categoryIndex) => ({
         categoryName: category.name,
@@ -286,12 +286,6 @@ const EvaluateSubject = () => {
           });
       }
         }
-
-        alert(
-            `Evaluation submitted successfully! Your score: ${totalScore} / ${maxScore} (${percentageScore.toFixed(
-                2
-            )}%)`
-        );
         navigate(location.state?.redirectTo || "/student-dashboard");
     } catch (error) {
         alert("Failed to submit evaluation. Please try again.");

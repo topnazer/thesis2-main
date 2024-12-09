@@ -25,7 +25,7 @@ const SubjectEvaluationPage = () => {
             const formSnap = await getDoc(formRef);
             if (formSnap.exists()) {
                 setCategories(formSnap.data().categories || []);
-                setExpirationDate(data.expirationDate || "");
+                setExpirationDate(formSnap.data().expirationDate || "");
             }
         } catch (error) {
             console.error("Error fetching form data:", error);

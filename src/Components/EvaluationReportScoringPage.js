@@ -100,7 +100,7 @@ const EvaluationReportScoringPage = () => {
 
             // Fetch faculty evaluation score
             const facultyEvaluationDoc = await getDoc(
-              doc(db, 'facultyEvaluations', facultyId)
+              doc(db, 'facdeanEvaluations', facultyId)
             );
             const facultyEvaluationData = facultyEvaluationDoc.exists()
               ? facultyEvaluationDoc.data()
