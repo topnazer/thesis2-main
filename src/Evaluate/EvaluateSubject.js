@@ -16,6 +16,8 @@ const EvaluateSubject = () => {
   const [error, setError] = useState(null);
   const [responses, setResponses] = useState({});
   const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
   const db = getFirestore();
 
   // Fetch subject information
@@ -100,7 +102,7 @@ const EvaluateSubject = () => {
 
   const handleNext = () => {
     if (!isCurrentCategoryComplete()) {
-      alert("Please answer all questions in this category before proceeding.");
+      
       return;
     }
     if (currentCategoryIndex < categories.length - 1) {
@@ -144,10 +146,18 @@ const EvaluateSubject = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isCurrentCategoryComplete()) {
-        alert("Please answer all questions in this category before submitting.");
-        return;
-    }
+    if (submitting) {
+      // Prevent multiple submissions
+      return;
+  }
+
+  setSubmitting(true); // Disable submit button
+
+  if (!isCurrentCategoryComplete()) {
+      setSubmitting(false); // Re-enable button
+      return;
+  }
+
 
     const user = auth.currentUser;
     if (!user) {
@@ -412,9 +422,9 @@ const renderQuestionsForCurrentCategory = () => {
               <button type="button" className="previous-button" onClick={handlePrevious}>Previous</button>
             )}
             {currentCategoryIndex < categories.length - 1 ? (
-              <button type="button" className="next-button" onClick={handleNext}>Next</button>
+              <button type="button" className="next-button" onClick={handleNext}  disabled={submitting}>Next</button>
             ) : (
-              <button type="submit" className="submit-button">Submit Evaluation</button>
+              <button type="submit" className="submit-button"   disabled={submitting}>Submit Evaluation</button>
             )}
           </div>
         </form>
