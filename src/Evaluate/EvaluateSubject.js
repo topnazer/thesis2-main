@@ -143,10 +143,10 @@ const EvaluateSubject = () => {
 };
 
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (submitting) {
+  if (submitting) {
       // Prevent multiple submissions
       return;
   }
@@ -158,56 +158,59 @@ const EvaluateSubject = () => {
       return;
   }
 
+  const user = auth.currentUser;
+  if (!user) {
+      alert("User not authenticated.");
+      return;
+  }
 
-    const user = auth.currentUser;
-    if (!user) {
-        alert("User not authenticated.");
-        return;
-    }
+  // Ensure the subject and facultyId exist
+  if (!subject || !subject.facultyId) {
+      alert("Subject or Faculty information is missing.");
+      return;
+  }
 
-    // Ensure the subject and facultyId exist
-    if (!subject || !subject.facultyId) {
-        alert("Subject or Faculty information is missing.");
-        return;
-    }
+  // Fetch the student's name
+  let studentName = "Anonymous"; // Default if name not found
+  try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+          const userData = userDoc.data();
+          studentName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
+      }
+  } catch (error) {
+      console.error("Error fetching student name:", error);
+  }
 
-    // Fetch the student's name
-    let studentName = "Anonymous"; // Default if name not found
-    try {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-            const userData = userDoc.data();
-            studentName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
-        }
-    } catch (error) {
-        console.error("Error fetching student name:", error);
-    }
+  // Fetch the subject's name
+  let subjectName = subject.name || "Unknown Subject";
 
-    // Fetch the subject's name
-    let subjectName = subject.name || "Unknown Subject";
+  // Calculate scores and option frequencies
+  const { percentageScore } = calculateRatingScore();
 
-    // Calculate scores and option frequencies
-    const { percentageScore } = calculateRatingScore();
-    // Build detailed question-response data
-    const detailedQuestions = categories.map((category, categoryIndex) => ({
-        categoryName: category.name,
-        type: category.type, // Include category type
-        questions: category.questions.map((question, questionIndex) => {
-            const uniqueKey = `${categoryIndex}-${questionIndex}`;
-            return {
-                text: question.text, // Include the question text
-                type: category.type, // Include the question type
-                response: responses[uniqueKey] || (category.type === "Checkbox" ? [] : "N/A"), // Add response
-                options: category.options || [], // Include available options for the question
-            };
-        }),
-    }));
+  // Convert percentageScore to 1-5 scale
+  const averageScore = Math.round(percentageScore / 20);
 
-    try {
+  // Build detailed question-response data
+  const detailedQuestions = categories.map((category, categoryIndex) => ({
+      categoryName: category.name,
+      type: category.type, // Include category type
+      questions: category.questions.map((question, questionIndex) => {
+          const uniqueKey = `${categoryIndex}-${questionIndex}`;
+          return {
+              text: question.text, // Include the question text
+              type: category.type, // Include the question type
+              response: responses[uniqueKey] || (category.type === "Checkbox" ? [] : "N/A"), // Add response
+              options: category.options || [], // Include available options for the question
+          };
+      }),
+  }));
+
+  try {
       // Generate a unique ID for the evaluation to prevent overwriting
       const evaluationId = `${user.uid}_${new Date().getTime()}`;
       const evaluationRef = doc(db, `evaluations/${subject.facultyId}/students`, evaluationId);
-  
+
       await setDoc(evaluationRef, {
           userId: user.uid,
           sectionId,
@@ -215,76 +218,38 @@ const EvaluateSubject = () => {
           subjectName, // Include subject name
           facultyId: subject.facultyId, // Use facultyId from subject
           studentName, // Include student name
-          ratingScore: { percentageScore }, // Include rating score
+          ratingScore: { averageScore }, // Include rating score (converted scale)
           comment, // Include comments
           createdAt: new Date(),
           detailedQuestions
       });
-  
-        // Update or create subject evaluation score with facultyId, studentName, and subjectName
-        const subjectEvaluationRef = doc(db, "subjectEvaluations", subjectId);
-        const subjectEvaluationDoc = await getDoc(subjectEvaluationRef);
 
-        let newAverageScore;
-        let completedEvaluations;
+      // Update or create subject evaluation score with facultyId, studentName, and subjectName
+      const subjectEvaluationRef = doc(db, "subjectEvaluations", subjectId);
+      const subjectEvaluationDoc = await getDoc(subjectEvaluationRef);
 
-        if (subjectEvaluationDoc.exists()) {
-            const existingAverageScore = subjectEvaluationDoc.data().averageScore || 0;
-            completedEvaluations = (subjectEvaluationDoc.data().completedEvaluations || 0) + 1;
-            newAverageScore =
-                ((existingAverageScore * (completedEvaluations - 1)) + percentageScore) /
-                completedEvaluations;
+      let newAverageScore;
+      let completedEvaluations;
 
-            await setDoc(
-                subjectEvaluationRef,
-                {
-                    averageScore: newAverageScore,
-                    completedEvaluations,
-                    subjectName, // Include subject name
-                    facultyId: subject.facultyId, // Use facultyId from subject
-                },
-                { merge: true }
-            );
-        } else {
-            newAverageScore = percentageScore;
-            completedEvaluations = 1;
+      if (subjectEvaluationDoc.exists()) {
+          const existingAverageScore = subjectEvaluationDoc.data().averageScore || 0;
+          completedEvaluations = (subjectEvaluationDoc.data().completedEvaluations || 0) + 1;
+          newAverageScore =
+              ((existingAverageScore * (completedEvaluations - 1)) + averageScore) /
+              completedEvaluations;
 
-            await setDoc(subjectEvaluationRef, {
-                averageScore: newAverageScore,
-                completedEvaluations,
-                subjectName, // Include subject name
-                facultyId: subject.facultyId, // Use facultyId from subject
-                createdAt: new Date(), // Use createdAt for new document
-            });
-        }
-
-        // Update faculty evaluation if applicable
-        if (subject.facultyId) {
-          const subjectEvaluationRef = doc(collection(db, "subjectDone", subjectId, "completed_evaluations"), user.uid);
-          const subjectEvaluationDoc = await getDoc(subjectEvaluationRef);
-
-          let newAverageScore;
-          let completedEvaluations;
-
-          if (subjectEvaluationDoc.exists()) {
-            const existingAverageScore = subjectEvaluationDoc.data().averageScore || 0;
-            completedEvaluations = (subjectEvaluationDoc.data().completedEvaluations || 0) + 1;
-            newAverageScore =
-                ((existingAverageScore * (completedEvaluations - 1)) + percentageScore) /
-                completedEvaluations;
-
-            await setDoc(
-                subjectEvaluationRef,
-                {
-                    averageScore: newAverageScore,
-                    completedEvaluations,
-                    subjectName, // Include subject name
-                    facultyId: subject.facultyId, // Use facultyId from subject
-                },
-                { merge: true }
-            );
-        }  else {
-          newAverageScore = percentageScore;
+          await setDoc(
+              subjectEvaluationRef,
+              {
+                  averageScore: newAverageScore,
+                  completedEvaluations,
+                  subjectName, // Include subject name
+                  facultyId: subject.facultyId, // Use facultyId from subject
+              },
+              { merge: true }
+          );
+      } else {
+          newAverageScore = averageScore;
           completedEvaluations = 1;
 
           await setDoc(subjectEvaluationRef, {
@@ -295,12 +260,51 @@ const EvaluateSubject = () => {
               createdAt: new Date(), // Use createdAt for new document
           });
       }
-        }
-        navigate(location.state?.redirectTo || "/student-dashboard");
-    } catch (error) {
-        alert("Failed to submit evaluation. Please try again.");
-        console.error("Error submitting evaluation:", error.message);
-    }
+
+      // Update faculty evaluation if applicable
+      if (subject.facultyId) {
+          const subjectEvaluationRef = doc(collection(db, "subjectDone", subjectId, "completed_evaluations"), user.uid);
+          const subjectEvaluationDoc = await getDoc(subjectEvaluationRef);
+
+          let newAverageScore;
+          let completedEvaluations;
+
+          if (subjectEvaluationDoc.exists()) {
+              const existingAverageScore = subjectEvaluationDoc.data().averageScore || 0;
+              completedEvaluations = (subjectEvaluationDoc.data().completedEvaluations || 0) + 1;
+              newAverageScore =
+                  ((existingAverageScore * (completedEvaluations - 1)) + averageScore) /
+                  completedEvaluations;
+
+              await setDoc(
+                  subjectEvaluationRef,
+                  {
+                      averageScore: newAverageScore,
+                      completedEvaluations,
+                      subjectName, // Include subject name
+                      facultyId: subject.facultyId, // Use facultyId from subject
+                  },
+                  { merge: true }
+              );
+          } else {
+              newAverageScore = averageScore;
+              completedEvaluations = 1;
+
+              await setDoc(subjectEvaluationRef, {
+                  averageScore: newAverageScore,
+                  completedEvaluations,
+                  subjectName, // Include subject name
+                  facultyId: subject.facultyId, // Use facultyId from subject
+                  createdAt: new Date(), // Use createdAt for new document
+              });
+          }
+      }
+
+      navigate(location.state?.redirectTo || "/student-dashboard");
+  } catch (error) {
+      alert("Failed to submit evaluation. Please try again.");
+      console.error("Error submitting evaluation:", error.message);
+  }
 };
 
   

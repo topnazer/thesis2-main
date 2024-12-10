@@ -1,21 +1,24 @@
 import React, { useState } from "react";
-import { auth } from "../firebase";
-import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
-import './Auth.css';
+import { getAuth, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore"; // Firestore imports
+import "./Auth.css";
 
 const SignUpForm = ({ toggleLogin }) => {
+  const auth = getAuth(); // Initialize auth here
+  const db = getFirestore();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [department, setDepartment] = useState(""); // Start with an empty department
-  const [role, setRole] = useState(""); // Start with no default role
-  const db = getFirestore();
+  const [department, setDepartment] = useState("");
+  const [role, setRole] = useState("");
+  const [isNewUser, setIsNewUser] = useState(false);
 
-  const handleSignUp = async (e) => {
+  // Handle Manual Sign-Up
+  const handleManualSignUp = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
@@ -34,37 +37,22 @@ const SignUpForm = ({ toggleLogin }) => {
     }
 
     try {
-      console.log("Creating user...");
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      console.log("User created successfully:", user);
 
-      console.log("Saving user data in Firestore...");
-      // Prepare user data
       const userData = {
         firstName,
         middleName,
         lastName,
         email,
         role,
+        department: role !== "ACAF" ? department : null,
         status: "Pending",
       };
 
-      // Ensure department is only added for non-ACAF roles
-      if (role !== "ACAF") {
-        userData.department = department;
-      } else {
-        delete userData.department; // Explicitly remove department field
-      }
-
       await setDoc(doc(db, "users", user.uid), userData);
-      console.log("User data saved to Firestore");
-
-      console.log("Attempting to sign out...");
-      await signOut(auth);
-      console.log("Sign-out successful");
-
       alert("Sign-up successful! Please wait for admin approval.");
+      await signOut(auth);
       toggleLogin();
     } catch (error) {
       console.error("Error in sign-up process:", error.message, error.stack);
@@ -72,89 +60,209 @@ const SignUpForm = ({ toggleLogin }) => {
     }
   };
 
+  // Handle Google Sign-In/Up
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider(); // Initialize Google provider
+    try {
+      const result = await signInWithPopup(auth, provider); // Open Google sign-in popup
+      const user = result.user;
+  
+      // Extract name from Google profile
+      const displayName = user.displayName || "";
+      const nameParts = displayName.split(" ");
+      setFirstName(nameParts[0] || "");
+      setLastName(nameParts[1] || "");
+      setMiddleName(nameParts[2] || "");
+  
+      // Check if user already exists in Firestore
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists()) {
+        // If user doesn't exist, prefill email and show additional form
+        setEmail(user.email || "");
+        setIsNewUser(true);
+      } else {
+        alert("Welcome back!");
+      }
+    } catch (error) {
+      console.error("Error with Google Sign-In:", error.message);
+      alert("Failed to sign in with Google: " + error.message);
+    }
+  };
+  
+
+  // Save Additional Info for Google Users
+  const handleAdditionalInfoSubmit = async (e) => {
+    e.preventDefault();
+    const user = auth.currentUser;
+
+    if (!role) {
+      alert("Please select a role.");
+      return;
+    }
+
+    if (role !== "ACAF" && !department) {
+      alert("Please select a department.");
+      return;
+    }
+
+    try {
+      const userData = {
+        firstName,
+        middleName,
+        lastName,
+        email: user.email,
+        role,
+        department: role !== "ACAF" ? department : null,
+        status: "Pending",
+      };
+
+      await setDoc(doc(db, "users", user.uid), userData);
+      alert("User information saved successfully.");
+      setIsNewUser(false);
+    } catch (error) {
+      console.error("Error saving user data:", error.message);
+    }
+  };
+
   return (
     <div className="signup-container">
       <div className="signup-box">
-        <h2>Create an Account</h2>
-        <form onSubmit={handleSignUp}>
-          <select
-            value={role}
-            onChange={(e) => {
-              const selectedRole = e.target.value;
-              setRole(selectedRole);
-              if (selectedRole === "ACAF") {
-                setDepartment(""); // Clear department when role is ACAF
-              }
-            }}
-            className="role-select"
-            required
-          >
-            <option value="" disabled selected>Select Role</option>
-            <option value="Student">Student</option>
-            <option value="Faculty">Faculty</option>
-            <option value="Dean">Dean</option>
-            <option value="ACAF">ACAF</option>
-          </select>
-          {(role === "Student" || role === "Faculty" || role === "Dean") && (
+        <h2>{isNewUser ? "Complete Your Profile" : "Create an Account"}</h2>
+        {isNewUser ? (
+          <form onSubmit={handleAdditionalInfoSubmit}>
+            <input
+              type="text"
+              placeholder="First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Middle Name"
+              value={middleName}
+              onChange={(e) => setMiddleName(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+            />
             <select
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
+              value={role}
+              onChange={(e) => {
+                const selectedRole = e.target.value;
+                setRole(selectedRole);
+                if (selectedRole === "ACAF") setDepartment(""); // Clear department if ACAF
+              }}
               required
             >
-              <option value="" disabled>Select Department</option>
-              <option value="CCS">CCS</option>
-              <option value="COC">COC</option>
-              <option value="CED">CED</option>
-              <option value="CASS">CASS</option>
-              <option value="COE">COE</option>
-              <option value="CBA">CBA</option>
+              <option value="" disabled>Select Role</option>
+              <option value="Student">Student</option>
+              <option value="Faculty">Faculty</option>
+              <option value="Dean">Dean</option>
+              <option value="ACAF">ACAF</option>
             </select>
-          )}
-          <input
-            type="text"
-            placeholder="First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Middle Name"
-            value={middleName}
-            onChange={(e) => setMiddleName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-          <div className="span-item">
-            <button type="submit" className="signup-button">Sign Up</button>
-          </div>
-        </form>
+            {(role === "Student" || role === "Faculty" || role === "Dean") && (
+              <select
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                required
+              >
+                <option value="" disabled>Select Department</option>
+                <option value="CCS">CCS</option>
+                <option value="COC">COC</option>
+                <option value="CED">CED</option>
+                <option value="CASS">CASS</option>
+                <option value="COE">COE</option>
+                <option value="CBA">CBA</option>
+              </select>
+            )}
+            <button type="submit">Save Info</button>
+          </form>
+        ) : (
+          <>
+            <form onSubmit={handleManualSignUp}>
+              <input
+                type="text"
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Middle Name"
+                value={middleName}
+                onChange={(e) => setMiddleName(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+              />
+              <select
+                value={role}
+                onChange={(e) => {
+                  const selectedRole = e.target.value;
+                  setRole(selectedRole);
+                  if (selectedRole === "ACAF") setDepartment(""); // Clear department if ACAF
+                }}
+                required
+              >
+                <option value="" disabled>Select Role</option>
+                <option value="Student">Student</option>
+                <option value="Faculty">Faculty</option>
+                <option value="Dean">Dean</option>
+                <option value="ACAF">ACAF</option>
+              </select>
+              {(role === "Student" || role === "Faculty" || role === "Dean") && (
+                <select
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>Select Department</option>
+                  <option value="CCS">CCS</option>
+                  <option value="COC">COC</option>
+                  <option value="CED">CED</option>
+                  <option value="CASS">CASS</option>
+                  <option value="COE">COE</option>
+                  <option value="CBA">CBA</option>
+                </select>
+              )}
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <button type="submit" className="signup-button">Sign Up</button>
+            </form>
+            <button onClick={handleGoogleSignIn} className="google-signin-button">
+  Sign in / Sign up with Google
+</button>
+          </>
+        )}
         <button onClick={toggleLogin} className="login-button">Back to Login</button>
       </div>
     </div>

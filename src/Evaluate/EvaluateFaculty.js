@@ -153,16 +153,16 @@ const EvaluateFaculty = () => {
     e.preventDefault();
 
     if (submitting) {
-      // Prevent multiple submissions
-      return;
-  }
+        // Prevent multiple submissions
+        return;
+    }
 
-  setSubmitting(true); // Disable submit button
+    setSubmitting(true); // Disable submit button
 
-  if (!isCurrentCategoryComplete()) {
-      setSubmitting(false); // Re-enable button
-      return;
-  }
+    if (!isCurrentCategoryComplete()) {
+        setSubmitting(false); // Re-enable button
+        return;
+    }
 
     const user = auth.currentUser;
     if (!user) {
@@ -171,6 +171,9 @@ const EvaluateFaculty = () => {
     }
 
     const { totalScore, maxScore, percentageScore } = calculateRatingScore();
+
+    // Convert percentageScore to 1–5 scale
+    const averageScore = Math.round(percentageScore / 20);
 
     const detailedQuestions = categories.map((category, categoryIndex) => ({
         categoryName: category.name,
@@ -206,7 +209,7 @@ const EvaluateFaculty = () => {
             userId: user.uid,
             facultyId,
             evaluatorName,
-            ratingScore: { totalScore, maxScore, percentageScore },
+            ratingScore: { totalScore, maxScore, averageScore }, // Store averageScore
             comment,
             createdAt: new Date(),
             detailedQuestions, // Include detailed questions
@@ -233,7 +236,7 @@ const EvaluateFaculty = () => {
                 const existingAverageScore = facDeanEvaluationDoc.data().averageScore || 0;
                 completedEvaluations = (facDeanEvaluationDoc.data().completedEvaluations || 0) + 1;
                 newAverageScore =
-                    (existingAverageScore * (completedEvaluations - 1) + percentageScore) / completedEvaluations;
+                    (existingAverageScore * (completedEvaluations - 1) + averageScore) / completedEvaluations;
 
                 await setDoc(
                     facDeanEvaluationRef,
@@ -244,7 +247,7 @@ const EvaluateFaculty = () => {
                     { merge: true }
                 );
             } else {
-                newAverageScore = percentageScore;
+                newAverageScore = averageScore;
                 completedEvaluations = 1;
 
                 await setDoc(facDeanEvaluationRef, {
@@ -265,7 +268,8 @@ const EvaluateFaculty = () => {
             const existingAverageScore = facultyEvaluationDoc.data().averageScore || 0;
             completedEvaluationsFaculty = (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
             newAverageScore =
-                (existingAverageScore * (completedEvaluationsFaculty - 1) + percentageScore) / completedEvaluationsFaculty;
+                (existingAverageScore * (completedEvaluationsFaculty - 1) + averageScore) /
+                completedEvaluationsFaculty;
 
             await setDoc(
                 facultyEvaluationRef,
@@ -276,7 +280,7 @@ const EvaluateFaculty = () => {
                 { merge: true }
             );
         } else {
-            newAverageScore = percentageScore;
+            newAverageScore = averageScore;
             completedEvaluationsFaculty = 1;
 
             await setDoc(facultyEvaluationRef, {
@@ -285,14 +289,12 @@ const EvaluateFaculty = () => {
             });
         }
 
-       
         navigate(location.state?.redirectTo || "/faculty-dashboard");
     } catch (error) {
         alert("Failed to submit evaluation. Please try again.");
         console.error("Error submitting evaluation:", error.message);
     }
 };
-
 
 
   const renderQuestionsForCurrentCategory = () => {

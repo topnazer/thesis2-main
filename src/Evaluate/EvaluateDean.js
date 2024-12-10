@@ -138,98 +138,103 @@ const EvaluateDean = () => {
     e.preventDefault();
 
     if (submitting) {
-      // Prevent multiple submissions
-      return;
-  }
+        // Prevent multiple submissions
+        return;
+    }
 
-  setSubmitting(true); // Disable submit button
+    setSubmitting(true); // Disable submit button
 
-  if (!isCurrentCategoryComplete()) {
-      
-      setSubmitting(false); // Re-enable button
-      return;
-  }
+    if (!isCurrentCategoryComplete()) {
+        setSubmitting(false); // Re-enable button
+        return;
+    }
 
     const user = auth.currentUser;
     if (!user) {
-      alert("User not authenticated.");
-      return;
+        alert("User not authenticated.");
+        return;
     }
 
     const { totalScore, maxScore, percentageScore } = calculateRatingScore();
+
+    // Convert percentageScore to 1–5 scale
+    const averageScore = Math.round(percentageScore / 20);
+
     const detailedQuestions = categories.map((category, categoryIndex) => ({
-      categoryName: category.name,
-      type: category.type, // Include category type
-      questions: category.questions.map((question, questionIndex) => {
-          const uniqueKey = `${categoryIndex}-${questionIndex}`;
-          return {
-              text: question.text, // Include the question text
-              type: category.type, // Include the question type
-              response: responses[uniqueKey] || (category.type === "Checkbox" ? [] : "N/A"), // Add response
-              options: category.options || [], // Include available options for the question
-          };
-      }),
-  }));
+        categoryName: category.name,
+        type: category.type, // Include category type
+        questions: category.questions.map((question, questionIndex) => {
+            const uniqueKey = `${categoryIndex}-${questionIndex}`;
+            return {
+                text: question.text, // Include the question text
+                type: category.type, // Include the question type
+                response: responses[uniqueKey] || (category.type === "Checkbox" ? [] : "N/A"), // Add response
+                options: category.options || [], // Include available options for the question
+            };
+        }),
+    }));
 
-  
+    try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists()) {
+            alert("Evaluator information is missing.");
+            return;
+        }
+        const evaluatorData = userDoc.data();
+        const evaluatorName = `${evaluatorData.firstName || "Unknown"} ${evaluatorData.lastName || "User"}`;
 
-  try {
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (!userDoc.exists()) {
-      alert("Evaluator information is missing.");
-      return;
-    }
-    const evaluatorData = userDoc.data();
-    const evaluatorName = `${evaluatorData.firstName || "Unknown"} ${evaluatorData.lastName || "User"}`;
-    // Save individual evaluation
-    const evaluationRef = doc(collection(db, "deanEvaluations", deanId, "completed_evaluations"), user.uid);
+        // Save individual evaluation
+        const evaluationRef = doc(collection(db, "deanEvaluations", deanId, "completed_evaluations"), user.uid);
 
-    await setDoc(evaluationRef, {
-      userId: user.uid,
-      deanId,
-      Evaluator: evaluatorName,
-      ratingScore: { totalScore, maxScore, percentageScore },
-      comment,
-      percentageScore,
-      createdAt: new Date(),
-      detailedQuestions, 
-    });
-
-      const deanEvaluationRef = doc(db, "deanEvaluations", deanId);
-      const deanEvaluationDoc = await getDoc(deanEvaluationRef);
-
-      let newAverageScore;
-      let completedEvaluations;
-
-      if (deanEvaluationDoc.exists()) {
-        const existingAverageScore = deanEvaluationDoc.data().averageScore || 0;
-        completedEvaluations = (deanEvaluationDoc.data().completedEvaluations || 0) + 1;
-        newAverageScore = ((existingAverageScore * (completedEvaluations - 1)) + percentageScore) / completedEvaluations;
-
-        await setDoc(
-          deanEvaluationRef,
-          {
-            averageScore: newAverageScore,
-            completedEvaluations,
-          },
-          { merge: true }
-        );
-      } else {
-        newAverageScore = percentageScore;
-        completedEvaluations = 1;
-
-        await setDoc(deanEvaluationRef, {
-          averageScore: newAverageScore,
-          completedEvaluations,
+        await setDoc(evaluationRef, {
+            userId: user.uid,
+            deanId,
+            Evaluator: evaluatorName,
+            ratingScore: { totalScore, maxScore, averageScore }, // Save averageScore
+            comment,
+            createdAt: new Date(),
+            detailedQuestions,
         });
-      }
 
-      navigate(location.state?.redirectTo || "/dean-dashboard");
+        // Update or create dean evaluation summary
+        const deanEvaluationRef = doc(db, "deanEvaluations", deanId);
+        const deanEvaluationDoc = await getDoc(deanEvaluationRef);
+
+        let newAverageScore;
+        let completedEvaluations;
+
+        if (deanEvaluationDoc.exists()) {
+            const existingAverageScore = deanEvaluationDoc.data().averageScore || 0;
+            completedEvaluations = (deanEvaluationDoc.data().completedEvaluations || 0) + 1;
+            newAverageScore =
+                ((existingAverageScore * (completedEvaluations - 1)) + averageScore) /
+                completedEvaluations;
+
+            await setDoc(
+                deanEvaluationRef,
+                {
+                    averageScore: newAverageScore,
+                    completedEvaluations,
+                },
+                { merge: true }
+            );
+        } else {
+            newAverageScore = averageScore;
+            completedEvaluations = 1;
+
+            await setDoc(deanEvaluationRef, {
+                averageScore: newAverageScore,
+                completedEvaluations,
+            });
+        }
+
+        navigate(location.state?.redirectTo || "/dean-dashboard");
     } catch (error) {
-      alert("Failed to submit evaluation. Please try again.");
-      console.error("Error submitting evaluation:", error.message);
+        alert("Failed to submit evaluation. Please try again.");
+        console.error("Error submitting evaluation:", error.message);
     }
-  };
+};
+
 
   const renderQuestionsForCurrentCategory = () => {
     const currentCategory = categories[currentCategoryIndex];

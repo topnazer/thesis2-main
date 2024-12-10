@@ -60,97 +60,108 @@ const EvaluationReportScoringPage = () => {
 
   const fetchFaculties = useCallback(() => {
     const facultyQuery = query(
-      collection(db, 'users'),
-      where('role', '==', 'Faculty')
+        collection(db, 'users'),
+        where('role', '==', 'Faculty')
     );
 
     const unsubscribe = onSnapshot(
-      facultyQuery,
-      async (snapshot) => {
-        const facultyList = await Promise.all(
-          snapshot.docs.map(async (facultyDoc) => {
-            const facultyData = facultyDoc.data();
-            const facultyId = facultyDoc.id;
+        facultyQuery,
+        async (snapshot) => {
+            const facultyList = await Promise.all(
+                snapshot.docs.map(async (facultyDoc) => {
+                    const facultyData = facultyDoc.data();
+                    const facultyId = facultyDoc.id;
 
-            const subjectEvaluationsQuery = query(
-              collection(db, 'subjectEvaluations'),
-              where('facultyId', '==', facultyId)
+                    // Query subject evaluations for this faculty
+                    const subjectEvaluationsQuery = query(
+                        collection(db, 'subjectEvaluations'),
+                        where('facultyId', '==', facultyId)
+                    );
+                    const subjectEvaluationsSnapshot = await getDocs(subjectEvaluationsQuery);
+
+                    let totalSubjectScore = 0;
+                    let subjectCount = 0;
+
+                    if (!subjectEvaluationsSnapshot.empty) {
+                        subjectEvaluationsSnapshot.forEach((doc) => {
+                            const evaluationData = doc.data();
+                            totalSubjectScore += evaluationData.averageScore || 0;
+                            subjectCount += 1;
+                        });
+                    }
+
+                    const subjectScore =
+                        subjectCount > 0
+                            ? totalSubjectScore / subjectCount
+                            : 'Not scored yet';
+
+                    // Query faculty dean evaluations
+                    const facultyEvaluationDoc = await getDoc(
+                        doc(db, 'facdeanEvaluations', facultyId)
+                    );
+                    const facultyEvaluationData = facultyEvaluationDoc.exists()
+                        ? facultyEvaluationDoc.data()
+                        : null;
+
+                    const facultyScore = facultyEvaluationData
+                        ? facultyEvaluationData.averageScore
+                        : 'Not scored yet';
+
+                    // Calculate weighted scores
+                    const weightedSubjectScore =
+                        typeof subjectScore === 'number'
+                            ? parseFloat(((subjectScore * subjectWeight) / 100).toFixed(2))
+                            : 'Not scored yet';
+
+                    const weightedFacultyScore =
+                        typeof facultyScore === 'number'
+                            ? parseFloat(((facultyScore * facultyWeight) / 100).toFixed(2))
+                            : 'Not scored yet';
+
+                    // Calculate final score
+                    const finalScore =
+                        typeof weightedSubjectScore === 'number' &&
+                        typeof weightedFacultyScore === 'number'
+                            ? weightedSubjectScore + weightedFacultyScore
+                            : 'Not scored yet';
+
+                    // Assign remarks based on finalScore
+                    const remarks =
+                        typeof finalScore === 'number'
+                            ? finalScore >= 5
+                                ? 'Excellent'
+                                : finalScore >= 4
+                                ? 'Very Satisfactory'
+                                : finalScore >= 3
+                                ? 'Satisfactory'
+                                : finalScore >= 2
+                                ? 'Needs Improvement'
+                                : 'Poor'
+                            : 'Not scored yet';
+
+                    // Return faculty data with calculated scores
+                    return {
+                        id: facultyId,
+                        ...facultyData,
+                        facultyScore: weightedFacultyScore,
+                        subjectScore: weightedSubjectScore,
+                        finalScore,
+                        remarks,
+                    };
+                })
             );
-            const subjectEvaluationsSnapshot = await getDocs(
-              subjectEvaluationsQuery
-            );
 
-            let totalSubjectScore = 0;
-            let subjectCount = 0;
-
-            if (!subjectEvaluationsSnapshot.empty) {
-              subjectEvaluationsSnapshot.forEach((doc) => {
-                const evaluationData = doc.data();
-                totalSubjectScore += evaluationData.averageScore || 0;
-                subjectCount += 1;
-              });
-            }
-
-            const subjectScore =
-              subjectCount > 0
-                ? totalSubjectScore / subjectCount
-                : 'Not scored yet';
-
-            const facultyEvaluationDoc = await getDoc(
-              doc(db, 'facdeanEvaluations', facultyId)
-            );
-            const facultyEvaluationData = facultyEvaluationDoc.exists()
-              ? facultyEvaluationDoc.data()
-              : null;
-            const facultyScore = facultyEvaluationData
-              ? facultyEvaluationData.averageScore
-              : 'Not scored yet';
-
-            const weightedSubjectScore =
-              typeof subjectScore === 'number'
-                ? parseFloat(((subjectScore * subjectWeight) / 100).toFixed(2))
-                : 'Not scored yet';
-
-            const weightedFacultyScore =
-              typeof facultyScore === 'number'
-                ? (facultyScore * facultyWeight) / 100
-                : 'Not scored yet';
-
-            const finalScore =
-              typeof weightedSubjectScore === 'number' &&
-              typeof weightedFacultyScore === 'number'
-                ? weightedSubjectScore + weightedFacultyScore
-                : 'Not scored yet';
-
-            const remarks =
-              typeof finalScore === 'number'
-                ? finalScore >= 80
-                  ? 'Above Average'
-                  : 'Below Average'
-                : 'Not scored yet';
-
-            return {
-              id: facultyId,
-              ...facultyData,
-              facultyScore: weightedFacultyScore,
-              subjectScore: weightedSubjectScore,
-              finalScore,
-              remarks,
-            };
-          })
-        );
-
-        setFaculties(facultyList);
-        setLoading(false);
-      },
-      (error) => {
-        console.error('Error fetching faculties:', error);
-        setLoading(false);
-      }
+            setFaculties(facultyList);
+            setLoading(false);
+        },
+        (error) => {
+            console.error('Error fetching faculties:', error);
+            setLoading(false);
+        }
     );
 
     return unsubscribe;
-  }, [db, subjectWeight, facultyWeight]);
+}, [db, subjectWeight, facultyWeight]);
 
   useEffect(() => {
     fetchFaculties();
