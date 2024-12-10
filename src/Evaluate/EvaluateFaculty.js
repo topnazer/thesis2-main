@@ -315,11 +315,11 @@ const EvaluateFaculty = () => {
         <th>{name}: Question</th>
           {type === "Rating" && (
             <>
-              <th>5</th>
-              <th>4</th>
-              <th>3</th>
-              <th>2</th>
               <th>1</th>
+              <th>2</th>
+              <th>3</th>
+              <th>4</th>
+              <th>5</th>
             </>
           )}
           {(type === "Multiple Choice" || type === "Checkbox") && options.map((option, index) => (

@@ -38,28 +38,124 @@ const [commentsCurrentPage, setCommentsCurrentPage] = useState(0);
 const subjectCommentsPerPage = 10; // Define items per page for subject comments
 const totalSubjectCommentPages = Math.ceil(comments.length / subjectCommentsPerPage);
 const [subjectCommentsCurrentPage, setSubjectCommentsCurrentPage] = useState(0);
+const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
+
 
   const navigate = useNavigate();
   const db = getFirestore();
 
+
+  useEffect(() => {
+    const fetchEvaluationData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const facultyId = user.uid;
+  
+        // Call the function to fetch evaluations
+        const totalEvaluations = await fetchCompletedEvaluations(facultyId);
+        setCompletedEvaluationsCount(totalEvaluations);
+      }
+    };
+  
+    fetchEvaluationData();
+  }, []);
+  
+  const fetchCompletedEvaluations = async (facultyId) => {
+    try {
+      // Reference the `students` subcollection
+      const studentsRef = collection(db, `evaluations/${facultyId}/students`);
+  
+      // Get all documents in the `students` subcollection
+      const studentsSnapshot = await getDocs(studentsRef);
+  
+      if (studentsSnapshot.empty) {
+        console.warn("No evaluations found for the faculty.");
+        return 0; // Return 0 if no evaluations found
+      }
+  
+      // Extract `evaluationId`s (document IDs) from the snapshot
+      const evaluationIds = studentsSnapshot.docs.map((doc) => doc.id);
+  
+      console.log("Fetched Evaluation IDs:", evaluationIds); // Debugging log
+  
+      // Return the total number of `evaluationId`s
+      return evaluationIds.length;
+    } catch (error) {
+      console.error("Error fetching completed evaluations:", error);
+      return 0; // Return 0 in case of error
+    }
+  };
+
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        fetchUserInfo(user);
-        fetchNotifications(user);
-        fetchFacultyInDepartment(user);
-        fetchDeansInDepartment(user);
-        fetchEvaluationsDoneForUser(user);
-        fetchScores();
-        fetchAllStudents()
-        fetchSubjects(user);
-        setLoading(false);
-      } else {
-        navigate("/"); 
-      }
+      const fetchData = async () => {
+        if (user) {
+          const facultyId = user.uid;
+          await fetchUserInfo(user);
+          await fetchNotifications(user);
+          await fetchFacultyInDepartment(user);
+          await fetchDeansInDepartment(user);
+          await fetchEvaluationsDoneForUser(user);
+          await fetchScores();
+          await fetchAllStudents();
+  
+          // Fetch all enrolled students for the faculty
+          const students = await fetchAllEnrolledStudentsForFaculty(facultyId);
+          setEnrolledStudents(students);
+  
+          await fetchSubjects(user);
+          setLoading(false);
+        } else {
+          navigate("/");
+        }
+      };
+  
+      fetchData(); // Call the async function
     });
-    return unsubscribe; 
+  
+    return unsubscribe;
   }, [db, navigate]);
+  
+
+  const fetchAllEnrolledStudentsForFaculty = async (facultyId) => {
+    try {
+      // Fetch all subjects where the facultyId matches the logged-in user
+      const subjectsQuery = query(
+        collection(db, "subjects"),
+        where("facultyId", "==", facultyId)
+      );
+      const subjectsSnapshot = await getDocs(subjectsQuery);
+  
+      let enrolledStudents = [];
+  
+      // Iterate through each subject and fetch enrolled students
+      for (const subjectDoc of subjectsSnapshot.docs) {
+        const subjectId = subjectDoc.id;
+        const enrolledStudentsRef = collection(db, `subjects/${subjectId}/enrolledStudents`);
+        const enrolledStudentsSnapshot = await getDocs(enrolledStudentsRef);
+  
+        // Add all students to the array
+        enrolledStudents.push(
+          ...enrolledStudentsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+        );
+      }
+  
+      // Remove duplicates (students enrolled in multiple subjects)
+      const uniqueEnrolledStudents = Array.from(
+        new Map(enrolledStudents.map((student) => [student.id, student])).values()
+      );
+  
+      return uniqueEnrolledStudents;
+    } catch (error) {
+      console.error("Error fetching enrolled students for faculty:", error);
+      return [];
+    }
+  };
+  
 
 
   const fetchAllStudents = async () => {
@@ -652,6 +748,8 @@ const [subjectCommentsCurrentPage, setSubjectCommentsCurrentPage] = useState(0);
       // Render Subject Comments
       <div className="commentstables">
       <div className="commentstablesnav">
+      <p>Total Students Enrolled: {enrolledStudents.length}</p>
+      <p>Total Evaluations Submited: {completedEvaluationsCount}</p>
         <h2>Subject Evaluation Comments</h2>
         <button
           onClick={() => setShowCommentsTable(false)}

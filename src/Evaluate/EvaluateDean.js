@@ -254,11 +254,11 @@ const EvaluateDean = () => {
           <th>{name}: Question</th>
           {type === "Rating" && (
             <>
-              <th>Strongly disagree</th>
-              <th>Disagree</th>
-              <th>Neutral</th>
-              <th>Agree</th>
-              <th>Strongly agree</th>
+              <th>1</th>
+              <th>2</th>
+              <th>3</th>
+              <th>4</th>
+              <th>5</th>
             </>
           )}
           {(type === "Multiple Choice" || type === "Checkbox") && options.map((option, index) => (
