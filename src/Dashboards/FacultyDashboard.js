@@ -58,7 +58,7 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
     };
   
     fetchEvaluationData();
-  }, []);
+  }, );
   
   const fetchCompletedEvaluations = async (facultyId) => {
     try {
@@ -82,7 +82,7 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
       return evaluationIds.length;
     } catch (error) {
       console.error("Error fetching completed evaluations:", error);
-      return 0; // Return 0 in case of error
+      return 0; 
     }
   };
 
@@ -99,8 +99,6 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
           await fetchEvaluationsDoneForUser(user);
           await fetchScores();
           await fetchAllStudents();
-  
-          // Fetch all enrolled students for the faculty
           const students = await fetchAllEnrolledStudentsForFaculty(facultyId);
           setEnrolledStudents(students);
   
@@ -111,7 +109,7 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
         }
       };
   
-      fetchData(); // Call the async function
+      fetchData(); 
     });
   
     return unsubscribe;
@@ -120,7 +118,7 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
 
   const fetchAllEnrolledStudentsForFaculty = async (facultyId) => {
     try {
-      // Fetch all subjects where the facultyId matches the logged-in user
+      
       const subjectsQuery = query(
         collection(db, "subjects"),
         where("facultyId", "==", facultyId)
@@ -135,7 +133,7 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
         const enrolledStudentsRef = collection(db, `subjects/${subjectId}/enrolledStudents`);
         const enrolledStudentsSnapshot = await getDocs(enrolledStudentsRef);
   
-        // Add all students to the array
+        
         enrolledStudents.push(
           ...enrolledStudentsSnapshot.docs.map((doc) => ({
             id: doc.id,
@@ -144,7 +142,7 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
         );
       }
   
-      // Remove duplicates (students enrolled in multiple subjects)
+      
       const uniqueEnrolledStudents = Array.from(
         new Map(enrolledStudents.map((student) => [student.id, student])).values()
       );
@@ -272,7 +270,7 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
     }
   };
   
-  // Paginate comments for current page
+ 
   const currentComments = comments.slice(
     commentsCurrentPage * commentsPerPage,
     commentsCurrentPage * commentsPerPage + commentsPerPage

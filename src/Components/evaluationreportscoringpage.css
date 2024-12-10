@@ -1,111 +1,97 @@
-
-/* Main container for the Evaluation Scoring Page */
 .eval-scoring-page {
   margin: 0;
   padding: 0;
 }
 
-/* Centralized container for page content */
 .eval-scoring-page .scoringcontainer {
-  max-width: 1500px; /* Limits the width of the content */
-  margin: 0 auto; /* Centers the content */
-  padding: 0 20px; /* Adds space on the sides */
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-/* Faculty list section */
 .eval-scoring-page .faculty-list {
-  margin-top: 20px; /* Space from top */
+  margin-top: 20px;
 }
 
-/* Faculty table styling */
 .eval-scoring-page .faculty-list table {
-  width: 100%; /* Makes the table span full width */
-  border-collapse: collapse; /* Removes gaps between table cells */
+  width: 100%;
+  border-collapse: collapse;
 }
 
-/* Table cell styling */
 .eval-scoring-page .faculty-list th,
 .eval-scoring-page .faculty-list td {
-  padding: 10px; /* Adds padding for better readability */
-  border: 1px solid #ccc; /* Adds border around cells */
-  text-align: left; /* Aligns text to the left */
-  background-color: #ffffff; /* White background for cells */
-  font-size: 18px; /* Font size for readability */
- font-family: 'Roboto', sans-serif;
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: left;
+  background-color: #ffffff;
+  font-size: 18px;
+  font-family: 'Roboto', sans-serif;
 }
 
-/* Table header row styling */
 .eval-scoring-page .faculty-list th {
-  background-color: #F0FFF0; /* Light green background for header */
-  font-size: 20px; /* Slightly larger font for headers */
-  font-weight: bold; /* Makes the header text bold */
+  background-color: #F0FFF0;
+  font-size: 20px;
+  font-weight: bold;
 }
 
-/* Hover effect for table rows (td) */
 .eval-scoring-page .faculty-list tr:hover td {
-  background-color: #E8F5E9; /* Light green for hover effect */
-  cursor: pointer; /* Pointer cursor for interactivity */
+  background-color: #E8F5E9;
+  cursor: pointer;
 }
 
-/* Navbar styling */
 .eval-scoring-page .navbar {
-  background-color: rgb(69, 10, 10); 
+  background-color: rgb(69, 10, 10);
   padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid rgba(0, 0, 0, 0.5); 
+  border: 1px solid rgba(0, 0, 0, 0.5);
   color: rgb(247, 245, 245);
-  border-radius: 2px; /* Adds rounded corners */
+  border-radius: 2px;
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Navbar title styling */
 .eval-scoring-page .navbar h1 {
   font-size: 1.5rem;
   margin-left: 90px;
-  
 }
 
-.eval-scoring-page .faculty-list h2{
+.eval-scoring-page .faculty-list h2 {
   margin-bottom: 20px;
 }
 
-/* Modal background styling */
 .eval-scoring-page .modal {
-  position: fixed; /* Ensures it overlays the entire page */
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
-  display: flex; /* Centers the modal content */
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Modal content styling */
 .eval-scoring-page .modal-content {
-  background: rgb(229, 220, 220); /* White background for the modal */
-  padding: 20px; /* Adds internal padding */
-  border-radius: 10px; /* Rounded corners */
-  width: 400px; /* Fixed width for the modal */
-  text-align: center; /* Centers text in the modal */
+  background: rgb(229, 220, 220);
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+  text-align: center;
 }
 
-/* Weight control styles */
 .eval-scoring-page .weight-controls {
-  margin-bottom: 40px; /* Adds spacing below the controls */
+  margin-bottom: 40px;
 }
 
-/* Label spacing inside the weight controls */
 .eval-scoring-page .weight-controls label {
-  margin-right: 10px; /* Adds space to the right of labels */
+  margin-right: 10px;
 }
+
 .dashboardlogoscoring-container {
   position: absolute;
-  top: 0; /* Aligns the logo to the top of the header */
-  left: 0; /* Aligns the logo to the right of the header */
+  top: 0;
+  left: 0;
   margin-left: 15px;
   margin-top: 13px;
 }
@@ -116,33 +102,31 @@
   border-radius: 50%;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 .score-weights-btn {
-  background-color: #B22222; /* Base background color */
-  color: #FFFFFF; /* White text */
-  border: none; /* No border */
-  border-radius: 5px; /* Rounded corners */
-  padding: 10px 20px; /* Padding for a comfortable size */
-  font-size: 16px; /* Font size for readability */
-  font-weight: bold; /* Bold text */
-  cursor: pointer; /* Pointer cursor on hover */
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover effect */
+  background-color: #B22222;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Hover Effect */
 .score-weights-btn:hover {
-  background-color: #DC143C; /* Slightly darker green for hover */
-  color: #333333; /* Dark gray text for contrast */
+  background-color: #DC143C;
+  color: #333333;
 }
 
-/* Active State (When Button is Clicked) */
 .score-weights-btn:active {
-  background-color: #8B0000; /* Teal for pressed state */
-  transform: scale(0.98); /* Slight scale-down effect */
+  background-color: #8B0000;
+  transform: scale(0.98);
 }
 
-/* Disabled State (Optional) */
 .score-weights-btn:disabled {
-  background-color: #E0E0E0; /* Light gray for disabled state */
-  color: #A0A0A0; /* Muted gray for text */
-  cursor: not-allowed; /* Show not-allowed cursor */
+  background-color: #E0E0E0;
+  color: #A0A0A0;
+  cursor: not-allowed;
 }

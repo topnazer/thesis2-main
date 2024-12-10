@@ -19,6 +19,7 @@ const EvaluationReportScoringPage = () => {
   const [loading, setLoading] = useState(true);
   const [faculties, setFaculties] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedSemester, setSelectedSemester] = useState("1st Semester");
   const facultiesPerPage = 10;
   const db = getFirestore();
 
@@ -38,6 +39,11 @@ const EvaluationReportScoringPage = () => {
 
     fetchWeights();
   }, [db]);
+
+  const handleSemesterChange = (e) => {
+    setSelectedSemester(e.target.value);
+
+  }
 
   const handleSaveWeights = async () => {
     if (subjectWeight + facultyWeight !== 100) {
@@ -213,6 +219,7 @@ const EvaluationReportScoringPage = () => {
           <table class="print-table">
             <thead>
               <tr>
+                <th>Semester</th>
                 <th>Faculty Name</th>
                 <th>Department</th>
                 <th>Supervisor Score (40%)</th>
@@ -223,6 +230,7 @@ const EvaluationReportScoringPage = () => {
             </thead>
             <tbody>
               <tr>
+                <td>${selectedSemester}</td>
                 <td>${faculty.firstName} ${faculty.lastName}</td>
                 <td>${faculty.department}</td>
                 <td>${typeof faculty.facultyScore === 'number'
@@ -300,53 +308,67 @@ const EvaluationReportScoringPage = () => {
         </div>
       )}
 
-      <div className="scoringcontainer">
+<div className="scoringcontainer">
         <div className="faculty-list">
           <h2>Faculty Scores</h2>
           {loading ? (
             <p>Loading faculty data...</p>
           ) : (
             <div>
-               <table>
-        <thead>
-          <tr>
-            <th>Faculty Name</th>
-            <th>Department</th>
-            <th>Supervisor (40%)</th>
-            <th>Student (60%)</th>
-            <th>Overall Rating</th>
-            <th>Remarks</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-  {displayedFaculties.map((faculty) => (
-    <tr key={faculty.id}>
-      <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
-      <td>{faculty.department}</td>
-      <td>
-        {typeof faculty.facultyScore === 'number'
-          ? faculty.facultyScore.toFixed(2)
-          : faculty.facultyScore}
-      </td>
-      <td>
-        {typeof faculty.subjectScore === 'number'
-          ? faculty.subjectScore.toFixed(2)
-          : faculty.subjectScore}
-      </td>
-      <td>
-        {typeof faculty.finalScore === 'number'
-          ? faculty.finalScore.toFixed(2)
-          : faculty.finalScore}
-      </td>
-      <td>{faculty.remarks}</td>
-      <td>
-        <button onClick={() => handlePrint(faculty)}>Print</button>
-      </td>
-    </tr>
-  ))}
-</tbody>
-      </table>
+              <table>
+                <thead>
+                  <tr>
+                    <th colSpan="7" style={{ textAlign: 'left' }}>
+                      <label htmlFor="semester-select">Select Semester:</label>
+                      <select
+                        id="semester-select"
+                        value={selectedSemester}
+                        onChange={handleSemesterChange}
+                        style={{ marginLeft: '10px' }}
+                      >
+                        <option value="1st Semester">1st Semester</option>
+                        <option value="2nd Semester">2nd Semester</option>
+                      </select>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th>Faculty Name</th>
+                    <th>Department</th>
+                    <th>Supervisor (40%)</th>
+                    <th>Student (60%)</th>
+                    <th>Overall Rating</th>
+                    <th>Remarks</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayedFaculties.map((faculty) => (
+                    <tr key={faculty.id}>
+                      <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
+                      <td>{faculty.department}</td>
+                      <td>
+                        {typeof faculty.facultyScore === 'number'
+                          ? faculty.facultyScore.toFixed(2)
+                          : faculty.facultyScore}
+                      </td>
+                      <td>
+                        {typeof faculty.subjectScore === 'number'
+                          ? faculty.subjectScore.toFixed(2)
+                          : faculty.subjectScore}
+                      </td>
+                      <td>
+                        {typeof faculty.finalScore === 'number'
+                          ? faculty.finalScore.toFixed(2)
+                          : faculty.finalScore}
+                      </td>
+                      <td>{faculty.remarks}</td>
+                      <td>
+                        <button onClick={() => handlePrint(faculty)}>Print</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
               <div className="paginationreport">
                 <button onClick={handlePreviousPage} disabled={currentPage === 1}>
                   Previous
@@ -362,7 +384,7 @@ const EvaluationReportScoringPage = () => {
             </div>
           )}
         </div>
-      </div>
+        </div>
     </div>
   );
 };
