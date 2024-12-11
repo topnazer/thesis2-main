@@ -347,10 +347,10 @@ const EvaluationReportScoringPage = () => {
     <tr>
       <th>Faculty Name</th>
       <th>Department</th>
+      <th>Supervisor(40%)</th>
       <th>Supervisor (40%)</th>
-      <th>Supervisor (%)</th>
+      <th>Student(60%)</th>
       <th>Student (60%)</th>
-      <th>Student (%)</th>
       <th>Overall Rating</th>
       <th>Remarks</th>
       <th>Action</th>
@@ -362,24 +362,24 @@ const EvaluationReportScoringPage = () => {
         <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
         <td>{faculty.department}</td>
         <td>
-          {typeof faculty.facultyScore === 'number'
-            ? faculty.facultyScore.toFixed(2)
-            : faculty.facultyScore}
-        </td>
-        <td>
           {typeof faculty.facultyPercentage === 'number'
             ? `${faculty.facultyPercentage}`
             : faculty.facultyPercentage}
         </td>
         <td>
-          {typeof faculty.subjectScore === 'number'
-            ? faculty.subjectScore.toFixed(2)
-            : faculty.subjectScore}
+          {typeof faculty.facultyScore === 'number'
+            ? faculty.facultyScore.toFixed(2)
+            : faculty.facultyScore}
         </td>
         <td>
           {typeof faculty.subjectPercentage === 'number'
             ? `${faculty.subjectPercentage}`
             : faculty.subjectPercentage}
+        </td>
+        <td>
+          {typeof faculty.subjectScore === 'number'
+            ? faculty.subjectScore.toFixed(2)
+            : faculty.subjectScore}
         </td>
         <td>
           {typeof faculty.finalScore === 'number'
