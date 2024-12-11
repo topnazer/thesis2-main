@@ -118,42 +118,36 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
 
   const fetchAllEnrolledStudentsForFaculty = async (facultyId) => {
     try {
-      
-      const subjectsQuery = query(
-        collection(db, "subjects"),
-        where("facultyId", "==", facultyId)
-      );
-      const subjectsSnapshot = await getDocs(subjectsQuery);
-  
-      let enrolledStudents = [];
-  
-      // Iterate through each subject and fetch enrolled students
-      for (const subjectDoc of subjectsSnapshot.docs) {
-        const subjectId = subjectDoc.id;
-        const enrolledStudentsRef = collection(db, `subjects/${subjectId}/enrolledStudents`);
-        const enrolledStudentsSnapshot = await getDocs(enrolledStudentsRef);
-  
-        
-        enrolledStudents.push(
-          ...enrolledStudentsSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
+        const subjectsQuery = query(
+            collection(db, "subjects"),
+            where("facultyId", "==", facultyId)
         );
-      }
-  
-      
-      const uniqueEnrolledStudents = Array.from(
-        new Map(enrolledStudents.map((student) => [student.id, student])).values()
-      );
-  
-      return uniqueEnrolledStudents;
+        const subjectsSnapshot = await getDocs(subjectsQuery);
+
+        let enrolledStudents = [];
+
+        // Iterate through each subject and fetch enrolled students
+        for (const subjectDoc of subjectsSnapshot.docs) {
+            const subjectId = subjectDoc.id;
+            const enrolledStudentsRef = collection(db, `subjects/${subjectId}/enrolledStudents`);
+            const enrolledStudentsSnapshot = await getDocs(enrolledStudentsRef);
+
+            enrolledStudents.push(
+                ...enrolledStudentsSnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    subjectId, // Include subject ID for context
+                    ...doc.data(),
+                }))
+            );
+        }
+
+        // Instead of deduplication, we count all occurrences of the same student
+        return enrolledStudents;
     } catch (error) {
-      console.error("Error fetching enrolled students for faculty:", error);
-      return [];
+        console.error("Error fetching enrolled students for faculty:", error);
+        return [];
     }
-  };
-  
+};
 
 
   const fetchAllStudents = async () => {
@@ -745,16 +739,29 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
     ) : (
       // Render Subject Comments
       <div className="commentstables">
-      <div className="commentstablesnav">
-      <p>Total Students Enrolled: {enrolledStudents.length}</p>
-      <p>Total Evaluations Submited: {completedEvaluationsCount}</p>
-        <h2>Subject Evaluation Comments</h2>
-        <button
-          onClick={() => setShowCommentsTable(false)}
-        >
-          Back
-        </button>
-      </div>
+   <div className="commentstablesnav">
+  <button className="evaluation-progress-bttn">
+    <div
+      className="water-fill-button"
+      style={{
+        width: `${
+          enrolledStudents.length > 0
+            ? (completedEvaluationsCount / enrolledStudents.length) * 100
+            : 0
+        }%`,
+      }}
+    ></div>
+    <span className="progress-text">
+      {enrolledStudents.length > 0
+        ? ((completedEvaluationsCount / enrolledStudents.length) * 100).toFixed(2)
+        : 0}
+      % Evaluate Completed 
+    </span>
+  </button>
+  <h2>Subject Evaluation Comments</h2>
+  <button onClick={() => setShowCommentsTable(false)}>Back</button>
+</div>
+
       {comments.length > 0 ? (
         <>
           <table>
