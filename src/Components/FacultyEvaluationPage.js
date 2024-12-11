@@ -85,16 +85,11 @@ const FacultyEvaluationPage = () => {
 
 const deleteCategory = async (categoryId) => {
     try {
-        // Filter out the category to be deleted
         const updatedCategories = categories.filter((category) => category.id !== categoryId);
-
-        // Update only the 'categories' field in Firestore
         const formRef = doc(db, "evaluationForms", "faculty");
         await updateDoc(formRef, {
             categories: updatedCategories,
         });
-
-        // Update local state
         setFacultyCategories(updatedCategories);
         alert("Category deleted successfully!");
     } catch (error) {
@@ -110,15 +105,11 @@ const deleteCategory = async (categoryId) => {
         setFacultyCategoryType(category.type);
         setFacultyCategoryOptions(category.options || []);
     };
-
-
     const handleCategoryOptionsChange = (e) => {
         setFacultyOption(e.target.value);
     };
-
     const addOrEditOption = () => {
         if (!newOption.trim() || !selectedCategory) return;
-
         const updatedCategories = categories.map((category) =>
             category.name === selectedCategory
                 ? {

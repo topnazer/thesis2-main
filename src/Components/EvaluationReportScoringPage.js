@@ -20,6 +20,9 @@ const EvaluationReportScoringPage = () => {
   const [faculties, setFaculties] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedSemester, setSelectedSemester] = useState("1st Semester");
+  const [selectedSchoolYear, setSelectedSchoolYear] = useState("");
+  const currentYear = new Date().getFullYear();
+  const schoolYears = Array.from({ length: 10 }, (_, i) => `${currentYear + i}-${currentYear + i + 1}`);
   const facultiesPerPage = 10;
   const db = getFirestore();
 
@@ -230,7 +233,7 @@ const EvaluationReportScoringPage = () => {
             </thead>
             <tbody>
               <tr>
-                <td>${selectedSemester}</td>
+                <td>${selectedSemester} / ${currentYear}</td>
                 <td>${faculty.firstName} ${faculty.lastName}</td>
                 <td>${faculty.department}</td>
                 <td>${typeof faculty.facultyScore === 'number'
@@ -329,6 +332,16 @@ const EvaluationReportScoringPage = () => {
                         <option value="1st Semester">1st Semester</option>
                         <option value="2nd Semester">2nd Semester</option>
                       </select>
+                      <select
+    className="input-group"
+    value={selectedSchoolYear}
+    onChange={(e) => setSelectedSchoolYear(e.target.value)}
+  >
+    <option value="">Select School Year</option>
+    {schoolYears.map((year) => (
+      <option key={year} value={year}>{year}</option>
+    ))}
+  </select>
                     </th>
                   </tr>
                   <tr>
