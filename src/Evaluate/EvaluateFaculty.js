@@ -170,6 +170,7 @@ const EvaluateFaculty = () => {
         return;
     }
 
+    // Calculate scores and option frequencies
     const { totalScore, maxScore, percentageScore } = calculateRatingScore();
 
     // Convert percentageScore to 1–5 scale
@@ -209,7 +210,7 @@ const EvaluateFaculty = () => {
             userId: user.uid,
             facultyId,
             evaluatorName,
-            ratingScore: { totalScore, maxScore, averageScore }, // Store averageScore
+            ratingScore: { totalScore, maxScore, averageScore, percentageScore }, // Include percentageScore
             comment,
             createdAt: new Date(),
             detailedQuestions, // Include detailed questions
@@ -225,33 +226,42 @@ const EvaluateFaculty = () => {
             );
             await setDoc(deanEvaluationRef, evaluationData);
 
-            // Update or create the overall `averageScore` for facdeanEvaluations
+            // Update or create the overall `averageScore` and `percentageScore` for facdeanEvaluations
             const facDeanEvaluationRef = doc(db, "facdeanEvaluations", facultyId);
             const facDeanEvaluationDoc = await getDoc(facDeanEvaluationRef);
 
             let newAverageScore;
+            let newPercentageScore;
             let completedEvaluations;
 
             if (facDeanEvaluationDoc.exists()) {
                 const existingAverageScore = facDeanEvaluationDoc.data().averageScore || 0;
+                const existingPercentageScore = facDeanEvaluationDoc.data().percentageScore || 0;
                 completedEvaluations = (facDeanEvaluationDoc.data().completedEvaluations || 0) + 1;
+
                 newAverageScore =
                     (existingAverageScore * (completedEvaluations - 1) + averageScore) / completedEvaluations;
+
+                newPercentageScore =
+                    (existingPercentageScore * (completedEvaluations - 1) + percentageScore) / completedEvaluations;
 
                 await setDoc(
                     facDeanEvaluationRef,
                     {
                         averageScore: newAverageScore,
+                        percentageScore: newPercentageScore, // Include cumulative percentageScore
                         completedEvaluations,
                     },
                     { merge: true }
                 );
             } else {
                 newAverageScore = averageScore;
+                newPercentageScore = percentageScore;
                 completedEvaluations = 1;
 
                 await setDoc(facDeanEvaluationRef, {
                     averageScore: newAverageScore,
+                    percentageScore: newPercentageScore,
                     completedEvaluations,
                 });
             }
@@ -262,29 +272,39 @@ const EvaluateFaculty = () => {
         const facultyEvaluationDoc = await getDoc(facultyEvaluationRef);
 
         let newAverageScore;
+        let newPercentageScore;
         let completedEvaluationsFaculty;
 
         if (facultyEvaluationDoc.exists()) {
             const existingAverageScore = facultyEvaluationDoc.data().averageScore || 0;
+            const existingPercentageScore = facultyEvaluationDoc.data().percentageScore || 0;
             completedEvaluationsFaculty = (facultyEvaluationDoc.data().completedEvaluations || 0) + 1;
+
             newAverageScore =
                 (existingAverageScore * (completedEvaluationsFaculty - 1) + averageScore) /
+                completedEvaluationsFaculty;
+
+            newPercentageScore =
+                (existingPercentageScore * (completedEvaluationsFaculty - 1) + percentageScore) /
                 completedEvaluationsFaculty;
 
             await setDoc(
                 facultyEvaluationRef,
                 {
                     averageScore: newAverageScore,
+                    percentageScore: newPercentageScore, // Include cumulative percentageScore
                     completedEvaluations: completedEvaluationsFaculty,
                 },
                 { merge: true }
             );
         } else {
             newAverageScore = averageScore;
+            newPercentageScore = percentageScore;
             completedEvaluationsFaculty = 1;
 
             await setDoc(facultyEvaluationRef, {
                 averageScore: newAverageScore,
+                percentageScore: newPercentageScore,
                 completedEvaluations: completedEvaluationsFaculty,
             });
         }
@@ -293,8 +313,11 @@ const EvaluateFaculty = () => {
     } catch (error) {
         alert("Failed to submit evaluation. Please try again.");
         console.error("Error submitting evaluation:", error.message);
+    } finally {
+        setSubmitting(false);
     }
 };
+
 
 
   const renderQuestionsForCurrentCategory = () => {

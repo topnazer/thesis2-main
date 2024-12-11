@@ -45,8 +45,7 @@ const EvaluationReportScoringPage = () => {
 
   const handleSemesterChange = (e) => {
     setSelectedSemester(e.target.value);
-
-  }
+  };
 
   const handleSaveWeights = async () => {
     if (subjectWeight + facultyWeight !== 100) {
@@ -69,108 +68,124 @@ const EvaluationReportScoringPage = () => {
 
   const fetchFaculties = useCallback(() => {
     const facultyQuery = query(
-        collection(db, 'users'),
-        where('role', '==', 'Faculty')
+      collection(db, 'users'),
+      where('role', '==', 'Faculty')
     );
-
+  
     const unsubscribe = onSnapshot(
-        facultyQuery,
-        async (snapshot) => {
-            const facultyList = await Promise.all(
-                snapshot.docs.map(async (facultyDoc) => {
-                    const facultyData = facultyDoc.data();
-                    const facultyId = facultyDoc.id;
-
-                    // Query subject evaluations for this faculty
-                    const subjectEvaluationsQuery = query(
-                        collection(db, 'subjectEvaluations'),
-                        where('facultyId', '==', facultyId)
-                    );
-                    const subjectEvaluationsSnapshot = await getDocs(subjectEvaluationsQuery);
-
-                    let totalSubjectScore = 0;
-                    let subjectCount = 0;
-
-                    if (!subjectEvaluationsSnapshot.empty) {
-                        subjectEvaluationsSnapshot.forEach((doc) => {
-                            const evaluationData = doc.data();
-                            totalSubjectScore += evaluationData.averageScore || 0;
-                            subjectCount += 1;
-                        });
-                    }
-
-                    const subjectScore =
-                        subjectCount > 0
-                            ? totalSubjectScore / subjectCount
-                            : 'Not scored yet';
-
-                    // Query faculty dean evaluations
-                    const facultyEvaluationDoc = await getDoc(
-                        doc(db, 'facdeanEvaluations', facultyId)
-                    );
-                    const facultyEvaluationData = facultyEvaluationDoc.exists()
-                        ? facultyEvaluationDoc.data()
-                        : null;
-
-                    const facultyScore = facultyEvaluationData
-                        ? facultyEvaluationData.averageScore
-                        : 'Not scored yet';
-
-                    // Calculate weighted scores
-                    const weightedSubjectScore =
-                        typeof subjectScore === 'number'
-                            ? parseFloat(((subjectScore * subjectWeight) / 100).toFixed(2))
-                            : 'Not scored yet';
-
-                    const weightedFacultyScore =
-                        typeof facultyScore === 'number'
-                            ? parseFloat(((facultyScore * facultyWeight) / 100).toFixed(2))
-                            : 'Not scored yet';
-
-                    // Calculate final score
-                    const finalScore =
-                        typeof weightedSubjectScore === 'number' &&
-                        typeof weightedFacultyScore === 'number'
-                            ? weightedSubjectScore + weightedFacultyScore
-                            : 'Not scored yet';
-
-                    // Assign remarks based on finalScore
-                    const remarks =
-                        typeof finalScore === 'number'
-                            ? finalScore >= 5
-                                ? 'Excellent'
-                                : finalScore >= 4
-                                ? 'Very Satisfactory'
-                                : finalScore >= 3
-                                ? 'Satisfactory'
-                                : finalScore >= 2
-                                ? 'Needs Improvement'
-                                : 'Poor'
-                            : 'Not scored yet';
-
-                    // Return faculty data with calculated scores
-                    return {
-                        id: facultyId,
-                        ...facultyData,
-                        facultyScore: weightedFacultyScore,
-                        subjectScore: weightedSubjectScore,
-                        finalScore,
-                        remarks,
-                    };
-                })
+      facultyQuery,
+      async (snapshot) => {
+        const facultyList = await Promise.all(
+          snapshot.docs.map(async (facultyDoc) => {
+            const facultyData = facultyDoc.data();
+            const facultyId = facultyDoc.id;
+  
+            // Query subject evaluations for this faculty
+            const subjectEvaluationsQuery = query(
+              collection(db, 'subjectEvaluations'),
+              where('facultyId', '==', facultyId)
             );
-
-            setFaculties(facultyList);
-            setLoading(false);
-        },
-        (error) => {
-            console.error('Error fetching faculties:', error);
-            setLoading(false);
-        }
+            const subjectEvaluationsSnapshot = await getDocs(subjectEvaluationsQuery);
+  
+            let totalSubjectScore = 0;
+            let totalSubjectPercentage = 0;
+            let subjectCount = 0;
+  
+            if (!subjectEvaluationsSnapshot.empty) {
+              subjectEvaluationsSnapshot.forEach((doc) => {
+                const evaluationData = doc.data();
+                totalSubjectScore += evaluationData.averageScore || 0;
+                totalSubjectPercentage += evaluationData.percentageScore || 0; // Sum of raw percentage scores
+                subjectCount += 1;
+              });
+            }
+  
+            // Calculate averages
+            const subjectScore =
+              subjectCount > 0
+                ? totalSubjectScore / subjectCount
+                : 'Not scored yet';
+  
+            const subjectPercentage =
+              subjectCount > 0
+                ? Math.round((totalSubjectPercentage / subjectCount) * subjectWeight / 100) // Apply subjectWeight
+                : 'Not scored yet';
+  
+            // Query faculty dean evaluations
+            const facultyEvaluationDoc = await getDoc(
+              doc(db, 'facdeanEvaluations', facultyId)
+            );
+            const facultyEvaluationData = facultyEvaluationDoc.exists()
+              ? facultyEvaluationDoc.data()
+              : null;
+  
+            const facultyScore = facultyEvaluationData
+              ? facultyEvaluationData.averageScore
+              : 'Not scored yet';
+  
+            const facultyPercentage = facultyEvaluationData
+              ? Math.round((facultyEvaluationData.percentageScore || 0) * facultyWeight / 100) // Apply facultyWeight
+              : 'Not scored yet';
+  
+            // Calculate weighted scores
+            const weightedSubjectScore =
+              typeof subjectScore === 'number'
+                ? parseFloat(((subjectScore * subjectWeight) / 100).toFixed(2))
+                : 'Not scored yet';
+  
+            const weightedFacultyScore =
+              typeof facultyScore === 'number'
+                ? parseFloat(((facultyScore * facultyWeight) / 100).toFixed(2))
+                : 'Not scored yet';
+  
+            // Calculate final score
+            const finalScore =
+              typeof weightedSubjectScore === 'number' &&
+              typeof weightedFacultyScore === 'number'
+                ? weightedSubjectScore + weightedFacultyScore
+                : 'Not scored yet';
+  
+            // Assign remarks based on finalScore
+            const remarks =
+              typeof finalScore === 'number'
+                ? finalScore >= 5
+                  ? 'Excellent'
+                  : finalScore >= 4
+                  ? 'Very Satisfactory'
+                  : finalScore >= 3
+                  ? 'Satisfactory'
+                  : finalScore >= 2
+                  ? 'Needs Improvement'
+                  : 'Poor'
+                : 'Not scored yet';
+  
+            // Return faculty data with calculated scores
+            return {
+              id: facultyId,
+              ...facultyData,
+              facultyScore: weightedFacultyScore,
+              facultyPercentage,
+              subjectScore: weightedSubjectScore,
+              subjectPercentage, // Correctly weighted value
+              finalScore,
+              remarks,
+            };
+          })
+        );
+  
+        setFaculties(facultyList);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error fetching faculties:', error);
+        setLoading(false);
+      }
     );
-
+  
     return unsubscribe;
-}, [db, subjectWeight, facultyWeight]);
+  }, [db, subjectWeight, facultyWeight]);
+  
+  
 
   useEffect(() => {
     fetchFaculties();
@@ -226,7 +241,9 @@ const EvaluationReportScoringPage = () => {
                 <th>Faculty Name</th>
                 <th>Department</th>
                 <th>Supervisor Score (40%)</th>
+                <th>Supervisor (%)</th>
                 <th>Student Score (60%)</th>
+                <th>Student (%)</th>
                 <th>Final Score</th>
                 <th>Remarks</th>
               </tr>
@@ -239,9 +256,15 @@ const EvaluationReportScoringPage = () => {
                 <td>${typeof faculty.facultyScore === 'number'
                   ? faculty.facultyScore.toFixed(2)
                   : faculty.facultyScore}</td>
+                <td>${typeof faculty.facultyPercentage === 'number'
+                  ? `${faculty.facultyPercentage.toFixed(2)}%`
+                  : faculty.facultyPercentage}</td>
                 <td>${typeof faculty.subjectScore === 'number'
                   ? faculty.subjectScore.toFixed(2)
                   : faculty.subjectScore}</td>
+                <td>${typeof faculty.subjectPercentage === 'number'
+                  ? `${faculty.subjectPercentage.toFixed(2)}%`
+                  : faculty.subjectPercentage}</td>
                 <td>${typeof faculty.finalScore === 'number'
                   ? faculty.finalScore.toFixed(2)
                   : faculty.finalScore}</td>
@@ -255,10 +278,12 @@ const EvaluationReportScoringPage = () => {
     printWindow.document.close();
     printWindow.print();
   };
+
   const displayedFaculties = faculties.slice(
     (currentPage - 1) * facultiesPerPage,
     currentPage * facultiesPerPage
   );
+
   return (
     <div className="eval-scoring-page">
       <nav className="navbar">
@@ -267,9 +292,8 @@ const EvaluationReportScoringPage = () => {
         </div>
         <h1>Evaluation Report Scoring Page</h1>
         <button className="score-weights-btn" onClick={() => setShowModal(true)}>
-  Set Score Weights
-</button>
-
+          Set Score Weights
+        </button>
       </nav>
 
       {showModal && (
@@ -311,77 +335,66 @@ const EvaluationReportScoringPage = () => {
         </div>
       )}
 
-<div className="scoringcontainer">
+      <div className="scoringcontainer">
         <div className="faculty-list">
           <h2>Faculty Scores</h2>
           {loading ? (
             <p>Loading faculty data...</p>
           ) : (
             <div>
-              <table>
-                <thead>
-                  <tr>
-                    <th colSpan="7" style={{ textAlign: 'left' }}>
-                      <label htmlFor="semester-select">Select Semester:</label>
-                      <select
-                        id="semester-select"
-                        value={selectedSemester}
-                        onChange={handleSemesterChange}
-                        style={{ marginLeft: '10px' }}
-                      >
-                        <option value="1st Semester">1st Semester</option>
-                        <option value="2nd Semester">2nd Semester</option>
-                      </select>
-                      <select
-    className="input-group"
-    value={selectedSchoolYear}
-    onChange={(e) => setSelectedSchoolYear(e.target.value)}
-  >
-    <option value="">Select School Year</option>
-    {schoolYears.map((year) => (
-      <option key={year} value={year}>{year}</option>
+           <table>
+  <thead>
+    <tr>
+      <th>Faculty Name</th>
+      <th>Department</th>
+      <th>Supervisor (40%)</th>
+      <th>Supervisor (%)</th>
+      <th>Student (60%)</th>
+      <th>Student (%)</th>
+      <th>Overall Rating</th>
+      <th>Remarks</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {displayedFaculties.map((faculty) => (
+      <tr key={faculty.id}>
+        <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
+        <td>{faculty.department}</td>
+        <td>
+          {typeof faculty.facultyScore === 'number'
+            ? faculty.facultyScore.toFixed(2)
+            : faculty.facultyScore}
+        </td>
+        <td>
+          {typeof faculty.facultyPercentage === 'number'
+            ? `${faculty.facultyPercentage}`
+            : faculty.facultyPercentage}
+        </td>
+        <td>
+          {typeof faculty.subjectScore === 'number'
+            ? faculty.subjectScore.toFixed(2)
+            : faculty.subjectScore}
+        </td>
+        <td>
+          {typeof faculty.subjectPercentage === 'number'
+            ? `${faculty.subjectPercentage}`
+            : faculty.subjectPercentage}
+        </td>
+        <td>
+          {typeof faculty.finalScore === 'number'
+            ? faculty.finalScore.toFixed(2)
+            : faculty.finalScore}
+        </td>
+        <td>{faculty.remarks}</td>
+        <td>
+          <button onClick={() => handlePrint(faculty)}>Print</button>
+        </td>
+      </tr>
     ))}
-  </select>
-                    </th>
-                  </tr>
-                  <tr>
-                    <th>Faculty Name</th>
-                    <th>Department</th>
-                    <th>Supervisor (40%)</th>
-                    <th>Student (60%)</th>
-                    <th>Overall Rating</th>
-                    <th>Remarks</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayedFaculties.map((faculty) => (
-                    <tr key={faculty.id}>
-                      <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
-                      <td>{faculty.department}</td>
-                      <td>
-                        {typeof faculty.facultyScore === 'number'
-                          ? faculty.facultyScore.toFixed(2)
-                          : faculty.facultyScore}
-                      </td>
-                      <td>
-                        {typeof faculty.subjectScore === 'number'
-                          ? faculty.subjectScore.toFixed(2)
-                          : faculty.subjectScore}
-                      </td>
-                      <td>
-                        {typeof faculty.finalScore === 'number'
-                          ? faculty.finalScore.toFixed(2)
-                          : faculty.finalScore}
-                      </td>
-                      <td>{faculty.remarks}</td>
-                      <td>
-                        <button onClick={() => handlePrint(faculty)}>Print</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+  </tbody>
+</table>
+
               <div className="paginationreport">
                 <button onClick={handlePreviousPage} disabled={currentPage === 1}>
                   Previous
@@ -397,7 +410,7 @@ const EvaluationReportScoringPage = () => {
             </div>
           )}
         </div>
-        </div>
+      </div>
     </div>
   );
 };
