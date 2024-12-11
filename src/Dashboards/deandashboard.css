@@ -150,6 +150,14 @@ html, body {
   font-family: Arial, Helvetica, sans-serif; /* Consistent font */
 }
 
+.deanevaluation-report-container td:nth-child(2) {
+  width: 70%; /* Allocate more space for the comment column */
+}
+
+.deanevaluation-report-container td:nth-child(1) {
+  width: 15%; /* Allocate equal space for other columns */
+}
+
 .deanevaluation-report-container th {
   background-color: rgb(69, 10, 10); /* Same dark red */
   color: white; /* White text for contrast */

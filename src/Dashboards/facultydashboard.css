@@ -578,12 +578,11 @@ html, body {
   white-space: pre-wrap; /* Preserve formatting and wrap text */
 }
 
-.commentstables td:nth-child(3) {
+.commentstables td:nth-child(2) {
   width: 70%; /* Allocate more space for the comment column */
 }
 
-.commentstables td:nth-child(1),
-.commentstables td:nth-child(2) {
+.commentstables td:nth-child(1) {
   width: 15%; /* Allocate equal space for other columns */
 }
 

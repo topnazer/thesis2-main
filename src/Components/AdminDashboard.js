@@ -85,7 +85,7 @@ const AdminDashboard = () => {
           <Link to="subjects"><BookCopy/>   Subjects</Link>
           <Link to="Evaluation"><Hammer/>   Evaluation Tools</Link> 
           <Link to="evaluation-report"> <FileCheck /> Evaluation Report</Link>
-          <Link to="/admin/evaluation-report">Evaluation Report Scoring</Link>
+          <Link to="/admin/evaluation-report" > <FileCheck />Evaluation Scoring</Link>
           <button onClick={handleLogout}>Log Out</button>
           <div className="line"></div>  
         </div>

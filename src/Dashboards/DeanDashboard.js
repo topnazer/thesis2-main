@@ -260,8 +260,8 @@ const DeanDashboard = () => {
               <table className="deanevaluation-report-container">
                 <thead>
                   <tr>
-                    <th>Evaluator</th>
-                    <th>Percentage Score</th>
+                  
+                  
                     <th>Date</th>
                     <th>Comments</th>
                   </tr>
@@ -269,12 +269,8 @@ const DeanDashboard = () => {
                 <tbody>
                   {currentEvaluationReports.map((report, index) => (
                     <tr key={index}>
-                      <td>{report.evaluatorName}</td>
-                      <td>
-                        {report.ratingScore?.percentageScore
-                          ? `${report.ratingScore.percentageScore}%`
-                          : "N/A"}
-                      </td>
+                     
+                    
                       <td>
                         {report.createdAt
                           ? new Date(

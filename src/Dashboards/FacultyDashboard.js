@@ -40,6 +40,10 @@ const totalSubjectCommentPages = Math.ceil(comments.length / subjectCommentsPerP
 const [subjectCommentsCurrentPage, setSubjectCommentsCurrentPage] = useState(0);
 const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
 
+const [overallRating, setOverallRating] = useState(null); // Store overall rating
+const [facultyWeight, setFacultyWeight] = useState(40); // Default 40% weight
+const [subjectWeight, setSubjectWeight] = useState(60); // Default 60% weig
+
 
   const navigate = useNavigate();
   const db = getFirestore();
@@ -75,8 +79,7 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
   
       // Extract `evaluationId`s (document IDs) from the snapshot
       const evaluationIds = studentsSnapshot.docs.map((doc) => doc.id);
-  
-      console.log("Fetched Evaluation IDs:", evaluationIds); // Debugging log
+
   
       // Return the total number of `evaluationId`s
       return evaluationIds.length;
@@ -297,7 +300,19 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
       let totalSubjects = 0;
       let facultyAverageScore = 0;
   
-      // Fetch all subject evaluations for the faculty
+      // Default weights
+      let facultyWeight = 40; // Default 40% weight
+      let subjectWeight = 60; // Default 60% weight
+  
+      // Fetch weights from Firestore
+      const weightsDoc = await getDoc(doc(db, "settings", "scoreWeights"));
+      if (weightsDoc.exists()) {
+        const weights = weightsDoc.data();
+        if (weights.facultyWeight) facultyWeight = weights.facultyWeight;
+        if (weights.subjectWeight) subjectWeight = weights.subjectWeight;
+      }
+  
+      // Fetch subject evaluations for the faculty
       const subjectEvaluationsQuery = query(
         collection(db, "subjectEvaluations"),
         where("facultyId", "==", facultyId)
@@ -316,7 +331,7 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
       const subjectAverageScore =
         totalSubjects > 0 ? totalSubjectScore / totalSubjects : 0;
   
-     
+      // Fetch faculty evaluation score
       const facultyDocRef = doc(db, "facultyEvaluations", facultyId);
       const facultyDocSnapshot = await getDoc(facultyDocRef);
   
@@ -327,15 +342,25 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
         console.warn("No faculty evaluation found for this user.");
       }
   
-     
+      // Calculate overall rating based on weights
+      const weightedFacultyScore = (facultyAverageScore * facultyWeight) / 100;
+      const weightedSubjectScore = (subjectAverageScore * subjectWeight) / 100;
+      const overallRating = weightedFacultyScore + weightedSubjectScore;
+  
       setAverageScore({
         faculty: facultyAverageScore.toFixed(2),
         subject: subjectAverageScore.toFixed(2),
       });
+  
+      setOverallRating(overallRating.toFixed(2)); // Save overall rating
+
+
     } catch (error) {
       console.error("Error fetching scores:", error);
     }
   };
+  
+  
   
   const fetchNotifications = async (user) => {
     try {
@@ -767,7 +792,6 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
           <table>
             <thead>
               <tr>
-                <th>Subject Name</th>
                 <th>Date</th>
                 <th>Comment</th>
               </tr>
@@ -775,7 +799,6 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
             <tbody>
               {currentSubjectComments.map((comment, index) => (
                 <tr key={index}>
-                  <td>{comment.subjectName}</td>
                   <td>{comment.date}</td>
                   <td>{comment.comment}</td>
                 </tr>
@@ -813,17 +836,22 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
         <div className="dashboardlogo-container">
           <img src="/spc.png" alt="Logo" className="dashboardlogo" />
         </div>
-        <h1>Faculty Dashboard</h1>
+        <h1><strong>{userName}</strong></h1>
         <div style={{ display: "flex", alignItems: "center" }}>
-          <p style={{ fontSize: "25px" }}>
-            <strong>{userName}</strong>
-          </p>
+          
+          {overallRating !== null && (
+      <span style={{ marginLeft: "10px", fontWeight: "bold", fontSize: "20px" }}>
+        Overall Rating: {Number(overallRating).toFixed(2)}
+      </span>
+      
+    )}
           <button
             className="facnotification-icon"
             onClick={() => setShowNotifications(!showNotifications)}
           >
             Notifications {notifications.length > 0 && `(${notifications.length})`}
           </button>
+          
           <button onClick={() => setShowEvaluationReport(!showEvaluationReport)}>
             Evaluation Report
           </button>
@@ -875,12 +903,13 @@ const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
   onKeyDown={(e) => e.key === "Enter" && handleShowFacultyComments()}
 >
   <h3>Faculty Average Score</h3>
-  {averageScore?.faculty !== null ? (
-    <p>{Number(averageScore.faculty).toFixed(2)}</p>
-  ) : (
-    <p>No evaluations submitted</p>
-  )}
+  {averageScore.faculty !== null ? (
+              <p>{Number(averageScore.faculty).toFixed(2)}</p>
+            ) : (
+              <p>No evaluations submitted</p>
+            )}
 </div>
+
 
           </div>
           <button onClick={() => setShowEvaluationReport(false)}>Close</button>

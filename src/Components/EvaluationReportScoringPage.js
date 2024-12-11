@@ -203,81 +203,150 @@ const EvaluationReportScoringPage = () => {
     }
   };
 
-  const handlePrint = (faculty) => {
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Faculty Evaluation Report</title>
-          <style>
-            .print-header {
-              text-align: center;
-              margin-bottom: 20px;
-            }
-            .print-header img {
-              width: 100px;
-            }
-            .print-table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 20px 0;
-            }
-            .print-table th, .print-table td {
-              border: 1px solid #000;
-              padding: 8px;
-              text-align: left;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="print-header">
-            <img src="/spc.png" alt="Logo" />
-            <h1>Faculty Evaluation Report</h1>
-          </div>
-          <table class="print-table">
-            <thead>
-              <tr>
-                <th>Semester</th>
-                <th>Faculty Name</th>
-                <th>Department</th>
-                <th>Supervisor Score (40%)</th>
-                <th>Supervisor (%)</th>
-                <th>Student Score (60%)</th>
-                <th>Student (%)</th>
-                <th>Final Score</th>
-                <th>Remarks</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>${selectedSemester} / ${currentYear}</td>
-                <td>${faculty.firstName} ${faculty.lastName}</td>
-                <td>${faculty.department}</td>
-                <td>${typeof faculty.facultyScore === 'number'
-                  ? faculty.facultyScore.toFixed(2)
-                  : faculty.facultyScore}</td>
-                <td>${typeof faculty.facultyPercentage === 'number'
-                  ? `${faculty.facultyPercentage.toFixed(2)}%`
-                  : faculty.facultyPercentage}</td>
-                <td>${typeof faculty.subjectScore === 'number'
-                  ? faculty.subjectScore.toFixed(2)
-                  : faculty.subjectScore}</td>
-                <td>${typeof faculty.subjectPercentage === 'number'
-                  ? `${faculty.subjectPercentage.toFixed(2)}%`
-                  : faculty.subjectPercentage}</td>
-                <td>${typeof faculty.finalScore === 'number'
-                  ? faculty.finalScore.toFixed(2)
-                  : faculty.finalScore}</td>
-                <td>${faculty.remarks}</td>
-              </tr>
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
+  const handlePrint = async (faculty) => {
+    try {
+      // Fetch comments for the faculty
+      const commentsQuery = query(
+        collection(db, `evaluations/${faculty.id}/students`)
+      );
+      const commentsSnapshot = await getDocs(commentsQuery);
+      const comments = [];
+  
+      commentsSnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.comment && data.comment.trim()) {
+          comments.push(data.comment);
+        }
+      });
+  
+      // Fetch comments from the completed_evaluations subcollection in facdeanEvaluations
+      const completedEvaluationsRef = collection(
+        db,
+        "facdeanEvaluations",
+        faculty.id,
+        "completed_evaluations"
+      );
+      const completedEvaluationsSnapshot = await getDocs(completedEvaluationsRef);
+  
+      completedEvaluationsSnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.comment && data.comment.trim()) {
+          comments.push(data.comment);
+        }
+      });
+  
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Faculty Evaluation Report</title>
+            <style>
+              .print-header {
+                text-align: center;
+                margin-bottom: 20px;
+              }
+              .print-header img {
+                width: 100px;
+              }
+              .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+              }
+              .print-table th, .print-table td {
+                border: 1px solid #000;
+                padding: 8px;
+                text-align: left;
+              }
+              .comments-section {
+                margin-top: 20px;
+              }
+              .comments-section h2 {
+                margin-bottom: 10px;
+              }
+              .comment {
+                margin-bottom: 5px;
+                border: 1px solid #ccc;
+                padding: 8px;
+                background-color: #f9f9f9;
+              }
+              .cmmntrprt {
+                border: 1px solid #ccc;
+                padding: 8px;
+                background-color: #f9f9f9;
+                word-wrap: break-word;
+              }
+              .comments-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(30%, 1fr));
+                gap: 10px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="print-header">
+              <img src="/spc.png" alt="Logo" />
+              <h1>Faculty Evaluation Report</h1>
+            </div>
+            <table class="print-table">
+              <thead>
+                <tr>
+                  <th>Semester</th>
+                  <th>Faculty Name</th>
+                  <th>Department</th>
+                  <th>Supervisor Score (40%)</th>
+                  <th>Student Score (60%)</th>
+                  <th>Final Score</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>${selectedSemester} / ${currentYear}</td>
+                  <td>${faculty.firstName} ${faculty.lastName}</td>
+                  <td>${faculty.department}</td>
+                  <td>${typeof faculty.facultyScore === 'number'
+                    ? faculty.facultyScore.toFixed(2)
+                    : faculty.facultyScore}</td>
+                  <td>${typeof faculty.subjectScore === 'number'
+                    ? faculty.subjectScore.toFixed(2)
+                    : faculty.subjectScore}</td>
+                  <td>${typeof faculty.finalScore === 'number'
+                    ? faculty.finalScore.toFixed(2)
+                    : faculty.finalScore}</td>
+                  <td>${faculty.remarks}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="comments-section">
+              <h2>Evaluation Comments</h2>
+              ${
+                comments.length > 0
+                  ? `<div class="comments-grid">
+                      ${comments
+                        .map(
+                          (comment, index) =>
+                            `<div class="cmmntrprt" style="grid-column: ${Math.floor(
+                              index / 10
+                            ) + 1}">${comment}</div>`
+                        )
+                        .join('')}
+                    </div>`
+                  : '<p>No comments available</p>'
+              }
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    } catch (error) {
+      console.error("Error fetching comments for printing:", error);
+      alert("Failed to fetch comments. Please try again.");
+    }
   };
+  
+  
 
   const displayedFaculties = faculties.slice(
     (currentPage - 1) * facultiesPerPage,
@@ -347,9 +416,7 @@ const EvaluationReportScoringPage = () => {
     <tr>
       <th>Faculty Name</th>
       <th>Department</th>
-      <th>Supervisor(40%)</th>
       <th>Supervisor (40%)</th>
-      <th>Student(60%)</th>
       <th>Student (60%)</th>
       <th>Overall Rating</th>
       <th>Remarks</th>
@@ -362,22 +429,19 @@ const EvaluationReportScoringPage = () => {
         <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
         <td>{faculty.department}</td>
         <td>
-          {typeof faculty.facultyPercentage === 'number'
-            ? `${faculty.facultyPercentage}`
-            : faculty.facultyPercentage}
-        </td>
-        <td>
-          {typeof faculty.facultyScore === 'number'
+        {typeof faculty.facultyPercentage === 'number'
+              ? `${faculty.facultyPercentage}`
+              : faculty.facultyPercentage} 
+          /{typeof faculty.facultyScore === 'number'
             ? faculty.facultyScore.toFixed(2)
-            : faculty.facultyScore}
+            : faculty.facultyScore} 
+            
         </td>
         <td>
           {typeof faculty.subjectPercentage === 'number'
             ? `${faculty.subjectPercentage}`
-            : faculty.subjectPercentage}
-        </td>
-        <td>
-          {typeof faculty.subjectScore === 'number'
+            : faculty.subjectPercentage}/
+            {typeof faculty.subjectScore === 'number'
             ? faculty.subjectScore.toFixed(2)
             : faculty.subjectScore}
         </td>

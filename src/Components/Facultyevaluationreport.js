@@ -18,6 +18,11 @@ const Facultyevaluationreport = () => {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvaluation, setSelectedEvaluation] = useState(null);
+  const [enrolledStudents, setEnrolledStudents] = useState([]);
+const [completedEvaluationsCount, setCompletedEvaluationsCount] = useState(0);
+const [evaluationProgress, setEvaluationProgress] = useState({});
+
+
 
   const [evaluationsCurrentPage, setEvaluationsCurrentPage] = useState(1);
   const itemsPerPage = 5; // Items per page for both deans and evaluations
@@ -109,6 +114,9 @@ const Facultyevaluationreport = () => {
         const facultySnapshot = await getDocs(facultyQuery);
         const facultyList = facultySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         setFaculty(facultyList);
+        facultyList.forEach((faculty) => {
+          fetchEvaluationProgressForFaculty(faculty.id);
+        });
       } catch (error) {
         setError("Failed to load faculty data.");
         console.error("Error fetching faculty data:", error);
@@ -119,6 +127,97 @@ const Facultyevaluationreport = () => {
 
     fetchFacultyByDepartment();
   }, [selectedDepartment, db]);
+
+  const fetchEvaluationProgressForFaculty = async (facultyId) => {
+    try {
+      // Fetch enrolled students
+      const subjectsQuery = query(
+        collection(db, "subjects"),
+        where("facultyId", "==", facultyId)
+      );
+      const subjectsSnapshot = await getDocs(subjectsQuery);
+  
+      let enrolledStudentsList = [];
+      for (const subjectDoc of subjectsSnapshot.docs) {
+        const subjectId = subjectDoc.id;
+        const enrolledStudentsRef = collection(db, `subjects/${subjectId}/enrolledStudents`);
+        const enrolledStudentsSnapshot = await getDocs(enrolledStudentsRef);
+  
+        enrolledStudentsList.push(
+          ...enrolledStudentsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            subjectId,
+            ...doc.data(),
+          }))
+        );
+      }
+  
+      // Fetch completed evaluations
+      const evaluationsRef = collection(db, `evaluations/${facultyId}/students`);
+      const evaluationsSnapshot = await getDocs(evaluationsRef);
+  
+      const completedCount = evaluationsSnapshot.docs.length;
+      const enrolledCount = enrolledStudentsList.length;
+      const percentage = enrolledCount === 0 ? 0 : ((completedCount / enrolledCount) * 100).toFixed(2);
+  
+      // Update progress for this faculty
+      setEvaluationProgress((prev) => ({
+        ...prev,
+        [facultyId]: percentage,
+      }));
+    } catch (error) {
+      console.error("Error fetching evaluation progress for faculty:", error);
+    }
+  };
+  
+
+  const fetchEnrolledStudentsForFaculty = async (facultyId) => {
+    try {
+      const subjectsQuery = query(
+        collection(db, "subjects"),
+        where("facultyId", "==", facultyId)
+      );
+      const subjectsSnapshot = await getDocs(subjectsQuery);
+  
+      let enrolledStudentsList = [];
+  
+      for (const subjectDoc of subjectsSnapshot.docs) {
+        const subjectId = subjectDoc.id;
+        const enrolledStudentsRef = collection(db, `subjects/${subjectId}/enrolledStudents`);
+        const enrolledStudentsSnapshot = await getDocs(enrolledStudentsRef);
+  
+        enrolledStudentsList.push(
+          ...enrolledStudentsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            subjectId,
+            ...doc.data(),
+          }))
+        );
+      }
+  
+      setEnrolledStudents(enrolledStudentsList);
+    } catch (error) {
+      console.error("Error fetching enrolled students for faculty:", error);
+      setEnrolledStudents([]);
+    }
+  };
+  
+  const fetchCompletedEvaluationsForFaculty = async (facultyId) => {
+    try {
+      const evaluationsRef = collection(db, `evaluations/${facultyId}/students`);
+      const evaluationsSnapshot = await getDocs(evaluationsRef);
+  
+      setCompletedEvaluationsCount(evaluationsSnapshot.docs.length);
+    } catch (error) {
+      console.error("Error fetching completed evaluations:", error);
+      setCompletedEvaluationsCount(0);
+    }
+  };
+  const calculateEvaluationCompletionPercentage = () => {
+    if (enrolledStudents.length === 0) return 0;
+    return ((completedEvaluationsCount / enrolledStudents.length) * 100).toFixed(2);
+  };
+  
 
   // Fetch evaluations for a specific faculty
   const fetchEvaluations = async (facultyId) => {
@@ -192,10 +291,13 @@ const Facultyevaluationreport = () => {
   }
 };
 
-  const handleFacultyClick = (facultyMember) => {
-    setSelectedFaculty(facultyMember);
-    fetchEvaluations(facultyMember.id);
-  };
+const handleFacultyClick = async (facultyMember) => {
+  setSelectedFaculty(facultyMember);
+  fetchEvaluations(facultyMember.id); // This function doesn't use `await`
+  await fetchEnrolledStudentsForFaculty(facultyMember.id);
+  await fetchCompletedEvaluationsForFaculty(facultyMember.id);
+};
+
 
   const paginate = (items, currentPage) => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -253,6 +355,10 @@ const Facultyevaluationreport = () => {
                       {member.firstName} {member.lastName}
                     </strong>
                     <p>Email: {member.email}</p>
+                    <p>
+                    Evaluate Completed: {evaluationProgress[member.id] || "0.00"}%
+</p>
+
                     <p>Department: {member.department}</p>
                   </div>
                 </div>
