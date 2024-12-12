@@ -247,6 +247,7 @@ const EvaluationReportScoringPage = () => {
               }
               .print-header img {
                 width: 100px;
+                border-radius: 100%;
               }
               .print-table {
                 width: 100%;
@@ -271,16 +272,28 @@ const EvaluationReportScoringPage = () => {
                 background-color: #f9f9f9;
               }
               .cmmntrprt {
-                border: 1px solid #ccc;
+                list-style-type: circle;
                 padding: 8px;
-                background-color: #f9f9f9;
                 word-wrap: break-word;
               }
               .comments-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(30%, 1fr));
                 gap: 10px;
               }
+                .comments-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.comments-table th, .comments-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.comments-table th {
+  background-color: #f0f0f0;
+}
             </style>
           </head>
           <body>
@@ -319,22 +332,29 @@ const EvaluationReportScoringPage = () => {
               </tbody>
             </table>
             <div class="comments-section">
-              <h2>Evaluation Comments</h2>
-              ${
-                comments.length > 0
-                  ? `<div class="comments-grid">
-                      ${comments
-                        .map(
-                          (comment, index) =>
-                            `<div class="cmmntrprt" style="grid-column: ${Math.floor(
-                              index / 10
-                            ) + 1}">${comment}</div>`
-                        )
-                        .join('')}
-                    </div>`
-                  : '<p>No comments available</p>'
-              }
-            </div>
+  
+  ${
+    comments.length > 0
+      ? `<table class="comments-table">
+          <thead>
+            <tr>
+              <th><h2>Comments/Suggestions</h2></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${comments
+              .map(
+                (comment, index) =>
+                  `<tr>
+                    <td>${comment}</td>
+                  </tr>`
+              )
+              .join('')}
+          </tbody>
+        </table>`
+      : '<p>No comments available</p>'
+  }
+</div>
           </body>
         </html>
       `);
