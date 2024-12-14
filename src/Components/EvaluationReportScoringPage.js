@@ -24,6 +24,9 @@ const EvaluationReportScoringPage = () => {
   const currentYear = new Date().getFullYear();
   const schoolYears = Array.from({ length: 10 }, (_, i) => `${currentYear + i}-${currentYear + i + 1}`);
   const facultiesPerPage = 10;
+  const [departments, setDepartments] = useState([]);
+const [selectedDepartments, setSelectedDepartments] = useState([]);
+
   const db = getFirestore();
 
   useEffect(() => {
@@ -43,6 +46,47 @@ const EvaluationReportScoringPage = () => {
     fetchWeights();
   }, [db]);
 
+  const fetchDepartments = async () => {
+    try {
+      // Fetch all users
+      const usersSnapshot = await getDocs(collection(db, 'users'));
+      const departmentSet = new Set(); // Use Set to avoid duplicates
+  
+      // Loop through user documents to extract departments
+      usersSnapshot.forEach((doc) => {
+        const userData = doc.data();
+        if (userData.department) {
+          departmentSet.add(userData.department);
+        }
+      });
+  
+      // Convert the Set to an Array and update state
+      const departmentList = Array.from(departmentSet);
+      console.log('Fetched Departments:', departmentList); // Debugging output
+      setDepartments(departmentList);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+    }
+  };
+  
+  const handleSelectDepartment = (department) => {
+    setSelectedDepartments([department]); // Set the selected department as a single value in an array
+  };
+  
+  
+  useEffect(() => {
+    fetchDepartments();
+  }, [db]);
+
+  const handleDepartmentChange = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions).map(
+      (option) => option.value
+    );
+    console.log('Selected Departments:', selectedOptions); // Log selected departments
+    setSelectedDepartments(selectedOptions);
+    setCurrentPage(1); // Reset pagination
+  };
+  
   const handleSemesterChange = (e) => {
     setSelectedSemester(e.target.value);
   };
@@ -67,10 +111,23 @@ const EvaluationReportScoringPage = () => {
   };
 
   const fetchFaculties = useCallback(() => {
-    const facultyQuery = query(
-      collection(db, 'users'),
-      where('role', '==', 'Faculty')
-    );
+    setLoading(true);
+    let facultyQuery;
+  
+    if (selectedDepartments.length > 0) {
+      // If there are selected departments, filter by them
+      facultyQuery = query(
+        collection(db, 'users'),
+        where('role', '==', 'Faculty'),
+        where('department', 'in', selectedDepartments)
+      );
+    } else {
+      // If no department is selected, fetch all faculties
+      facultyQuery = query(
+        collection(db, 'users'),
+        where('role', '==', 'Faculty')
+      );
+    }
   
     const unsubscribe = onSnapshot(
       facultyQuery,
@@ -183,7 +240,7 @@ const EvaluationReportScoringPage = () => {
     );
   
     return unsubscribe;
-  }, [db, subjectWeight, facultyWeight]);
+  }, [db, subjectWeight, facultyWeight, selectedDepartments]);
   
   
 
@@ -427,6 +484,7 @@ const EvaluationReportScoringPage = () => {
       <div className="scoringcontainer">
         <div className="faculty-list">
           <h2>Faculty Scores</h2>
+   
           {loading ? (
             <p>Loading faculty data...</p>
           ) : (
@@ -435,7 +493,32 @@ const EvaluationReportScoringPage = () => {
   <thead>
     <tr>
       <th>Faculty Name</th>
-      <th>Department</th>
+      <th>
+  Department
+  <div className="dropdown">
+    <button className="dropdown-button">
+      {selectedDepartments.length > 0
+        ? selectedDepartments.join(', ')
+        : ''}
+    </button>
+    <div className="dropdown-menu">
+      {departments.length > 0 ? (
+        departments.map((department) => (
+          <div
+            key={department}
+            className="dropdown-item"
+            onClick={() => handleSelectDepartment(department)}
+          >
+            {department}
+          </div>
+        ))
+      ) : (
+        <div className="dropdown-item disabled">No Departments Available</div>
+      )}
+    </div>
+  </div>
+</th>
+
       <th>Supervisor (40%)</th>
       <th>Student (60%)</th>
       <th>Overall Rating</th>
