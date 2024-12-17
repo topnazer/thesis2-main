@@ -119,8 +119,12 @@ height: 36px;
 text-align: center;
 }
 .user-subject-content {
-  height: 100px;
-  max-height: 300px; 
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Two equal columns */
+  gap: 16px; /* Space between boxes */
+  max-height: 300px; /* Limit the height if needed */
+  overflow-y: auto; /* Scroll if content overflows */
+  padding: 10px;
 }
 .subject-content-grid {
   display: grid;
@@ -176,10 +180,10 @@ text-align: center;
 .close-subjects-container {
   position: absolute;
   bottom: 10px;
-  width: 100%;
   display: flex;
   justify-content: center;
   gap: 50px;
+  margin: 5px;
 }
 
 .search-user-bar {
@@ -187,12 +191,66 @@ text-align: center;
   justify-content: center;
 }
 
-.user-close, .show-subjects,.close-subjects, .unenroll-subjects {
-   padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 100px;
-    cursor: pointer;
-    margin: 5px;
+.user-close, .show-subjects, .close-subjects, .unenroll-subjects {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  margin: 5px;
 }
+
+.user-subject-content {
+  display: flex; /* Flexbox for two columns */
+  flex-wrap: wrap; /* Allow wrapping into multiple rows */
+  gap: 16px; /* Spacing between boxes */
+  max-height: 300px;
+  overflow-y: auto; /* Scroll if content overflows */
+  padding: 10px;
+}
+
+.subject-box {
+  flex: 1 1 calc(50% - 16px); /* Two columns, accounting for spacing */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  border-radius: 10px;
+  font-weight: bold;
+  color: rgb(243, 241, 241);
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-sizing: border-box; /* Include padding and borders in the width */
+}
+
+.subject-box.done {
+  background-color: #4CAF50; /* Green for "Evaluation Done" */
+}
+
+.subject-box.pending {
+  background-color: #F44336; /* Red for "Pending" */
+}
+
+.subject-box p {
+  margin: 0;
+  font-size: 1em;
+}
+
+.subject-checkbox {
+  transform: scale(1.2);
+  margin-left: 10px;
+}
+
+.subject-box:hover {
+  transform: scale(1.03); /* Slight hover scale */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Add shadow on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .subject-box {
+    flex: 1 1 100%; /* Single column on smaller screens */
+  }
+}
+
+

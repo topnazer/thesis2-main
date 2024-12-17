@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getFirestore, collection, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
+import { getFirestore, collection, getDocs, query, where, deleteDoc, doc, getDoc } from "firebase/firestore";
 import './User.css';
 
 const UsersPage = () => {
@@ -60,7 +60,24 @@ const UsersPage = () => {
         : `${role.toLowerCase()}/${userId}/subjects`;
       const subjectsRef = collection(db, collectionPath);
       const subjectSnapshot = await getDocs(subjectsRef);
-      const subjects = subjectSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+
+      // Fetch evaluation status
+      const subjects = await Promise.all(subjectSnapshot.docs.map(async (docSnapshot) => {
+        const subjectData = docSnapshot.data();
+        const subjectId = docSnapshot.id;
+
+        // Check if the subject evaluation is completed
+        const evaluationRef = doc(db, `subjectDone/${subjectId}/completed_evaluations`, userId);
+        const evaluationDoc = await getDoc(evaluationRef);
+        const evaluated = evaluationDoc.exists();
+
+        return {
+          id: subjectId,
+          name: subjectData.name,
+          evaluated,
+        };
+      }));
+
       return subjects;
     } catch (error) {
       console.error("Error fetching subjects:", error);
@@ -103,8 +120,10 @@ const UsersPage = () => {
 
   const departments = ["All", "CCS", "COC", "CED", "CASS", "COE", "CBA", "ACAF"];
 
-  const showOverlay = (user) => {
+  const showOverlay = async (user) => {
     setSelectedUser(user);
+    const subjects = await fetchUserSubjects(user.role, user.id);
+    setUserSubjects((prev) => ({ ...prev, [user.id]: subjects }));
     setUserDetail(true);
   };
 
@@ -192,61 +211,60 @@ const UsersPage = () => {
         </div>
       </div>
       <div className="user-page-right">
-        <div>
-          {userDetail && selectedUser && (
-            <div className="user-detail">
-              <h1>Details for {selectedUser.firstName} {selectedUser.lastName}</h1>
-              <div className="subject-content-grid">
-                <div className="grid-item">
-                  <strong>Email:</strong> {selectedUser.email}
+        {userDetail && selectedUser && (
+          <div className="user-detail">
+            <h1>Details for {selectedUser.firstName} {selectedUser.lastName}</h1>
+            <div className="subject-content-grid">
+              <div className="grid-item">
+                <strong>Email:</strong> {selectedUser.email}
+              </div>
+              <div className="grid-item">
+                <strong>Role:</strong> {selectedUser.role}
+              </div>
+              <div className="grid-item">
+                <strong>Department:</strong> {selectedUser.department}
+              </div>
+              <div className="grid-item">
+                <strong>Status:</strong> {selectedUser.status}
+              </div>
+            </div>
+            <div className="user-subject-button">
+              <button className="user-close" onClick={hideOverlay}>Close</button>
+              <button className="show-subjects" onClick={showSubjectsOverlay}>Show Subjects</button>
+            </div>
+            {isSubjectsOverlayVisible && (
+             <div className="subjects-overlay">
+             <h3>Subjects for {selectedUser.firstName} {selectedUser.lastName}</h3>
+             <div className="user-subject-content">
+               {userSubjects[selectedUser.id]?.map((subject) => (
+                 <div 
+                   className={`subject-box ${subject.evaluated ? "done" : "pending"}`} 
+                   key={subject.id}
+                 >
+                   <p>{subject.name}</p>
+                   <input
+                     type="checkbox"
+                     className="subject-checkbox"
+                     checked={selectedSubjects.includes(subject.id)}
+                     onChange={() => toggleSubjectSelection(subject.id)}
+                   />
+                 </div>
+                  ))}
                 </div>
-                <div className="grid-item">
-                  <strong>Role:</strong> {selectedUser.role}
-                </div>
-                <div className="grid-item">
-                  <strong>Department:</strong> {selectedUser.department}
-                </div>
-                <div className="grid-item">
-                  <strong>Status:</strong> {selectedUser.status}
+                <div className="close-subjects-container">
+                  <button className="close-subjects" onClick={hideSubjectsOverlay}>Close Subjects</button>
+                  <button 
+                    className="unenroll-subjects" 
+                    onClick={unenrollSelectedSubjects}
+                    disabled={selectedSubjects.length === 0}
+                  >
+                    Unenroll Selected Subjects
+                  </button>
                 </div>
               </div>
-              <div className="user-subject-button">
-                <button className="user-close" onClick={hideOverlay}>Close</button>                         
-                <button className="show-subjects" onClick={showSubjectsOverlay}>Show Subjects</button>
-              </div>
-              {isSubjectsOverlayVisible && (
-                <div className="subjects-overlay">
-                  <h3>Subjects for {selectedUser.firstName} {selectedUser.lastName}</h3>
-                  {userSubjects[selectedUser.id]?.length === 0 && <p>No subjects</p>}
-                  <div className="user-subject-content">
-                    <div className="subject-content-grid">
-                      {userSubjects[selectedUser.id]?.map((subject) => (
-                        <div className="grid-item" key={subject.id}>
-                          <input 
-                            type="checkbox" 
-                            checked={selectedSubjects.includes(subject.id)}
-                            onChange={() => toggleSubjectSelection(subject.id)}
-                          />
-                          <p>{subject.name}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="close-subjects-container">
-                    <button className="close-subjects" onClick={hideSubjectsOverlay}>Close Subjects</button>
-                    <button 
-                      className="unenroll-subjects" 
-                      onClick={unenrollSelectedSubjects}
-                      disabled={selectedSubjects.length === 0}
-                    >
-                      Unenroll Selected Subjects
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>           
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

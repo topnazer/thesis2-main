@@ -78,14 +78,6 @@ const [selectedDepartments, setSelectedDepartments] = useState([]);
     fetchDepartments();
   }, [db]);
 
-  const handleDepartmentChange = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions).map(
-      (option) => option.value
-    );
-    console.log('Selected Departments:', selectedOptions); // Log selected departments
-    setSelectedDepartments(selectedOptions);
-    setCurrentPage(1); // Reset pagination
-  };
   
   const handleSemesterChange = (e) => {
     setSelectedSemester(e.target.value);
@@ -113,7 +105,7 @@ const [selectedDepartments, setSelectedDepartments] = useState([]);
   const fetchFaculties = useCallback(() => {
     setLoading(true);
     let facultyQuery;
-  
+
     if (selectedDepartments.length > 0) {
       // If there are selected departments, filter by them
       facultyQuery = query(
@@ -229,7 +221,21 @@ const [selectedDepartments, setSelectedDepartments] = useState([]);
             };
           })
         );
-  
+
+        // Sort faculties: scored first, "Not scored yet" at the bottom
+        facultyList.sort((a, b) => {
+          if (typeof b.finalScore === 'number' && typeof a.finalScore === 'number') {
+            return b.finalScore - a.finalScore; // Sort numeric scores in descending order
+          }
+          if (typeof a.finalScore !== 'number' && typeof b.finalScore === 'number') {
+            return 1; // `b` has a score, `a` does not: `a` goes to the bottom
+          }
+          if (typeof b.finalScore !== 'number' && typeof a.finalScore === 'number') {
+            return -1; // `a` has a score, `b` does not: `b` goes to the bottom
+          }
+          return 0; // Both are not scored
+        });
+        
         setFaculties(facultyList);
         setLoading(false);
       },
@@ -241,8 +247,7 @@ const [selectedDepartments, setSelectedDepartments] = useState([]);
   
     return unsubscribe;
   }, [db, subjectWeight, facultyWeight, selectedDepartments]);
-  
-  
+
 
   useEffect(() => {
     fetchFaculties();
