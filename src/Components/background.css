@@ -1,0 +1,72 @@
+.animated-background {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #E6BEAE, #E7D8C9, #ECF8F8);
+  background-size: 400% 400%;
+  animation: gradientShift 10s ease infinite;
+  font-family: 'Arial', sans-serif;
+  border-radius: 15px;
+  overflow: hidden; /* To ensure gradient stays within the border radius */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Adding a subtle shadow */
+  padding: 20px; /* Adding padding inside the rounded container */
+}
+
+.background-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: #B2967D;
+  margin-bottom: 10px;
+}
+
+.background-subtitle {
+  font-size: 18px;
+  color: #EEE4E1;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.call-to-action {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #B2967D;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15); /* Adding shadow to the button */
+}
+
+.call-to-action:hover {
+  transform: scale(1.05);
+  background-color: #E6BEAE;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhancing shadow on hover */
+}
+
+.interactive-elements {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.interactive-icon {
+  font-size: 24px;
+  color: #B2967D;
+  transition: color 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+}
+
+.interactive-icon:hover {
+  color: #E6BEAE;
+  transform: scale(1.2);
+}
