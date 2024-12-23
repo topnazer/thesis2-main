@@ -494,36 +494,36 @@ const [selectedDepartments, setSelectedDepartments] = useState([]);
             <p>Loading faculty data...</p>
           ) : (
             <div>
-           <table>
+          <table>
   <thead>
     <tr>
+      <th>Ranks</th>
       <th>Faculty Name</th>
       <th>
-  Department
-  <div className="dropdown">
-    <button className="dropdown-button">
-      {selectedDepartments.length > 0
-        ? selectedDepartments.join(', ')
-        : ''}
-    </button>
-    <div className="dropdown-menu">
-      {departments.length > 0 ? (
-        departments.map((department) => (
-          <div
-            key={department}
-            className="dropdown-item"
-            onClick={() => handleSelectDepartment(department)}
-          >
-            {department}
+        Department
+        <div className="dropdown">
+          <button className="dropdown-button">
+            {selectedDepartments.length > 0
+              ? selectedDepartments.join(', ')
+              : ''}
+          </button>
+          <div className="dropdown-menu">
+            {departments.length > 0 ? (
+              departments.map((department) => (
+                <div
+                  key={department}
+                  className="dropdown-item"
+                  onClick={() => handleSelectDepartment(department)}
+                >
+                  {department}
+                </div>
+              ))
+            ) : (
+              <div className="dropdown-item disabled">No Departments Available</div>
+            )}
           </div>
-        ))
-      ) : (
-        <div className="dropdown-item disabled">No Departments Available</div>
-      )}
-    </div>
-  </div>
-</th>
-
+        </div>
+      </th>
       <th>Supervisor (40%)</th>
       <th>Student (60%)</th>
       <th>Overall Rating</th>
@@ -532,24 +532,22 @@ const [selectedDepartments, setSelectedDepartments] = useState([]);
     </tr>
   </thead>
   <tbody>
-    {displayedFaculties.map((faculty) => (
+    {displayedFaculties.map((faculty, index) => (
       <tr key={faculty.id}>
+        <td>{(currentPage - 1) * facultiesPerPage + index + 1}</td>
         <td>{`${faculty.firstName} ${faculty.lastName}`}</td>
         <td>{faculty.department}</td>
         <td>
-        {typeof faculty.facultyPercentage === 'number'
-              ? `${faculty.facultyPercentage}`
-              : faculty.facultyPercentage} 
-          /{typeof faculty.facultyScore === 'number'
+          {typeof faculty.facultyPercentage === 'number'
+            ? `${faculty.facultyPercentage}`
+            : faculty.facultyPercentage} / {typeof faculty.facultyScore === 'number'
             ? faculty.facultyScore.toFixed(2)
             : faculty.facultyScore} 
-            
         </td>
         <td>
           {typeof faculty.subjectPercentage === 'number'
             ? `${faculty.subjectPercentage}`
-            : faculty.subjectPercentage}/
-            {typeof faculty.subjectScore === 'number'
+            : faculty.subjectPercentage} / {typeof faculty.subjectScore === 'number'
             ? faculty.subjectScore.toFixed(2)
             : faculty.subjectScore}
         </td>
@@ -566,6 +564,7 @@ const [selectedDepartments, setSelectedDepartments] = useState([]);
     ))}
   </tbody>
 </table>
+
 
               <div className="paginationreport">
                 <button onClick={handlePreviousPage} disabled={currentPage === 1}>

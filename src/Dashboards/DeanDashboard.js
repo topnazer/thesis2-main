@@ -313,7 +313,7 @@ const DeanDashboard = () => {
             <div className="dashboardlogo-container">
               <img src="/spc.png" alt="Logo" className="dashboardlogo" />
             </div>
-            <h1>Dean Dashboard</h1>
+            <h1>Welcome Back!</h1>
             <div style={{ display: "flex", alignItems: "center" }}>
               <p style={{ fontSize: "25px" }}>
                 <strong>{userName}</strong>

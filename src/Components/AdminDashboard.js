@@ -71,7 +71,7 @@ const AdminDashboard = () => {
       </div>
       <div className="content-container">
       <div className="Admin-navbar">
-        <h1>Dashboard</h1>
+        <h1>Admin Kaba?</h1>
         <img src="/spc.png" alt="Description of the image" />
         <div className="Admin-links">
         <Link to="notifications" className="notification-link">
@@ -91,6 +91,7 @@ const AdminDashboard = () => {
         </div>
       </div>
       <div className="route-container">
+        <h1>ahasdhashdas</h1>
        <Routes>      
        <Route path="dean-evaluation-reports" element={<DeanEvaluationReport />} />
        <Route path="subject-evaluation-reports" element={<Facultyevaluationreport />} />

@@ -47,15 +47,30 @@
 .student-dashboard table td {
   padding: 1rem;
   border: 1px solid #dee2e6;
-  text-align: left;
   border-radius: 2px;
-  font-size: 17px;
-  background-color: white;
+  font-size: 20px;
+  background-color: rgb(250, 245, 245);
 }
 
 .student-dashboard table th {
   background-color: rgb(69 10 10); 
   color: white;
+}
+
+.student-dashboard table td:nth-child(1) {
+  width: 15%; /* Adjust the width for the first column */
+  text-align: center;
+}
+
+.student-dashboard table td:nth-child(2) {
+  width: 20%; /* Adjust the width for the second column */
+  text-align: center;
+}
+
+.student-dashboard table td:nth-child(3),
+.student-dashboard table td:nth-child(4) {
+  width: 32.5%; /* Equal widths for the 3rd and 4th columns */
+  text-align: left; 
 }
 
 .student-dashboard table tr {

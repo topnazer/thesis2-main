@@ -23,6 +23,7 @@ html, body {
     height: 40px;
     background-color:rgb(69 10 10); 
     color: #ffffff; 
+    text-align: center;
 }
 
 .Admin-header button{

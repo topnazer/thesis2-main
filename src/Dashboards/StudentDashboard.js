@@ -149,7 +149,7 @@ const StudentDashboard = () => {
         <div className="dashboardlogo-container">
           <img src="/spc.png" alt="Logo" className="dashboardlogo" />
         </div>
-        <h1>Student Dashboard</h1>
+        <h1>Welcome Back Nigerian!</h1>
         <div style={{ display: "flex", alignItems: "center" , gap: "20px"}}>
           <p style={{fontSize: "25px"}}><strong>{userName}</strong></p>
           <button className="notification-icon" onClick={() => setShowNotifications(!showNotifications)}>
@@ -181,7 +181,7 @@ const StudentDashboard = () => {
           <table>
             <thead>
               <tr>
-                <th>ID</th>
+                <th>Offer Number</th>
                 <th>Subject</th>
                 <th>Faculty</th>
                 <th>Evaluate</th>
