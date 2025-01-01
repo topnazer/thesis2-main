@@ -48,13 +48,19 @@
 
 .user-view {
   padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
+    background-color: #9FE2BF;
+    color: black;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-}
+    transition: transform 0.2s ease, background-color 0.3s ease; /* Smooth transition for hover effect */
 
+}
+.user-view:hover {
+  background-color: #5fb188; /* Slightly darker background on hover */
+  transform: translateY(-5px); /* Hop effect - moves up slightly */
+}
+   
 
 .user-subjects {
   font-size: 1em;
@@ -193,8 +199,8 @@ text-align: center;
 
 .user-close, .show-subjects, .close-subjects, .unenroll-subjects {
   padding: 10px 20px;
-  background-color: #4CAF50;
-  color: white;
+  background-color: #9FE2BF;
+  color: black;
   border: none;
   border-radius: 100px;
   cursor: pointer;
@@ -224,7 +230,7 @@ text-align: center;
 }
 
 .subject-box.done {
-  background-color: #4CAF50; /* Green for "Evaluation Done" */
+  background-color: #9FE2BF; /* Green for "Evaluation Done" */
 }
 
 .subject-box.pending {
@@ -253,4 +259,36 @@ text-align: center;
   }
 }
 
+.role-filter-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Space between the buttons */
+  margin-top: 15px; /* Add space above the buttons */
+}
+
+.role-filter-buttons button {
+  background-color: #f8f9fa; /* Light background color */
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid #ddd; /* Subtle border */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.role-filter-buttons button:hover {
+  background-color: #e9ecef; /* Slightly darker background on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a soft shadow on hover */
+}
+
+.role-filter-buttons button.active-role {
+  background-color: #9FE2BF; /* Active role button color */
+  color: black;
+  border: 2px solid #6cc79a; /* Highlight active button */
+}
+
+.role-filter-buttons button:focus {
+  outline: none;
+  box-shadow: 0 0 4px 2px #6cc79a; /* Focus ring */
+}
 

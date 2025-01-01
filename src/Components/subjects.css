@@ -185,13 +185,17 @@
 }
 .enroll-search-bar {
   border: 0.5px solid rgb(0, 0, 0);
-  padding: 0.3rem 0.2rem;
+  padding: 0.3rem 0.5rem; /* Adjust padding for smaller size */
   font-size: 1rem;
-  border-radius: 100px;
-  margin: 10px;
-  border: 2px solid rgb(133, 5, 5);
+  border-radius: 50px; /* Rounded edges */
+  margin: 10px auto; /* Center horizontally */
+  border: 2px solid rgb(133, 5, 5); /* Keep existing border color */
   text-align: center;
+  width: 60%; /* Set the width to 60% of the container */
+  max-width: 300px; /* Ensure the width doesn't exceed a maximum */
+  min-width: 200px; /* Optional: Set a minimum width */
 }
+
 .editsubj-grid select,.editsubj-grid input {
   border: 0.5px solid rgb(0, 0, 0);
   padding: 0.7rem 0.5rem;
@@ -276,8 +280,8 @@
 .addsubj-button button {
   padding: 10px 20px;
   font-size: 16px;
-  color: white;
-  background-color: #4caf50; 
+  color: black;
+  background-color: #9FE2BF; 
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -287,8 +291,8 @@
 .edit-buttons button {
   padding: 10px 20px;
   font-size: 16px;
-  color: white;
-  background-color: #4caf50; 
+  color: black;
+  background-color: #9FE2BF; 
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -351,10 +355,17 @@
 }
 
 .enrolled-students-container {
-  height:50%; 
-  max-height: 450px;
-  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Create two equal-width columns */
+  gap: 10px; /* Add space between rows and columns */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  max-height: 300px; /* Set maximum height */
+  overflow-y: auto; /* Enable vertical scrolling if needed */
+  background-color: #fff; /* Light background */
 }
+
 
 
 .enrolled-students-container button {
@@ -362,28 +373,41 @@
 }
 
 .student-item {
+  display: flex;
+  justify-content: flex-start; /* Align content to the left */
+  align-items: center; /* Center content vertically */
   padding: 10px;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid #ddd; /* Add border around each student */
+  border-radius: 5px;
+  background-color: #f9f9f9; /* Light background for contrast */
 }
 
 .student-item p {
   margin: 0;
+  font-size: 16px;
+  color: #333;
+  text-align: left; /* Ensure text alignment */
 }
 
 .subject-card button {
   padding: 10px 20px;
-  background-color: #4CAF50; 
+  background-color: #9FE2BF; 
   margin: 5px;
-  color: white;
+  color: black;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+.subject-card button:hover {
+  background-color: #5fb188; /* Slightly darker background on hover */
+  transform: translateY(-3px); /* Hop effect - moves up slightly */
 }
 
 .enroll-buttons button {
   padding: 10px 20px;
-  background-color: #4CAF50; 
-  color: white;
+  background-color: #9FE2BF; 
+  color: black;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -391,20 +415,23 @@
 
 
 .enrolled-student-buttons {
-  margin: 10px;
+  align-self: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
   padding: 10px 20px;
-  background-color: #4CAF50; 
-  color: white;
+  background-color: #9FE2BF; 
+  color: black;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 
+
 .editsubj-button button {
   padding: 10px 20px;
   font-size: 16px;
-  color: white;
-  background-color: #4caf50; /* Green button */
+  color: black;
+  background-color: #9FE2BF; /* Green button */
   border: none;
   border-radius: 5px;
   cursor: pointer;

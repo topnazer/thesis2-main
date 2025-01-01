@@ -25,6 +25,14 @@ html, body {
     color: #ffffff; 
     text-align: center;
 }
+.Admin-header p {
+   font-size: 20px; 
+   padding-top: 10px;
+   font-family: 'Times New Roman', Times, serif;
+   font-weight: bold;
+   
+}
+
 
 .Admin-header button{
     border: none;

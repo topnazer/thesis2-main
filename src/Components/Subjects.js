@@ -136,20 +136,21 @@ const Subjects = () => {
   
   const fetchEnrolledStudents = async (subjectId) => {
     try {
-      const enrolledStudentsRef = collection(db, `subjects/${subjectId}/enrolledStudents`);
-      const enrolledStudentsSnapshot = await getDocs(enrolledStudentsRef);
-      const studentsList = enrolledStudentsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setEnrolledStudents(studentsList);
-      setShowEnrolledStudents(true); 
+        const enrolledStudentsRef = collection(db, `subjects/${subjectId}/enrolledStudents`);
+        const enrolledStudentsSnapshot = await getDocs(enrolledStudentsRef);
+        const studentsList = enrolledStudentsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+        setEnrolledStudents(studentsList);
+        setShowEnrolledStudents(true);
     } catch (error) {
-      console.error("Error fetching enrolled students:", error);
-      alert("There was an error fetching enrolled students. Please try again.");
+        console.error("Error fetching enrolled students:", error);
+        alert("There was an error fetching enrolled students. Please try again.");
     }
-  };
-  
+};
+
+
   
    const handleDeleteSubject = async (subjectId) => {
       const confirmed = window.confirm("Are you sure you want to delete this subject?");
@@ -623,35 +624,37 @@ const Subjects = () => {
     </div>
   )}
 
-  {showEnrolledStudents && (
+{showEnrolledStudents && (
     <div className="enrolled-students-list">
-      <h1>Enrolled Students</h1>
-      <input
-        type="text"
-        value={searchStudent}
-        onChange={(e) => setSearchStudent(e.target.value)}
-        placeholder="Search by email"
-        className="enroll-search-bar"
-      />
-      <div className="enrolled-students-container">
-        {enrolledStudents
-          .filter((student) =>
-            student.email.toLowerCase().includes(searchStudent.toLowerCase())
-          )
-          .map((student) => (
-            <div key={student.id} className="student-item">
-              <p>{student.email}</p>
-            </div>
-          ))}
-        {enrolledStudents.filter((student) =>
-          student.email.toLowerCase().includes(searchStudent.toLowerCase())
-        ).length === 0 && <p>No students found.</p>}
-      </div>
-      <button className="enrolled-student-buttons" onClick={() => setShowEnrolledStudents(false)}>
-        Cancel
-      </button>
+        <h1>Enrolled Students</h1>
+        <p>Studends Enrolled: {enrolledStudents.length}</p>
+        <input
+            type="text"
+            value={searchStudent}
+            onChange={(e) => setSearchStudent(e.target.value)}
+            placeholder="Search by email"
+            className="enroll-search-bar"
+        />
+        <div className="enrolled-students-container">
+            {enrolledStudents
+                .filter((student) =>
+                    student.email.toLowerCase().includes(searchStudent.toLowerCase())
+                )
+                .map((student) => (
+                    <div key={student.id} className="student-item">
+                        <p>{student.email}</p>
+                    </div>
+                ))}
+            {enrolledStudents.filter((student) =>
+                student.email.toLowerCase().includes(searchStudent.toLowerCase())
+            ).length === 0 && <p>No students found.</p>}
+        </div>
+        <button className="enrolled-student-buttons" onClick={() => setShowEnrolledStudents(false)}>
+            Cancel
+        </button>
     </div>
-  )}
+)}
+
 </div>
    
       </div>

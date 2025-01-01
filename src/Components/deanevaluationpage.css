@@ -71,13 +71,13 @@
 }
 
 .dean-save-button {
-    background-color: #4CAF50;
-    color: white;
+    background-color: #9FE2BF;
+    color: black;
 }
 
 .dean-delete-button {
     background-color: #f44336;
-    color: white;
+    color: black;
 }
 
 .dean-edit-button {
@@ -188,7 +188,7 @@ textarea::placeholder {
 }
 
 .questions-preview button:hover {
-    background-color: #4CAF50;
+    background-color: #9FE2BF;
 }
 
 .dean-expiration-section {

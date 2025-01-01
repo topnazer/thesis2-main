@@ -64,7 +64,7 @@ const AdminDashboard = () => {
   return (
     <div className="whole-container">
       <div className="Admin-header">
-        
+      <p>kunwari mabait pero bumembang</p>
       </div>
       <div className="content-container">
         <div className="Admin-navbar">
@@ -87,7 +87,7 @@ const AdminDashboard = () => {
           </div>
         </div>
         <div className="route-container">
-          
+         
           <Routes>      
             <Route path="dean-evaluation-reports" element={<DeanEvaluationReport />} />
             <Route path="subject-evaluation-reports" element={<Facultyevaluationreport />} />

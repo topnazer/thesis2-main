@@ -67,15 +67,15 @@
 }
 
 .subject-form button {
-    background-color: #4CAF50;
-    color: white;
+    background-color: #9FE2BF;
+    color: black;
 }
 
 
 
 .subject-evaluation-container .expiration-date-section button {
-    background-color: #4CAF50;
-    color: white;
+    background-color: #9FE2BF;
+    color: black;
 }
 
 .subject-preview {
@@ -186,7 +186,7 @@ textarea::placeholder {
     align-items: center;
 }
 .questions-preview button:hover {
-    background-color: #4CAF50;  
+    background-color: #9FE2BF;  
 }
 
 .question-action{

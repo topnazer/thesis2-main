@@ -11,6 +11,7 @@ const UsersPage = () => {
   const [selectedDepartment, setSelectedDepartment] = useState("All");
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubjects, setSelectedSubjects] = useState([]);
+  const [selectedRole, setSelectedRole] = useState(''); // New state for role filtering
   const db = getFirestore();
 
   const fetchUsersByDepartment = useCallback(async (department) => {
@@ -61,12 +62,10 @@ const UsersPage = () => {
       const subjectsRef = collection(db, collectionPath);
       const subjectSnapshot = await getDocs(subjectsRef);
 
-      // Fetch evaluation status
       const subjects = await Promise.all(subjectSnapshot.docs.map(async (docSnapshot) => {
         const subjectData = docSnapshot.data();
         const subjectId = docSnapshot.id;
 
-        // Check if the subject evaluation is completed
         const evaluationRef = doc(db, `subjectDone/${subjectId}/completed_evaluations`, userId);
         const evaluationDoc = await getDoc(evaluationRef);
         const evaluated = evaluationDoc.exists();
@@ -145,7 +144,16 @@ const UsersPage = () => {
     const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
     const role = user.role.toLowerCase();
     const search = searchTerm.toLowerCase();
-    return fullName.includes(search) || role.includes(search);
+
+    const roleFilter = selectedRole === 'Faculty'
+      ? user.role === 'Faculty' || user.role === 'Dean'
+      : selectedRole
+        ? user.role === selectedRole
+        : true;
+
+    const departmentFilter = selectedDepartment !== "All" ? user.department === selectedDepartment : true;
+
+    return (fullName.includes(search) || role.includes(search)) && roleFilter && departmentFilter;
   });
 
   const getDepartmentColor = (department) => {
@@ -176,6 +184,28 @@ const UsersPage = () => {
               </button>
             ))}
           </div>
+          {selectedDepartment !== "All" && (
+            <div className='role-filter-buttons'>
+              <button
+                className={selectedRole === 'Student' ? 'active-role' : ''}
+                onClick={() => setSelectedRole('Student')}
+              >
+                Students
+              </button>
+              <button
+                className={selectedRole === 'Faculty' ? 'active-role' : ''}
+                onClick={() => setSelectedRole('Faculty')}
+              >
+                Faculty/Dean
+              </button>
+              <button
+                className={!selectedRole ? 'active-role' : ''}
+                onClick={() => setSelectedRole('')}
+              >
+                All
+              </button>
+            </div>
+          )}
           <div className='search-user-bar'>
             <input
               type="text"
@@ -198,9 +228,7 @@ const UsersPage = () => {
                     <strong>{user.firstName} {user.lastName}</strong>
                     <strong><p>({user.role})</p></strong>
                     <p>
-                      {user.role === "ACAF"
-                        ? `Role: ${user.role}`
-                        : `Department: ${user.department}`}
+                      Department: {user.department}
                     </p>
                   </div>
                   <button className="user-view" onClick={() => showOverlay(user)}>View</button>

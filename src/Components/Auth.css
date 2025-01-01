@@ -262,17 +262,17 @@
 }
 
 .modal-content button:first-of-type {
-  background-color: #4CAF50;
-  color: white;
+  background-color: #9FE2BF;
+  color: black;
 }
 
 .modal-content button:first-of-type:hover {
-  background-color: #45a049;
+  background-color: #9FE2BF;
 }
 
 .modal-content button:last-of-type {
   background-color: #f44336;
-  color: white;
+  color: black;
 }
 
 .modal-content button:last-of-type:hover {
