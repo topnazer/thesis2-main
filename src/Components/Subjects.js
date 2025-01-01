@@ -627,14 +627,18 @@ const Subjects = () => {
 {showEnrolledStudents && (
     <div className="enrolled-students-list">
         <h1>Enrolled Students</h1>
-        <p>Studends Enrolled: {enrolledStudents.length}</p>
-        <input
-            type="text"
-            value={searchStudent}
-            onChange={(e) => setSearchStudent(e.target.value)}
-            placeholder="Search by email"
-            className="enroll-search-bar"
-        />
+        <div className="students-enrolled-container">
+  <p className="students-enrolled-count">
+    Students Enrolled: {enrolledStudents.length}
+  </p>
+  <input
+    type="text"
+    value={searchStudent}
+    onChange={(e) => setSearchStudent(e.target.value)}
+    placeholder="Search by email"
+    className="enroll-search-bar"
+  />
+</div>
         <div className="enrolled-students-container">
             {enrolledStudents
                 .filter((student) =>
